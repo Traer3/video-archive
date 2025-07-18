@@ -1,14 +1,16 @@
-import { View } from 'react-native';
-import TestArea from './src/TestArea';
+import {View } from 'react-native';
 import styles from './src/styles/BaseStyle'
+import Background from './src/styles/Background';
 export default function App() {
 
 
-
+/// <TestArea/>
   return (
     <View 
-        style={styles.baseTheme}>
-          <TestArea/>
+        style={styles.baseTheme}
+        >
+         
+        <Background/>
     </View>
   );
 }
