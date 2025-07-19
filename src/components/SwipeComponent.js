@@ -1,51 +1,41 @@
-import { Animated, View, Text, StyleSheet } from "react-native";
-import { PanGestureHandler, State, GestureHandlerRootView } from "react-native-gesture-handler";
+import { useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler"; 
+import Animated,{useSharedValue, useAnimatedStyle, withSpring, runOnJS} from "react-native-reanimated";
 
 
 export default function SwipeComponent(){
-    const translateX = new Animated.Value(0);
+    const translateX = useSharedValue(0);
 
-    const  onGestureEvent = Animated.event(
-        [{nativeEvent: {translationX: translateX}}],
-        {useNativeDriver: true}
-    );
-
-    const onHandlerStateChange = (event) =>{
-        if(event.nativeEvent.oldState === State.ACTIVE) {
-            if(event.nativeEvent.translationX > 100){
-                Animated.spring(translateX,{
-                    toValue: 0,
-                    useNativeDriver: true
-                }).start();
-                alert('Элемент активирован');
-            }else{
-                // Возвращаем на место
-                Animated.spring(translateX,{
-                    toValue: 0,
-                    useNativeDriver:true
-                }).start();
+    const [text, setText] = useState("kys")
+    const panGesture = Gesture.Pan()
+        .onUpdate((event)=>{
+            translateX.value = event.translationX;
+        })
+        .onEnd((event)=>{
+            if(event.translationX > 100){
+               runOnJS(setText)("never KYS")
+               runOnJS(alert)("Элемент активирован! ")
             }
-        }
-    };
+            //возврат в исходное положение
+            translateX.value = withSpring(0, {
+                damping: 10,  
+                stiffness: 100 
+              });
+        });
+
+        const animatedStyle = useAnimatedStyle(()=>({
+            transform:[{translateX: translateX.value}],
+        }));
 
     return(
         <GestureHandlerRootView style={{flex:1}}>
-            <View style={styles.container}>
-                <PanGestureHandler
-                    onGestureEvent={onGestureEvent}
-                    onHandlerStateChange={onHandlerStateChange}
-                >
-                    <Animated.View
-                        style={[
-                            styles.box,
-                            {
-                                transform:[{translateX: translateX}]
-                            }
-                        ]}
-                    >
-                        <Text>Свайпни меня вправо</Text>
+            <View style={styles.container}>     
+                <GestureDetector gesture={panGesture}>
+                    <Animated.View style={[styles.box, animatedStyle]}>
+                            <Text>{text}</Text>
                     </Animated.View>
-                </PanGestureHandler>
+                </GestureDetector>
             </View>
         </GestureHandlerRootView>
     );

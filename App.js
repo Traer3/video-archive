@@ -14,9 +14,7 @@ export default function App() {
         >
         <Background/>
         
-        <SidePanel>
-          <CustomButton/>
-        </SidePanel>
+       
 
         <View style={{position:'absolute'}}>
         <SwipeComponent/>
