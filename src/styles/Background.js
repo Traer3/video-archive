@@ -1,29 +1,28 @@
 
-import { Image, View } from 'react-native';
+import { Image} from 'react-native';
+import { BlurView } from 'expo-blur';
 import BGImage from './img/background.png'
 
 export default function Background () {
     return(
-        <View 
-            style={{
-                position:'absolute',
-                zIndex:-1,
-                height:'100%',
-                width:'100%',
-                backgroundColor:'blue',
-                
-            }}
-            > 
-            <Image 
+            <BlurView
+                intensity={90}
+                tint="dark"
                 style={{
-                    height:'100%',
                     width:'100%',
-                    zIndex:-2
+                    height:'100%',
                 }}
-                source={BGImage}
-                resizeMode='stretch'
-            />
-            
-        </View>
+            >
+                <Image 
+                    style={{
+                        position:'absolute',
+                        height:'100%',
+                        width:'100%',
+                        zIndex:-1
+                    }}
+                    source={BGImage}
+                    resizeMode='stretch'
+                />
+            </BlurView>
     );
 };

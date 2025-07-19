@@ -29,8 +29,9 @@ const TestArea = () => {
 
 const styles = StyleSheet.create({
   container: {
+    position:'absolute',
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'none',
     alignItems: 'center',
     justifyContent: 'center',
   },
