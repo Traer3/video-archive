@@ -4,6 +4,7 @@ import Background from './src/styles/Background';
 import TestArea from './src/TestArea'
 import CustomButton from './src/components/CustomButton';
 import SidePanel from './src/components/SidePanel';
+import SwipeComponent from './src/components/SwipeComponent';
 export default function App() {
 
    //<TestArea/>
@@ -12,9 +13,14 @@ export default function App() {
         style={styles.baseTheme}
         >
         <Background/>
+        
         <SidePanel>
           <CustomButton/>
         </SidePanel>
+
+        <View style={{position:'absolute'}}>
+        <SwipeComponent/>
+        </View>
     </View>
   );
 }
