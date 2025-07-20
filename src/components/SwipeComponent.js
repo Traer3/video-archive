@@ -13,7 +13,7 @@ export default function SwipeComponent(){
             translateX.value = event.translationX;
         })
         .onEnd((event)=>{
-            if(event.translationX > 100){
+            if(event.translationX > 100){ // в какую сторону 
                runOnJS(setText)("never KYS")
                runOnJS(alert)("Элемент активирован! ")
             }
