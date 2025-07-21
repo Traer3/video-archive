@@ -9,9 +9,11 @@ export default function SwipeComponent(){
 
     const [text, setText] = useState("kys")
     const panGesture = Gesture.Pan()
+
         .onUpdate((event)=>{
             translateX.value = event.translationX;
         })
+        
         .onEnd((event)=>{
             if(event.translationX > 100){ // в какую сторону 
                runOnJS(setText)("never KYS")
