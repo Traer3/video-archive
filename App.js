@@ -1,4 +1,4 @@
-import {View } from 'react-native';
+import {Text, View } from 'react-native';
 import styles from './src/styles/BaseStyle'
 import Background from './src/styles/Background';
 import TestArea from './src/TestArea'
@@ -9,16 +9,15 @@ export default function App() {
 
    //<TestArea/>
   return (
-    <View 
-        style={styles.baseTheme}
-        >
-        <Background/>
-        
-       
-
-        <View style={{position:'absolute'}}>
-        <SwipeComponent/>
-        </View>
+    <View style={{flex:1,}}>
+      
+      
+      <View style={styles.baseTheme}>
+        <SidePanel>
+            <Text>HELP</Text>
+          </SidePanel>
+      </View>
+      
     </View>
   );
 }

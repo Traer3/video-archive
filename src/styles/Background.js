@@ -5,6 +5,17 @@ import BGImage from './img/background.png'
 
 export default function Background () {
     return(
+           <>
+            <Image 
+                style={{
+                    position:'absolute',
+                    height:'100%',
+                    width:'100%',
+                    zIndex:-1,
+                }}
+                source={BGImage}
+                resizeMode='stretch'
+            />
             <BlurView
                 intensity={90}
                 tint="dark"
@@ -13,16 +24,8 @@ export default function Background () {
                     height:'100%',
                 }}
             >
-                <Image 
-                    style={{
-                        position:'absolute',
-                        height:'100%',
-                        width:'100%',
-                        zIndex:-1
-                    }}
-                    source={BGImage}
-                    resizeMode='stretch'
-                />
+                
             </BlurView>
+           </>
     );
 };
