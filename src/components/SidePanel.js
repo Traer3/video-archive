@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { View, StyleSheet } from "react-native"
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
@@ -5,29 +6,33 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 
 
 export default function SidePanel({children}){
 
-
-    const translateX = useSharedValue();
+    const [isOpen, setIsOpen] = useState(false);
+    const translateX = useSharedValue(-85);
     const panGesture = Gesture.Pan()
         .onUpdate((event)=>{
-            translateX.value = event.translationX;
+            translateX.value = -85 + event.translationX;
         })
 
         .onEnd((event)=>{
             if(event.translationX > 100){
-                runOnJS(alert)("Ты повернул вправо!")
+                translateX.value = withSpring(0);
+                runOnJS(setIsOpen)(true);
+                //runOnJS(alert)("Ты повернул вправо!")
                 
+            }else if(event.translationX < 100){
+                translateX.value = withSpring(-85)
+                //runOnJS(alert)("Ты повернул влево!")
+                runOnJS(setIsOpen)(false);
+            } else {
+                translateX.value = withSpring(isOpen ? 0 : -85);
             }
-            if(event.translationX < 100){
-                runOnJS(alert)("Ты повернул влево!")
-            }
-            translateX.value = withSpring(0, {
-                damping: 10,
-                stiffness: 100
-            });
+            //translateX.value = withSpring(0, { damping: 10,stiffness: 100});
         });
+    
     
     const animatedStyle = useAnimatedStyle(()=>({
         transform:[{translateX: translateX.value}],
+        // transform:[{translateX: `${translateX.value}%`}],
     }));
 
     return(
@@ -59,7 +64,7 @@ const styles = StyleSheet.create({
         height:'95%',
         top:30,
         left:1,
-        transform: "translateX(-85%)"
+        
     },
     conteiner:{
         flex:1,
