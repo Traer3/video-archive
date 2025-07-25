@@ -5,7 +5,8 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 
 
 export default function SidePanel({children}){
 
-    const translateX = useSharedValue(0);
+
+    const translateX = useSharedValue();
     const panGesture = Gesture.Pan()
         .onUpdate((event)=>{
             translateX.value = event.translationX;
@@ -14,6 +15,7 @@ export default function SidePanel({children}){
         .onEnd((event)=>{
             if(event.translationX > 100){
                 runOnJS(alert)("Ты повернул вправо!")
+                
             }
             if(event.translationX < 100){
                 runOnJS(alert)("Ты повернул влево!")
@@ -29,11 +31,14 @@ export default function SidePanel({children}){
     }));
 
     return(
-        <GestureHandlerRootView style={{flex:1,}}>
-            <View style={styles.conteiner}>
+        <GestureHandlerRootView>
+            <View style={{flex:1}}>
                 <GestureDetector gesture={panGesture}>
-                    <Animated.View style={[styles.panel, animatedStyle]}>
-                        {children}
+                    <Animated.View 
+                        style={[styles.conteiner, animatedStyle]}>
+                            <View style={styles.panel}>
+                                {children}
+                            </View>
                     </Animated.View>
                 </GestureDetector>
             </View>
@@ -42,7 +47,9 @@ export default function SidePanel({children}){
 }
 
 const styles = StyleSheet.create({
+
     panel:{
+        flex:1,
         position:'absolute',
         borderRadius:2,
         borderWidth:1,
@@ -52,8 +59,9 @@ const styles = StyleSheet.create({
         height:'95%',
         top:30,
         left:1,
+        transform: "translateX(-85%)"
     },
     conteiner:{
-        flex:1, 
+        flex:1,
     }
 })

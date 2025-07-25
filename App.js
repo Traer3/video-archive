@@ -11,12 +11,21 @@ export default function App() {
   return (
     <View style={{flex:1,}}>
       
-      
-      <View style={styles.baseTheme}>
+      <Background/>
+     
+      <View style={{
+        position:"absolute",
+        flex:1,
+        borderWidth:2,
+        borderColor:'red',
+        height:'100%',
+        width:'100%'
+      }}>
         <SidePanel>
             <Text>HELP</Text>
-          </SidePanel>
+        </SidePanel>
       </View>
+      
       
     </View>
   );
