@@ -3,9 +3,12 @@ import styles from './src/styles/BaseStyle'
 import Background from './src/styles/Background';
 import CustomButton from './src/components/CustomButton';
 import SidePanel from './src/components/SidePanel';
+import SwipeArea from './src/components/YTcomps/SwipeArea';
+import { useState } from 'react';
 export default function App() {
 
-   //<TestArea/>
+  const [showYT, setShowYT] = useState(false);
+
   return (
     <View style={{flex:1,}}>
       
@@ -13,9 +16,14 @@ export default function App() {
      
       <View style={styles.baseTheme}>
         <SidePanel>
-            <Text>HELP</Text>
-            <CustomButton/>
+            <CustomButton buttonSetState={setShowYT} buttonState={showYT}/>
         </SidePanel>
+
+        <>
+          {showYT && <SwipeArea areaState={setShowYT}/>}
+        </>
+        
+
       </View>
       
       

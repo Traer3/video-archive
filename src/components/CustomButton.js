@@ -1,12 +1,12 @@
 import { Pressable ,Text } from "react-native"
 
-export default function CustomButton(){
+export default function CustomButton({buttonSetState, buttonState}){
     //rgb(73,106,154) цвет кнокпи 
     // rgb(43,75,123) цвет рамки 
     // rgb(178,191,217) цвет текста 
     return(
         <Pressable
-            onPress={()=> alert('KYS')}
+            onPress={()=>buttonSetState(!buttonState)}
             style={{
                 borderRadius:2,
                 borderWidth:1,
