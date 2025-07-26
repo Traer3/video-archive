@@ -9,6 +9,10 @@ dist/
 web-build/
 expo-env.d.ts
 
+#Content
+.video/*
+!video/.gitkeep
+
 # Native
 .kotlin/
 *.orig.*

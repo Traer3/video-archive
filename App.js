@@ -16,7 +16,7 @@ export default function App() {
      
       <View style={styles.baseTheme}>
         <SidePanel>
-            <CustomButton buttonSetState={setShowYT} buttonState={showYT}/>
+            <CustomButton buttonName={"YouTube"} buttonSetState={setShowYT} buttonState={showYT}/>
         </SidePanel>
 
         <>

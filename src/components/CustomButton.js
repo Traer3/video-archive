@@ -1,6 +1,6 @@
 import { Pressable ,Text } from "react-native"
 
-export default function CustomButton({buttonSetState, buttonState}){
+export default function CustomButton({buttonName,buttonSetState, buttonState}){
     //rgb(73,106,154) цвет кнокпи 
     // rgb(43,75,123) цвет рамки 
     // rgb(178,191,217) цвет текста 
@@ -18,7 +18,7 @@ export default function CustomButton({buttonSetState, buttonState}){
                 //overflow:'hidden'
             }}
         >
-            <Text style={{color:'rgb(198, 212, 240)'}}>never kys</Text>
+            <Text style={{color:'rgb(198, 212, 240)'}}>{buttonName}</Text>
         </Pressable>
     )
 }
