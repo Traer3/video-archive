@@ -10,7 +10,7 @@ web-build/
 expo-env.d.ts
 
 #Content
-videos/*
+assets/videos/*
 !videos/.gitkeep
 
 # Native
