@@ -1,72 +1,139 @@
 import { useEffect, useState } from "react";
-import * as FileSystem from "expo-file-system"
-import * as MediaLibrary from "expo-media-library"
-import { View, Text , Image } from "react-native";
-import Video from "react-native-video";
+import { Image, TouchableOpacity, View, StyleSheet, FlatList, Text, Modal} from "react-native";
+import * as VideoThumbnails from 'expo-video-thumbnails';
+import { videos } from "./Vids";
+import {Asset} from 'expo-asset';
+import { Video } from "expo-av";
+
 
 
 export default function YTAssembler () {
-    const [videos, setVideos] = useState([]);
 
+    const [videoData, setVideoData] = useState([]);
 
     useEffect(()=>{
-        
-        const loadVideos = async ()=> {
-            try{
-                const videosDir = `${FileSystem.bundleDirectory}videos/`;
-                console.log("Путь к папке ", videosDir)
-                const dirInfo = await FileSystem.getInfoAsync(videosDir);
-                if(!dirInfo.exists){
-                    console.log("Papki nety )");
-                    return;
+        const loadData = async () => {
+            const enriched = [];
+            for(let vid of videos){
+                try{
+                    const asset = Asset.fromModule(vid.source);
+                    await asset.downloadAsync();
+                    
+                    if(!asset.localUri){
+                        console.warn("No localUri for", vid.name);
+                        continue;
+                    }
+
+                    const {uri} = await VideoThumbnails.getThumbnailAsync(asset.localUri, {time:100});
+
+                    enriched.push({
+                        ...vid,
+                        thumbnail: uri,
+                        duration: '00:30',
+                    });
+                } catch (e){
+                    console.warn("Thumbnail error",e);
                 }
-
-                const files = await FileSystem.readDirectoryAsync(videosDir);
-                const videoData = await Promise.all(
-                    files
-                        .filter(file => file.endsWith('.mp4'))
-                        .map(async(file)=>{
-                            const fileInfo = await FileSystem.getInfoAsync(`${videosDir}${file}`);
-                            return {
-                                name: file,
-                                date: new Date(fileInfo.modificationTime).toLocaleDateString(),
-                                size: fileInfo.size,
-                                uri:`${videosDir}${file}`,
-                            };
-                        })
-                );
-                setVideos(videoData);
-            }catch(error){
-                console.error("Ощибка при загрузке видео: ", error);
             }
+            setVideoData(enriched);
         };
+        loadData();
+    },[])
 
-        loadVideos();
+    const renderItem = ({item}) => (
+        <TouchableOpacity style={styles.card} onPress={()=> setSelectedVideo(item.source)}>
+            <Image source={{uri: item.thumbnail}} style={styles.thumbnail}/>
+            <View style={styles.info}>
+                <Text style={styles.title}>{item.name}</Text>
+                <Text>Date: {item.date}</Text>
+                <Text>Duration: {item.duration}</Text>
+            </View>
+        </TouchableOpacity>
+        
+    )
 
-    },[]);
+
+    const [selectedVideo, setSelectedVideo] = useState(null);
+
 
     return(
-        <View>
-            {videos.length === 0 ? (
-                <Text style={{padding:20}}>видео не найдены</Text>
-            ) : (
-                videos.map((video, index)=>(
-                    <View key={index} style={{margin:10}}>
-                        <Text>Название {video.name}</Text>
-                        <Text>Дата {video.date}</Text>
-                        <Text>Размер: {(video.size / (1024 * 1024)).toFixed(2)} MB</Text>
+        <View style={{flex:1, }}>
+            <FlatList
+                data={videoData}
+                keyExtractor={(item)=>item.id}
+                renderItem={renderItem}
+            />
 
-                    
-
+            <Modal visible={!!selectedVideo} transparent={true} animationType="slide" onRequestClose={()=> setSelectedVideo(null)}>
+                <View style={styles.modalBackground}>
+                    <TouchableOpacity
+                        style={styles.closeArea}
+                        onPress={()=> setSelectedVideo(null)}
+                    />
+                    <View style={styles.videoContainer}>
                         <Video
-                            source={{uri: video.uri}}
-                            style={{width:300, height:200}}
-                            paused={true}
+                            source={selectedVideo}
+                            style={styles.video}
                             resizeMode="contain"
+                            useNativeControls
+                            shouldPlay
                         />
-                    </View>   
-                ))
-            )}
+                    </View>
+                </View>
+            </Modal>
         </View>
     )
-}
+    
+};
+
+const styles = StyleSheet.create({
+    card:{
+        flexDirection: 'row',
+        margin: 10,
+        backgroundColor:'#f2f2f2',
+        borderRadius:10,
+        overflow:'hidden',
+    },
+    thumbnail:{
+        width:120,
+        height:80,
+    },
+    info:{
+        padding:10,
+        flex:1,
+    },
+    title:{
+        fontWeight:'bold',
+        marginBottom: 5,
+    },
+
+    item:{
+        padding:15,
+        marginBottom: 10,
+        backgroundColor: "#eee",
+        borderRadius: 8,
+        
+        
+    },
+    text:{
+        fontSize:16,
+
+    },
+    modalBackground:{
+        flex:1,
+        backgroundColor:"rgba(0,0,0,0.9)",
+        justifyContent:'center',
+        alignItems:'center',
+    },
+    closeArea:{
+        ...StyleSheet.absoluteFillObject,
+    },
+    videoContainer:{
+        width:'100%',
+        height:'60%',
+    },
+    video:{
+        width:'100%',
+        height:'100%',
+    }
+});
