@@ -3,7 +3,8 @@ import { Image, TouchableOpacity, View, StyleSheet, FlatList, Text, Modal} from 
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import { videos } from "./Vids";
 import {Asset} from 'expo-asset';
-import { Video } from "expo-av";
+import { VideoView } from "expo-video";
+import { useVideoPlayer } from "expo-video";
 import YTVidForm from "./YTVidForm";
 
 
@@ -52,6 +53,13 @@ export default function YTAssembler () {
 
 
     const [selectedVideo, setSelectedVideo] = useState(null);
+    const player = useVideoPlayer(
+        selectedVideo,
+        (player) => {
+            player.loop = false
+            player.play();
+        }
+    );
 
 
     return(
@@ -69,13 +77,15 @@ export default function YTAssembler () {
                         onPress={()=> setSelectedVideo(null)}
                     />
                     <View style={styles.videoContainer}>
-                        <Video
-                            source={selectedVideo}
-                            style={styles.video}
-                            resizeMode="contain"
-                            useNativeControls
-                            shouldPlay
-                        />
+                        {selectedVideo && (
+                            <VideoView
+                                style={styles.video}
+                                player={player}
+                                allowsFullscreen
+                                allowsPictureInPicture
+                                nativeControls
+                            />
+                        )}
                     </View>
                 </View>
             </Modal>

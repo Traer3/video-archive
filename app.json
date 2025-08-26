@@ -7,26 +7,26 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-
-    "assetBundlePatterns": ["assets/videos/*"],
+    "assetBundlePatterns": [
+      "assets/videos/*"
+    ],
     "packagerOpts": {
-      "assetExts": ["mp4"]
+      "assetExts": [
+        "mp4"
+      ]
     },
-
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
         }
       },
-
-    "supportsTablet": true
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
@@ -39,7 +39,8 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "react-native-video"
+      "react-native-video",
+      "expo-video"
     ]
   }
 }
