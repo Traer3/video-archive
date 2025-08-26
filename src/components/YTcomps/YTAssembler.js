@@ -4,6 +4,7 @@ import * as VideoThumbnails from 'expo-video-thumbnails';
 import { videos } from "./Vids";
 import {Asset} from 'expo-asset';
 import { Video } from "expo-av";
+import YTVidForm from "./YTVidForm";
 
 
 
@@ -41,12 +42,9 @@ export default function YTAssembler () {
     },[])
 
     const renderItem = ({item}) => (
-        <TouchableOpacity style={styles.card} onPress={()=> setSelectedVideo(item.source)}>
-            <Image source={{uri: item.thumbnail}} style={styles.thumbnail}/>
-            <View style={styles.info}>
-                <Text style={styles.title}>{item.name}</Text>
-                <Text>Date: {item.date}</Text>
-                <Text>Duration: {item.duration}</Text>
+        <TouchableOpacity onPress={()=> setSelectedVideo(item.source)}>
+            <View style={{flex:1,}}>
+                <YTVidForm thumbnail={{uri: item.thumbnail}} name={item.name} date={item.date} duration={item.duration}/>
             </View>
         </TouchableOpacity>
         
@@ -87,33 +85,12 @@ export default function YTAssembler () {
 };
 
 const styles = StyleSheet.create({
-    card:{
-        flexDirection: 'row',
-        margin: 10,
-        backgroundColor:'#f2f2f2',
-        borderRadius:10,
-        overflow:'hidden',
-    },
-    thumbnail:{
-        width:120,
-        height:80,
-    },
-    info:{
-        padding:10,
-        flex:1,
-    },
-    title:{
-        fontWeight:'bold',
-        marginBottom: 5,
-    },
-
+    
     item:{
         padding:15,
         marginBottom: 10,
         backgroundColor: "#eee",
         borderRadius: 8,
-        
-        
     },
     text:{
         fontSize:16,
@@ -121,7 +98,7 @@ const styles = StyleSheet.create({
     },
     modalBackground:{
         flex:1,
-        backgroundColor:"rgba(0,0,0,0.9)",
+        backgroundColor:"rgba(0,0,0,0.5)",
         justifyContent:'center',
         alignItems:'center',
     },

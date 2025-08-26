@@ -2,12 +2,12 @@ import { View, StyleSheet, Text, Image } from "react-native"
 import creature from '../../meme/hoshino.png'
 import bratty from '../../meme/arona.gif'
 
-export default function YTVidForm() {
+export default function YTVidForm({thumbnail, name, date , duration}) {
     return(
         <View style={styles.baseForm}>
                 <Image
                     style={styles.imageStyle}
-                    source={creature}
+                    source={thumbnail}
                     resizeMode='stretch'
                 />
                 <View 
@@ -15,10 +15,13 @@ export default function YTVidForm() {
                         marginLeft:3
                     }}>
                     <Text>
-                        Name
+                       {name}
                     </Text>
                     <Text>
-                        Date
+                        {date}
+                    </Text>
+                    <Text>
+                        {duration}
                     </Text>
                 </View>
         </View>
@@ -27,10 +30,10 @@ export default function YTVidForm() {
 
 const styles = StyleSheet.create({
     baseForm:{
-        display:'flex',
+        flex:1,
         flexDirection:'row',
         backgroundColor:'rgb(73,106,154)',
-        height:'9%',
+        height:'10%',
         width:'99%',
         borderWidth:2,
         borderColor:'rgb(43,75,123)',
@@ -39,10 +42,10 @@ const styles = StyleSheet.create({
     },
     imageStyle:{
         borderWidth:1,
-        borderColor:'red',
 
-        borderRadius:4,
-        height:'99%',
-        width:'45%'
+
+        borderRadius:2,
+        height:'100%',
+        width:'30%'
     }
 })
