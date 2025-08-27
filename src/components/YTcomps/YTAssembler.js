@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Image, TouchableOpacity, View, StyleSheet, FlatList, Text, Modal} from "react-native";
+import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal} from "react-native";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import { videos } from "./Vids";
 import {Asset} from 'expo-asset';
