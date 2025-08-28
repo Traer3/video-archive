@@ -25,6 +25,7 @@ export default function App() {
           {showYT && <SwipeArea areaState={setShowYT}/>}
         </>
         <DataFetch/>
+        
       </View>
       
       
