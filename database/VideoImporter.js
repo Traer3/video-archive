@@ -12,7 +12,7 @@ const pool = new Pool({
     port: 5432,
 });
 
-//filter for copy 
+
 
 async function VideoImporter(folderPath){
     const files = fs.readdirSync(folderPath);
