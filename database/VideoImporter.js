@@ -74,7 +74,7 @@ async function VideoImporter(folderPath){
         }
     }
 
-    console.log('\n RESULTS:');
+    console.log('\n📊 RESULTS:');
     console.log(`Added new files: ${importedCount}`);
     console.log(`Skiped duplicates: ${skippedCount}`);
     console.log('Import end')
