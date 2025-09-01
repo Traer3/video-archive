@@ -13,6 +13,8 @@ export default DataFetch = () => {
         
     },[]);
 
+    
+
     return(
         <View style={{flex:1, padding: 10, position:'absolute'}}>
             <FlatList
@@ -34,9 +36,15 @@ export default DataFetch = () => {
                         <Text style={{fontSize: 18, fontWeight:"bold", color:'red'}}>
                             Category: {item.category}
                         </Text>
+
+                        <Text style={{fontSize: 18, fontWeight:"bold", color:'red'}}>
+                            Category: {item.url}
+                        </Text>
+                        
                     </View>
                 )}  
             />
+            
         </View>
     )
 }

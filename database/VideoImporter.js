@@ -13,6 +13,10 @@ const pool = new Pool({
 });
 
 
+//заменить 
+function generateRequirePath(fileName){
+    return `../../../vids/${fileName}`;
+}
 
 async function VideoImporter(folderPath){
    try {
@@ -52,12 +56,14 @@ async function VideoImporter(folderPath){
                 const finalName = await generateUniqueName(existingVideos, originalName);
                 const duration = 0;
 
+                const requirePath = generateRequirePath(file);
+
                 await pool.query(
                     `INSERT INTO videos (name, url, duration, size_mb, category, thumbnail)
                      VALUES ($1, $2, $3, $4, $5, $6)`,
                      [
                         finalName,
-                        `file://${filePath}`,
+                        requirePath,
                         duration,
                         sizeBM,
                         'uncategorized',
@@ -132,6 +138,10 @@ async function generateUniqueName(existingVideos, baseName) {
     }
     return maxNumber > 0 ? `${baseName} (${maxNumber + 1})` : baseName;
 }
+
+
+
+
 
 function isVideoFile(fileName){
     const videoExtensions = ['.mp4', '.avi', '.mov', '.mkv'];
