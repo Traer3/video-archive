@@ -11,112 +11,86 @@ import YTVidForm from "./YTVidForm";
 
 export default function YTAssembler () {
 
-    const [videoData, setVideoData] = useState([]);
 
-    const [loading, setLoading] = useState(true);
-
+    //wipe all 
+    // db for vid 
 
     useEffect(()=>{
         const getVids = async () => {
             try{
                 const responce = await fetch("http://192.168.0.2:3001/videos");
                 const data = await responce.json();
-
-                await loadingVideoData(data);
-            } catch (err) {
-                console.log("DB error: ", err);
-            } finally {
-                setLoading(false)
-            }
-       };
-       getVids();
-    },[])
-
-    const preLoadVideos = async (videosList) =>{
-        const assets = [];
-
-        for (const vid of videosList){
-            try{
-                const asset = Asset.fromURI(vid.url);
-                await asset.downloadAsync();
-
-                assets.push({
-                    ...vid,
-                    asset: asset,
-                    localUri: asset.localUri
-                });
+                urlReader(data)
             }catch(err){
-                console.warn(`Error preloading video ${vid.name}: `,err);
-                assets.push({
-                    ...vid,
-                    asset: null,
-                    localUri: vid.url
-                });
+                console.log("DB error: ", err)
             }
         }
-        return assets;
-    };
+        getVids();
+       
+    },[])
 
+    const [videos, setVideos] = useState([])
 
-    const loadingVideoData = async (vidosList) => {
-        try{
-            const preLoadedVideos = await preLoadVideos(vidosList)
+    const urlReader = (DBvideos) => {
+       const parsedVideos = DBvideos.map((vid)=>({
+        category: vid.category,
+        created_at: vid.created_at,
+        duration: vid.duration,
+        id: vid.id,
+        name: vid.name,
+        size_mb: vid.size_mb,
+        thumbnail: vid.thumbnail,
+        url: vid.url,
+       }))
+        setVideos(parsedVideos)
+        
+    }
+
+    const urls = videos.map((vid)=> vid.url)
+    console.log(urls)
+
+    const [videoData, setVideoData] = useState([]);
+
+    useEffect(()=>{
+
+        const loadData = async () => {
             const enriched = [];
-
-            for(let vid of preLoadedVideos){
+            for(let vid of videos){
                 try{
-                    let thumbnailUri = null;
-
-                    if(vid.localUri){
-                        try{
-                            const {uri} = await VideoThumbnails.getThumbnailAsync(vid.localUri,{
-                                time: 1000,
-                                quality: 0.7
-                            });
-                            thumbnailUri = uri;
-                        }catch(thumbnailError){
-                            console.warn("Thumbnail Error for ", vid.name, thumbnailError)
-                        }
+                    const asset = Asset.fromModule(vid.url.json);
+                    await asset.downloadAsync();
+                    
+                    if(!asset.localUri){
+                        console.warn("No localUri for", vid.name);
+                        continue;
                     }
 
-                    enriched.push({
-                        ...vid,
-                        thumbnail: thumbnailUri,
-                        duration: vid.duration ? formatDuration(vid.duration) : '00:30',
-                    });
-                } catch (e){
-                    console.warn("Processing error for ",vid.name , e);
+                    const {uri} = await VideoThumbnails.getThumbnailAsync(asset.localUri, {time:100});
 
                     enriched.push({
                         ...vid,
-                        thumbnail: null,
-                        duration: vid.duration ? formatDuration(vid.duration) : '00:30'
+                        thumbnail: uri,
+                        duration: '00:30',
                     });
+                } catch (e){
+                    console.warn("Thumbnail error",e);
                 }
             }
             setVideoData(enriched);
-        }catch(err){
-            console.error("Error in loadingVideoData: ", err)
-        }
-    };
+            
+        };
+        loadData();
+        
+    },[videos])
 
-
-    const formatDuration = (seconds) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins.toString().padStart(2, '0')}: ${secs.toString().padStart(2,'0')}`;
-    }
-
+    useEffect(()=>{
+        console.log("Updated videoDATA: ", videoData)
+    },[videoData])
 
     const renderItem = ({item}) => (
-        <TouchableOpacity onPress={()=> setSelectedVideo(item.localUri || item.url)}>
+        <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
             <View style={{flex:1,}}>
-                <YTVidForm 
-                    thumbnail={item.thumbnail ? {uri: item.thumbnail} : null} 
-                    name={item.name} 
-                    date={item.date} 
-                    duration={item.duration}
-                />
+                <YTVidForm thumbnail={{uri: item.thumbnail}} name={item.name} date={item.date} duration={item.duration}/>
             </View>
         </TouchableOpacity>
         
@@ -132,7 +106,6 @@ export default function YTAssembler () {
         }
     );
 
-    
 
     return(
         <View style={{flex:1, }}>
@@ -140,11 +113,6 @@ export default function YTAssembler () {
                 data={videoData}
                 keyExtractor={(item)=>item.id.toString()}
                 renderItem={renderItem}
-                ListEmptyComponent={
-                    <View style={styles.center}>
-                            <Text>No videos found</Text>
-                    </View>
-                }
             />
 
             <Modal visible={!!selectedVideo} transparent={true} animationType="slide" onRequestClose={()=> setSelectedVideo(null)}>
@@ -172,13 +140,6 @@ export default function YTAssembler () {
 };
 
 const styles = StyleSheet.create({
-
-    center:{
-        flex:1,
-        justifyContent:'center',
-        alignItems:'center',
-        padding:20
-    },
     
     item:{
         padding:15,
