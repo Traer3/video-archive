@@ -5,8 +5,6 @@ import CustomButton from './src/components/CustomButton';
 import SidePanel from './src/components/SidePanel';
 import SwipeArea from './src/components/YTcomps/SwipeArea';
 import { useState } from 'react';
-import YTAssembler from './src/components/YTcomps/YTAssembler';
-import DataFetch from './src/components/DBcomps/DataFetch';
 export default function App() {
 
   const [showYT, setShowYT] = useState(false);
