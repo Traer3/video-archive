@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal} from "react-native";
 import * as VideoThumbnails from 'expo-video-thumbnails';
-//import { videos } from "./Vids";
+
 import {Asset} from 'expo-asset';
 import { VideoView } from "expo-video";
 import { useVideoPlayer } from "expo-video";
@@ -18,7 +18,7 @@ export default function YTAssembler () {
     useEffect(()=>{
         const getVids = async () => {
             try{
-                const responce = await fetch("http://192.168.0.2:3001/videos");
+                const responce = await fetch("http://192.168.0.8:3001/videos");
                 const data = await responce.json();
                 urlReader(data)
             }catch(err){
@@ -57,7 +57,7 @@ export default function YTAssembler () {
             const enriched = [];
             for(let vid of videos){
                 try{
-                    const asset = Asset.fromModule(vid.url.json);
+                    const asset = Asset.fromModule(vid.url);
                     await asset.downloadAsync();
                     
                     if(!asset.localUri){

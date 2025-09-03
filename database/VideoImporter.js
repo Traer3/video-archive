@@ -12,10 +12,8 @@ const pool = new Pool({
     port: 5432,
 });
 
-
-//заменить 
 function generateRequirePath(fileName){
-    return `../../../vids/${fileName}`;
+    return `http://192.168.0.8:3004/${fileName}`; //vm ip
 }
 
 async function VideoImporter(folderPath){
@@ -148,5 +146,5 @@ function isVideoFile(fileName){
     return videoExtensions.includes(path.extname(fileName).toLocaleLowerCase());
 }
 
-const VIDEOS_FOLDER_PATH = '../vids'
+const VIDEOS_FOLDER_PATH = '../vids' //linux const VIDEOS_FOLDER_PATH = path.join(__dirname, "videos")
 VideoImporter(VIDEOS_FOLDER_PATH);
