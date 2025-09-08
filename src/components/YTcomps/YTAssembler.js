@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal} from "react-native";
+import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image} from "react-native";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 
 import {Asset} from 'expo-asset';
@@ -7,13 +7,13 @@ import { VideoView } from "expo-video";
 import { useVideoPlayer } from "expo-video";
 import YTVidForm from "./YTVidForm";
 
+import * as FileSystem from "expo-file-system"
+
+
+import placeholder from "../../../assets/AronaServer.jpg"
 
 
 export default function YTAssembler () {
-
-
-    //wipe all 
-    // db for vid 
 
     useEffect(()=>{
         const getVids = async () => {
@@ -33,21 +33,12 @@ export default function YTAssembler () {
 
     const urlReader = (DBvideos) => {
        const parsedVideos = DBvideos.map((vid)=>({
-        category: vid.category,
-        created_at: vid.created_at,
-        duration: vid.duration,
-        id: vid.id,
-        name: vid.name,
-        size_mb: vid.size_mb,
-        thumbnail: vid.thumbnail,
-        url: vid.url,
+        ...vid,
+        url: vid.url
        }))
         setVideos(parsedVideos)
         
     }
-
-    const urls = videos.map((vid)=> vid.url)
-    console.log(urls)
 
     const [videoData, setVideoData] = useState([]);
 
@@ -57,15 +48,16 @@ export default function YTAssembler () {
             const enriched = [];
             for(let vid of videos){
                 try{
-                    const asset = Asset.fromModule(vid.url);
-                    await asset.downloadAsync();
                     
-                    if(!asset.localUri){
-                        console.warn("No localUri for", vid.name);
-                        continue;
+                    filename = vid.id + ".mp4"
+                    const localUri = FileSystem.documentDirectory + filename;
+
+                    const fileInfo = await FileSystem.getInfoAsync(localUri);
+                    if(!fileInfo.exists){
+                        await FileSystem.downloadAsync(vid.url, localUri);
                     }
 
-                    const {uri} = await VideoThumbnails.getThumbnailAsync(asset.localUri, {time:100});
+                    const {uri} = await VideoThumbnails.getThumbnailAsync(localUri, {time:100});
 
                     enriched.push({
                         ...vid,
@@ -73,7 +65,13 @@ export default function YTAssembler () {
                         duration: '00:30',
                     });
                 } catch (e){
-                    console.warn("Thumbnail error",e);
+                    console.warn("Thumbnail error",vid.id);
+                    enriched.push({
+                        ...vid,
+                        thumbnail: Image.resolveAssetSource(placeholder).uri,
+                        duration: "a lot"
+                    })
+                    continue;
                 }
             }
             setVideoData(enriched);
@@ -83,8 +81,10 @@ export default function YTAssembler () {
         
     },[videos])
 
+    const [showTestUpdate, setShowTestUpdate] = useState(0)
     useEffect(()=>{
-        console.log("Updated videoDATA: ", videoData)
+        setShowTestUpdate(prevState => prevState +1)
+        console.log("Updated videoDATA",  showTestUpdate , )
     },[videoData])
 
     const renderItem = ({item}) => (

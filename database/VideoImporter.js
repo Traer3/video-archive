@@ -13,7 +13,7 @@ const pool = new Pool({
 });
 
 function generateRequirePath(fileName){
-    return `http://192.168.0.8:3004/${fileName}`; //vm ip
+    return "http://192.168.0.8:3004/" + encodeURIComponent(fileName); //vm ip
 }
 
 async function VideoImporter(folderPath){
@@ -142,7 +142,7 @@ async function generateUniqueName(existingVideos, baseName) {
 
 
 function isVideoFile(fileName){
-    const videoExtensions = ['.mp4', '.avi', '.mov', '.mkv'];
+    const videoExtensions = ['.mp4'];
     return videoExtensions.includes(path.extname(fileName).toLocaleLowerCase());
 }
 
