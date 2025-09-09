@@ -20,7 +20,7 @@ function VideoDownloader(url,index){
     return new Promise((resolve)=>{
         console.log(`Downdloading: [${index +1}]/${links.length}: ${url}`);
 
-        const comand = `yt-dlp -o "${OUT_DIR}/%(title)s.%(ext)s" "${url}"`;
+        const comand = `yt-dlp -o "${OUT_DIR}/%(title)s.%(ext)s" --merge-output-format mp4 "${url}"`;
         exec(comand,(error, stdout,stderr) => {
             if (error) {
                 console.log(`❌ error while downloaded: ${url}`);
