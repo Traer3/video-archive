@@ -16,6 +16,9 @@ assets/videos/*
 /vids/*
 /database/videos/*
 
+/database/LinksGenerator/*
+!database/LinksGenerator/YTGetLinks.js
+
 # Native
 .kotlin/
 *.orig.*
