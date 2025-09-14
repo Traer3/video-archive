@@ -30,12 +30,16 @@ async function saveCredentials(client) {
 }
 
 async function authorize(){
+
+
     let client = await loadSavedCredentialsIfExist();
-    if (client) return client;
+    if (client) return client; 
 
     const content = fs.readFileSync(CREDENTIALS_PATH);
     const credentials = JSON.parse(content);
     const {client_secret, client_id, redirect_uris} = credentials.installed;
+
+
     const oAuth2Client = new google.auth.OAuth2(
         client_id , client_secret, redirect_uris[0]);
     
@@ -45,6 +49,7 @@ async function authorize(){
     });
 
     console.log('Authorize this app by visiting this url:', authUrl);
+
     const readline =  require('readline').createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -53,11 +58,15 @@ async function authorize(){
     const code = await new Promise(resolve => {
         readline.question('Enter the code from that page here: ', resolve);
     });
+
+    
     readline.close();
 
     const {tokens} = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
+
     await saveCredentials(oAuth2Client);
+
     return oAuth2Client;
 }
 
@@ -80,7 +89,7 @@ async function listLikedVideos(auth) {
         });
 
         nextPageToken = res.data.nextPageToken;
-        console.log(`📥 Loaded: ${allVideos.length} so fart...`)
+        console.log(`📥 Loaded: ${allVideos.length} so far...`)
     } while(nextPageToken);
 
     fs.writeFileSync('likes.txt',allVideos.join('\n'));
