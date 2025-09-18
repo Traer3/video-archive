@@ -119,7 +119,8 @@ async function listLikedVideoTitles(auth) {
         allNamesYT.push(item.snippet.title)
         //console.log(`${index + 1}. ${item.snippet.title}`);
     });
-    
+
+    return allNamesYT;
 }
 
 
@@ -151,4 +152,18 @@ async function listLikedVideos(auth) {
 
 //authorize().then(listLikedVideos).catch(console.error);
 
-//authorize().then(listLikedVideoTitles).catch(console.error);
+(async ()=>{
+    const auth = await authorize();
+    const YTvidsName = await listLikedVideoTitles(auth);
+    console.log(YTvidsName)
+})();
+
+/*
+(async () => {
+    await getVids();
+    const names = videoNames.map((vid)=> vid.name)
+    console.log(names)
+})();
+*/
+
+
