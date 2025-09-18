@@ -7,6 +7,40 @@ const SCOPES = ['https://www.googleapis.com/auth/youtube.readonly'];
 const TOKEN_PATH = path.join(__dirname, 'token.json');
 const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
 
+
+const getVids = async () => {
+    try{
+        const responce = await fetch("http://192.168.0.8:3001/videos");
+        const data = await responce.json();
+        nameReader(data)
+    }catch(err){
+        console.log("DB error: ", err)
+    }
+}
+getVids();
+
+let videoNames = [];
+
+const nameReader = (DBvideos) => {
+    const parsedVideos = DBvideos.map((vid)=>({
+     ...vid,
+     name: vid.name
+    }))
+    videoNames = parsedVideos;
+     
+ }
+
+/*
+(async () => {
+    await getVids();
+    const names = videoNames.map((vid)=> vid.name)
+    console.log(names)
+})();
+*/
+
+
+
+
 async function loadSavedCredentialsIfExist() {
     try{
         const content = fs.readFileSync(TOKEN_PATH);
@@ -70,6 +104,25 @@ async function authorize(){
     return oAuth2Client;
 }
 
+async function listLikedVideoTitles(auth) {
+    let allNamesYT = [];
+
+    const service = google.youtube('v3');
+    const res = await service.playlistItems.list({
+        playlistId: 'LL',
+        part: 'snippet',
+        maxResults: 10,
+        auth,
+    });
+
+    res.data.items.forEach((item)=>{
+        allNamesYT.push(item.snippet.title)
+        //console.log(`${index + 1}. ${item.snippet.title}`);
+    });
+    
+}
+
+
 async function listLikedVideos(auth) {
     const service = google.youtube('v3');
     let nextPageToken = null;
@@ -96,4 +149,6 @@ async function listLikedVideos(auth) {
     console.log(`✅ Saved: ${allVideos.length} vids in likes.txt`)
 }
 
-authorize().then(listLikedVideos).catch(console.error);
+//authorize().then(listLikedVideos).catch(console.error);
+
+//authorize().then(listLikedVideoTitles).catch(console.error);
