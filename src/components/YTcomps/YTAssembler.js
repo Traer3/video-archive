@@ -41,25 +41,17 @@ export default function YTAssembler () {
 
     const [videoData, setVideoData] = useState([]);
 
+
     useEffect(()=>{
         const loadData = async () => {
             const enriched = [];
 
             for(let vid of videos){
                 try{
-                    
-                    const filename = vid.id + ".mp4"
-                    const localUri = FileSystem.documentDirectory + filename;
+                         
+                    let VideoUrl = String(vid.url)
 
-                    const file = new FileSystem.File(localUri);
-                    const info = await file.info();
-
-                    if(!info.exists){
-                        await file.download(vid.url);
-                    }
-
-                    const {uri} = await VideoThumbnails.getThumbnailAsync(file.uri, {time:100});
-
+                    const {uri} = await VideoThumbnails.getThumbnailAsync(VideoUrl, {time:1000});
 
                     enriched.push({
                         ...vid,
@@ -116,9 +108,9 @@ export default function YTAssembler () {
                 keyExtractor={(item)=>item.id.toString()}
                 renderItem={renderItem}
             />
-
             <Modal visible={!!selectedVideo} transparent={true} animationType="slide" onRequestClose={()=> setSelectedVideo(null)}>
                 <View style={styles.modalBackground}>
+                    
                     <TouchableOpacity
                         style={styles.closeArea}
                         onPress={()=> setSelectedVideo(null)}
@@ -170,5 +162,5 @@ const styles = StyleSheet.create({
     video:{
         width:'100%',
         height:'100%',
-    }
+    },
 });
