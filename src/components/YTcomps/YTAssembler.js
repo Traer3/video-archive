@@ -8,9 +8,8 @@ import YTVidForm from "./YTVidForm";
 
 import * as FileSystem from "expo-file-system"
 
-
 import placeholder from "../../../assets/AronaServer.jpg"
-import { FullscreenOrientationType ,} from "react-native-video";
+
 
 
 export default function YTAssembler () {
@@ -59,7 +58,8 @@ export default function YTAssembler () {
                         await file.download(vid.url);
                     }
 
-                    const {uri} = await VideoThumbnails.getThumbnailAsync(localUri, {time:100});
+                    const {uri} = await VideoThumbnails.getThumbnailAsync(file.uri, {time:100});
+
 
                     enriched.push({
                         ...vid,
@@ -130,9 +130,7 @@ export default function YTAssembler () {
                                 player={player}
                                 fullscreenOptions={{
                                     enable: true,
-                                    orientation: FullscreenOrientationType.ALL
                                 }}
-                                //onPictureInPictureStart={{enable: true}}
                                 nativeControls
                             />
                         )}
