@@ -12,9 +12,10 @@ export default function YTVidForm({thumbnail, name, date , duration}) {
                 />
                 <View 
                     style={{
+                        flex:1,
                         marginLeft:3
                     }}>
-                    <Text>
+                    <Text style={{width:'220',}} numberOfLines={1} ellipsizeMode="tail">
                        {name}
                     </Text>
                     <Text>
@@ -33,17 +34,17 @@ const styles = StyleSheet.create({
         flex:1,
         flexDirection:'row',
         backgroundColor:'rgb(73,106,154)',
-        height:'10%',
-        width:'99%',
+        height:'80',
         borderWidth:2,
         borderColor:'rgb(43,75,123)',
-        margin:1
+        marginTop:8,
+        marginLeft:10,
+        marginRight:10,
+
         
     },
     imageStyle:{
         borderWidth:1,
-
-
         borderRadius:2,
         height:'100%',
         width:'30%'

@@ -64,22 +64,25 @@ export default  function SwipeArea({areaState}) {
 
 const styles = StyleSheet.create({
     conteiner: {
-        width:'60%',
+        width:'84%',
         height:'100%',
         backgroundColor:'rgb(71, 103, 151)',
-        marginLeft:'20%',
-        marginTop:'10%',
+        margin:'8%',
         overflow:'hidden',
+  
+
     },
     content:{
         flex:1,
         justifyContent:'colume',
+        
     },
     outerArea:{
         position:'absolute',
         width:'100%',
         height:'100%',
         backgroundColor:'rgba(0,0,0,0.5)',
+        
     }
     
 

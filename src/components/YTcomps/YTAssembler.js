@@ -82,9 +82,7 @@ export default function YTAssembler () {
 
     const renderItem = ({item}) => (
         <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
-            <View style={{flex:1,}}>
                 <YTVidForm thumbnail={{uri: item.thumbnail}} name={item.name} date={item.date} duration={item.duration}/>
-            </View>
         </TouchableOpacity>
         
     )
@@ -140,16 +138,18 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         backgroundColor: "#eee",
         borderRadius: 8,
+        
     },
     text:{
         fontSize:16,
-
+        
     },
     modalBackground:{
         flex:1,
         backgroundColor:"rgba(0,0,0,0.5)",
         justifyContent:'center',
         alignItems:'center',
+        
     },
     closeArea:{
         ...StyleSheet.absoluteFillObject,
@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
     videoContainer:{
         width:'100%',
         height:'60%',
+        
     },
     video:{
         width:'100%',
