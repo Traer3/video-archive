@@ -3,14 +3,14 @@ import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image} from 
 import * as VideoThumbnails from 'expo-video-thumbnails';
 
 import {Asset} from 'expo-asset';
-import { VideoView } from "expo-video";
-import { useVideoPlayer } from "expo-video";
+import { VideoView, useVideoPlayer, } from "expo-video";
 import YTVidForm from "./YTVidForm";
 
 import * as FileSystem from "expo-file-system"
 
 
 import placeholder from "../../../assets/AronaServer.jpg"
+import { FullscreenOrientationType ,} from "react-native-video";
 
 
 export default function YTAssembler () {
@@ -43,18 +43,20 @@ export default function YTAssembler () {
     const [videoData, setVideoData] = useState([]);
 
     useEffect(()=>{
-
         const loadData = async () => {
             const enriched = [];
+
             for(let vid of videos){
                 try{
                     
-                    filename = vid.id + ".mp4"
+                    const filename = vid.id + ".mp4"
                     const localUri = FileSystem.documentDirectory + filename;
 
-                    const fileInfo = await FileSystem.getInfoAsync(localUri);
-                    if(!fileInfo.exists){
-                        await FileSystem.downloadAsync(vid.url, localUri);
+                    const file = new FileSystem.File(localUri);
+                    const info = await file.info();
+
+                    if(!info.exists){
+                        await file.download(vid.url);
                     }
 
                     const {uri} = await VideoThumbnails.getThumbnailAsync(localUri, {time:100});
@@ -126,8 +128,11 @@ export default function YTAssembler () {
                             <VideoView
                                 style={styles.video}
                                 player={player}
-                                allowsFullscreen
-                                allowsPictureInPicture
+                                fullscreenOptions={{
+                                    enable: true,
+                                    orientation: FullscreenOrientationType.ALL
+                                }}
+                                //onPictureInPictureStart={{enable: true}}
                                 nativeControls
                             />
                         )}
