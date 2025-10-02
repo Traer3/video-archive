@@ -2,14 +2,10 @@ import { useEffect, useState } from "react";
 import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image} from "react-native";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 
-import {Asset} from 'expo-asset';
 import { VideoView, useVideoPlayer, } from "expo-video";
 import YTVidForm from "./YTVidForm";
 
-import * as FileSystem from "expo-file-system"
-
 import placeholder from "../../../assets/AronaServer.jpg"
-
 
 
 export default function YTAssembler () {
@@ -56,8 +52,11 @@ export default function YTAssembler () {
                     enriched.push({
                         ...vid,
                         thumbnail: uri,
-                        duration: '00:30',
+                        duration: '00:30', // заменить фиксированое время на актуальное
+
                     });
+
+                    
                 } catch (e){
                     console.warn("Thumbnail error",vid.id);
                     enriched.push({
