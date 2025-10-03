@@ -8,6 +8,8 @@ import { useState } from 'react';
 export default function App() {
 
   const [showYT, setShowYT] = useState(false);
+  const [showTT, setShowTT] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
     <View style={{flex:1,}}>
@@ -17,8 +19,8 @@ export default function App() {
       <View style={styles.baseTheme}>
         <SidePanel>
             <CustomButton iconsName="YTLogo" buttonSetState={setShowYT} buttonState={showYT}/>
-            <CustomButton iconsName="TTLogo" buttonSetState={setShowYT} buttonState={showYT}/>
-            <CustomButton iconsName="MenuIcon" buttonSetState={setShowYT} buttonState={showYT}/>
+            <CustomButton iconsName="TTLogo" buttonSetState={setShowTT} buttonState={showTT}/>
+            <CustomButton iconsName="MenuIcon" buttonSetState={setShowMenu} buttonState={showMenu}/>
         </SidePanel>
 
         <>
