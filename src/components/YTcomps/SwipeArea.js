@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, Dimensions, Pressable } from "react-native"
+import { View, StyleSheet, Text, Dimensions, Pressable,  } from "react-native"
 import YTVidForm from "./YTVidForm";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withDecay, withSpring } from "react-native-reanimated";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
@@ -51,8 +51,9 @@ export default  function SwipeArea({areaState}) {
                                         styles.content, 
                                         animatedStyle
                                     ]}>
-
-                                    <YTAssembler/>    
+                                    
+                                    <YTAssembler/>   
+                                    
                                        
                                 </Animated.View>
                             </View>
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
         backgroundColor:'rgb(71, 103, 151)',
         margin:'8%',
         overflow:'hidden',
-  
+      
 
     },
     content:{

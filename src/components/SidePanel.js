@@ -60,13 +60,19 @@ const styles = StyleSheet.create({
         borderWidth:1,
         borderColor:'rgb(43,75,123)',
         backgroundColor:'rgb(73,106,154)',
-        width:'20%',
-        height:'95%',
-        top:30,
-        left:1,
+        width:'100%',
+        height:'8%',
+        bottom:0,
+        left:85,
+        padding:10,
+        
+        flexDirection:'row',
+        alignItems:'center',
+        justifyContent:"space-between"
         
     },
     conteiner:{
         flex:1,
+       
     }
 })
