@@ -10,21 +10,33 @@ export default  function SwipeArea({areaState}) {
     const offSetY = useSharedValue(0);
     const translateY = useSharedValue(0);
 
+    const MIN_TRANSLATE_Y = -200;
+    const MAX_TRANSLATE_Y = 0;
+
     const panGesture = Gesture.Pan()
         .onBegin(()=>{
             offSetY.value = translateY.value;
         })
         .onUpdate((event)=>{
-            translateY.value = offSetY.value + event.translationY;
+            let  newY = offSetY.value + event.translationY;
+            if(newY < MIN_TRANSLATE_Y){
+                newY = MIN_TRANSLATE_Y;
+            }else if (newY > MAX_TRANSLATE_Y){
+                newY = MAX_TRANSLATE_Y;
+            }
+
+            translateY.value = newY;
         })
 
         .onEnd((event)=>{
-           translateY.value = offSetY.value + event.translationY
-           
-           translateY.value = withDecay({
+            translateY.value = withDecay({
                 velocity: event.velocityY,
-                clamp: [-1000, 1000]
-           });
+                clamp:[MIN_TRANSLATE_Y, MAX_TRANSLATE_Y],
+                deceleration: 0.98
+            });
+
+            //if(event.translationX < -50){ areaState(false);} runOnJS is deprecated =(
+           
         })
     
     const animatedStyle = useAnimatedStyle(()=>({
@@ -35,29 +47,27 @@ export default  function SwipeArea({areaState}) {
         areaState(false)
     }
 
+
+
     return(
         <GestureHandlerRootView style={{borderWidth:0.1}} >
-          
-                <Pressable 
-                    style={styles.outerArea} 
-                    onPress={onAreaPress}
-                    >
-                </Pressable>
+          <Pressable style={styles.outerArea} onPress={onAreaPress}/>
+            <GestureDetector gesture={panGesture}>
+                    <View style={styles.conteiner}>
+                        <Animated.View 
+                            style={[
+                                styles.content, 
+                                animatedStyle
+                            ]}>
+                                    
+                            <YTAssembler/>   
+                                               
+                        </Animated.View>
+                    </View>
+            </GestureDetector>
                 
-                <GestureDetector gesture={panGesture}>
-                            <View style={styles.conteiner}>
-                                <Animated.View 
-                                    style={[
-                                        styles.content, 
-                                        animatedStyle
-                                    ]}>
-                                    
-                                    <YTAssembler/>   
-                                    
-                                       
-                                </Animated.View>
-                            </View>
-                        </GestureDetector>
+                
+                
            
         </GestureHandlerRootView>
     );
@@ -75,7 +85,7 @@ const styles = StyleSheet.create({
     },
     content:{
         flex:1,
-        justifyContent:'colume',
+        flexDirection: 'column',
         
     },
     outerArea:{

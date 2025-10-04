@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image} from "react-native";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 
-import { VideoView, useVideoPlayer, } from "expo-video";
+import { VideoPlayer, VideoView, useVideoPlayer, } from "expo-video";
 import YTVidForm from "./YTVidForm";
 
 import placeholder from "../../../assets/AronaServer.jpg"
@@ -37,6 +37,8 @@ export default function YTAssembler () {
 
     const [videoData, setVideoData] = useState([]);
 
+   
+
 
     useEffect(()=>{
         const loadData = async () => {
@@ -44,11 +46,26 @@ export default function YTAssembler () {
 
             for(let vid of videos){
                 try{
-                         
+                    
                     let VideoUrl = String(vid.url)
 
-                    const {uri} = await VideoThumbnails.getThumbnailAsync(VideoUrl, {time:1000});
+                    const {uri} = await VideoThumbnails.getThumbnailAsync(VideoUrl, {time:100});
 
+                  /* ebashim
+
+                       //duration reader 
+                    let player = new VideoPlayer({uri:VideoUrl});
+                    let VidDuration = '00:30'
+                    player.addListener('statusUpdate', (status)=>{
+                        if(status.durationMillis){
+                            VidDuration  = toString(status.durationMillis / 1000)
+                        }
+                    })  
+
+                  */
+
+                    
+                    
                     enriched.push({
                         ...vid,
                         thumbnail: uri,
@@ -58,7 +75,7 @@ export default function YTAssembler () {
 
                     
                 } catch (e){
-                    console.warn("Thumbnail error",vid.id);
+                    //console.warn("Thumbnail error",vid.id);
                     enriched.push({
                         ...vid,
                         thumbnail: Image.resolveAssetSource(placeholder).uri,
@@ -77,7 +94,7 @@ export default function YTAssembler () {
     const [showTestUpdate, setShowTestUpdate] = useState(0)
     useEffect(()=>{
         setShowTestUpdate(prevState => prevState +1)
-        console.log("Updated videoDATA",  showTestUpdate , )
+        //console.log("Updated videoDATA",  showTestUpdate , )
     },[videoData])
 
     const renderItem = ({item}) => (

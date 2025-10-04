@@ -31,7 +31,7 @@ export default function SidePanel({children}){
     
     
     const animatedStyle = useAnimatedStyle(()=>({
-        transform:[{translateX: translateX.value}],
+       //uncomment this one to make them slide =)  //transform:[{translateX: translateX.value}],
         // transform:[{translateX: `${translateX.value}%`}],
     }));
 
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
         width:'100%',
         height:'8%',
         bottom:0,
-        left:85,
+       
         padding:10,
         
         flexDirection:'row',
