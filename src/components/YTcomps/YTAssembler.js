@@ -6,6 +6,7 @@ import { VideoPlayer, VideoView, useVideoPlayer, } from "expo-video";
 import YTVidForm from "./YTVidForm";
 
 import placeholder from "../../../assets/AronaServer.jpg"
+import { DurationFetcher } from "./DurationFetcher";
 
 
 export default function YTAssembler () {
@@ -38,42 +39,12 @@ export default function YTAssembler () {
     const [videoData, setVideoData] = useState([]);
 
    
+    
 
 
     useEffect(()=>{
         const loadData = async () => {
             const enriched = [];
-
-            for(let vid of videos){
-                try{
-                    const [duration, setDuration] = useState(null);
-                    console.log(duration)
-
-                    let VideoUrl = String(vid.url)
-                    let player = useVideoPlayer(VideoUrl, (player)=>{
-                        player.loop = false;
-                    });
-                    
-                    const interval = setInterval(()=> {
-                        if(player.duration) {
-                            const totalSec = Math.floor(player.duration / 1000);
-                            const minutes = Math.floor(totalSec / 60);
-                            const seconds = totalSec % 60;
-                            setDuration(`${minutes}:${seconds.toString().padStart(2,"0")}`);
-                            clearInterval(interval);
-                        }
-                    })
-
-
-                    enriched.push({
-                        ...vid,
-                        duration: duration, // заменить фиксированое время на актуальное
-                    });
-
-                }catch(err){
-                    console.log("cant see duration")
-                }
-            }
 
             for(let vid of videos){
                 try{
@@ -87,7 +58,7 @@ export default function YTAssembler () {
                     enriched.push({
                         ...vid,
                         thumbnail: uri,
-                        //duration: '00:30', // заменить фиксированое время на актуальное
+                        duration: null, // заменить фиксированое время на актуальное
 
                     });
 
@@ -116,11 +87,11 @@ export default function YTAssembler () {
     },[videoData])
 
     const renderItem = ({item}) => (
-        <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
+            <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
                 <YTVidForm thumbnail={{uri: item.thumbnail}} name={item.name} date={item.date} duration={item.duration}/>
-        </TouchableOpacity>
-        
-    )
+            </TouchableOpacity>
+        )
+
 
 
     const [selectedVideo, setSelectedVideo] = useState(null);
@@ -135,6 +106,25 @@ export default function YTAssembler () {
 
     return(
         <View style={{flex:1, }}>
+            {videos.length > 0 &&
+                videos.map((vid)=>(
+                    <DurationFetcher
+                    
+                    key={vid.id}
+                    url={vid.url}
+                    onDurationReady={(dur)=>{
+                        setVideoData((prev)=> 
+                            prev.map((video)=> 
+                              video.id === vid.id ? {...video, duration: dur}: video
+                            )
+                        );
+                        console.log(`Video ${vid.id} duration: ${dur}`);
+                    }}
+                />
+                ))
+            }
+
+
             <FlatList
                 data={videoData}
                 keyExtractor={(item)=>item.id.toString()}
