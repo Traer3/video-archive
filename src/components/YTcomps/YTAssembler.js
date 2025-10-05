@@ -46,30 +46,48 @@ export default function YTAssembler () {
 
             for(let vid of videos){
                 try{
+                    const [duration, setDuration] = useState(null);
+                    console.log(duration)
+
+                    let VideoUrl = String(vid.url)
+                    let player = useVideoPlayer(VideoUrl, (player)=>{
+                        player.loop = false;
+                    });
+                    
+                    const interval = setInterval(()=> {
+                        if(player.duration) {
+                            const totalSec = Math.floor(player.duration / 1000);
+                            const minutes = Math.floor(totalSec / 60);
+                            const seconds = totalSec % 60;
+                            setDuration(`${minutes}:${seconds.toString().padStart(2,"0")}`);
+                            clearInterval(interval);
+                        }
+                    })
+
+
+                    enriched.push({
+                        ...vid,
+                        duration: duration, // заменить фиксированое время на актуальное
+                    });
+
+                }catch(err){
+                    console.log("cant see duration")
+                }
+            }
+
+            for(let vid of videos){
+                try{
                     
                     let VideoUrl = String(vid.url)
 
                     const {uri} = await VideoThumbnails.getThumbnailAsync(VideoUrl, {time:100});
-
-                  /* ebashim
-
-                       //duration reader 
-                    let player = new VideoPlayer({uri:VideoUrl});
-                    let VidDuration = '00:30'
-                    player.addListener('statusUpdate', (status)=>{
-                        if(status.durationMillis){
-                            VidDuration  = toString(status.durationMillis / 1000)
-                        }
-                    })  
-
-                  */
 
                     
                     
                     enriched.push({
                         ...vid,
                         thumbnail: uri,
-                        duration: '00:30', // заменить фиксированое время на актуальное
+                        //duration: '00:30', // заменить фиксированое время на актуальное
 
                     });
 
