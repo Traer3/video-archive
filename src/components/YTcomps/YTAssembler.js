@@ -58,7 +58,7 @@ export default function YTAssembler () {
                     enriched.push({
                         ...vid,
                         thumbnail: uri,
-                        duration: null, // заменить фиксированое время на актуальное
+                        duration: "", // заменить фиксированое время на актуальное
 
                     });
 
@@ -68,7 +68,7 @@ export default function YTAssembler () {
                     enriched.push({
                         ...vid,
                         thumbnail: Image.resolveAssetSource(placeholder).uri,
-                        duration: "a lot"
+                        duration: ""
                     })
                     continue;
                 }
@@ -106,23 +106,20 @@ export default function YTAssembler () {
 
     return(
         <View style={{flex:1, }}>
-            {videos.length > 0 &&
-                videos.map((vid)=>(
-                    <DurationFetcher
-                    
+            {videoData.map((vid)=>(
+                <DurationFetcher
                     key={vid.id}
                     url={vid.url}
                     onDurationReady={(dur)=>{
                         setVideoData((prev)=> 
                             prev.map((video)=> 
-                              video.id === vid.id ? {...video, duration: dur}: video
+                            video.id === vid.id ? {...video, duration: dur}: video
                             )
                         );
                         console.log(`Video ${vid.id} duration: ${dur}`);
                     }}
                 />
-                ))
-            }
+            ))}
 
 
             <FlatList
