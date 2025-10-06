@@ -116,7 +116,7 @@ export default function YTAssembler () {
                             video.id === vid.id ? {...video, duration: dur}: video
                             )
                         );
-                        console.log(`Video ${vid.id} duration: ${dur}`);
+                        //console.log(`Video ${vid.id} duration: ${dur}`);
                     }}
                 />
             ))}

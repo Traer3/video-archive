@@ -27,6 +27,20 @@ app.get("/videos", async(req, res) => {
     }
 });
 
+app.post('/saveVidDuration',(req,res)=>{
+    const {vidId, vidDurationData} = req.body;
+    const vidDuration = JSON.stringify(vidDurationData)
+        db('Vids') // это точно передаст в таблицу ? 
+            .where ({id: vidId})
+            .update({duration : vidDuration}) // duration в БД integer , а передаю как строку ) 
+            .then(()=> res.status(200).json({message: 'Video duration save successfuly'}))
+            .catch((err)=> res.status(500).json({message: err.message}))
+})
+
 app.listen(3001, ()=>{
     console.log("✅ API initiated")
 });
+
+
+
+
