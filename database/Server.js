@@ -37,7 +37,6 @@ app.post('/saveVidDuration', async(req,res)=>{
             return res.status(400).json({message: "Missing video ID or duration"});
         }
 
-      
         const result = await pool.query(
             'UPDATE videos SET duration = $1 WHERE id = $2 RETURNING *',
             [vidDurationData, vidId]
