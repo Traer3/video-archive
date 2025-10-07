@@ -11,12 +11,14 @@ import { DurationFetcher } from "./DurationFetcher";
 
 export default function YTAssembler () {
 
+    const BASE_URL = 'http://192.168.0.8:3001'
+
     useEffect(()=>{
         const getVids = async () => {
             try{
-                const responce = await fetch("http://192.168.0.8:3001/videos");
+                const responce = await fetch(`${BASE_URL}/videos`);
                 const data = await responce.json();
-                urlReader(data)
+                vidReader(data)
             }catch(err){
                 console.log("DB error: ", err)
             }
@@ -27,10 +29,11 @@ export default function YTAssembler () {
 
     const [videos, setVideos] = useState([])
 
-    const urlReader = (DBvideos) => {
+    const vidReader = (DBvideos) => {
        const parsedVideos = DBvideos.map((vid)=>({
         ...vid,
-        url: vid.url
+        url: vid.url,
+        duration: vid.duration
        }))
         setVideos(parsedVideos)
         
@@ -38,7 +41,43 @@ export default function YTAssembler () {
 
     const [videoData, setVideoData] = useState([]);
 
-   
+   const savedIds = new Set();
+   const saveVideoData = async (vidId,vidDuration) =>{
+        try{
+
+            if(!vidDuration){
+                console.log("⚠️ Video duration is null or undefined")
+                return;
+            }
+
+            if(savedIds.has(vidId)){
+                console.log(`⏭ Video ${vidId} already saved, skipping...`);
+                return;
+            }
+
+            const res = await fetch(`${BASE_URL}/saveVidDuration`,{
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    vidId: vidId,
+                    vidDurationData: vidDuration,
+                }),
+            });
+
+            if(!res.ok){
+                throw new Error(`Server error:  ${res.status}`);
+            }
+           
+            const data = await res.json();
+            savedIds.add(vidId);
+            console.log(`✅ Duration saved for video ${vidId} : ${vidDuration}`)
+            console.log("Updated video: ", data.updatedVideo);
+                       
+        }catch(err){
+            console.error('❌ Error saving video: ', err);
+        }
+        
+   }
     
 
 
@@ -58,8 +97,6 @@ export default function YTAssembler () {
                     enriched.push({
                         ...vid,
                         thumbnail: uri,
-                        duration: "", // заменить фиксированое время на актуальное
-
                     });
 
                     
@@ -68,7 +105,6 @@ export default function YTAssembler () {
                     enriched.push({
                         ...vid,
                         thumbnail: Image.resolveAssetSource(placeholder).uri,
-                        duration: ""
                     })
                     continue;
                 }
@@ -106,20 +142,23 @@ export default function YTAssembler () {
 
     return(
         <View style={{flex:1, }}>
-            {videoData.map((vid)=>(
-                <DurationFetcher
-                    key={vid.id}
-                    url={vid.url}
-                    onDurationReady={(dur)=>{
-                        setVideoData((prev)=> 
-                            prev.map((video)=> 
-                            video.id === vid.id ? {...video, duration: dur}: video
-                            )
-                        );
-                        //console.log(`Video ${vid.id} duration: ${dur}`);
-                    }}
-                />
-            ))}
+            {videoData.map((vid)=>
+                !vid.duration ? (
+                    <DurationFetcher
+                        key={vid.id}
+                        url={vid.url}
+                        onDurationReady={(dur)=>{     
+                            saveVideoData(vid.id, dur)
+                            setVideoData((prev)=> 
+                                prev.map((video)=> 
+                                video.id === vid.id ? {...video, duration: dur}: video
+                                )
+                            );
+                            //console.log(`Video ${vid.id} duration: ${dur}`);
+                        }}
+                    />
+                ): null
+            )}
 
 
             <FlatList
