@@ -9,7 +9,7 @@ import placeholder from "../../../assets/AronaServer.jpg"
 import { DurationFetcher } from "./DurationFetcher";
 
 
-export default function YTAssembler () {
+export default function YTAssembler ({refreshKey}) {
 
     const BASE_URL = 'http://192.168.0.8:3001'
 
@@ -25,7 +25,7 @@ export default function YTAssembler () {
         }
         getVids();
        
-    },[])
+    },[refreshKey])
 
     const [videos, setVideos] = useState([])
 
@@ -116,11 +116,8 @@ export default function YTAssembler () {
         
     },[videos])
 
-    const [showTestUpdate, setShowTestUpdate] = useState(0)
-    useEffect(()=>{
-        setShowTestUpdate(prevState => prevState +1)
-        //console.log("Updated videoDATA",  showTestUpdate , )
-    },[videoData])
+    
+
 
     const renderItem = ({item}) => (
             <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>

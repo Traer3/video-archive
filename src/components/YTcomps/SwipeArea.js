@@ -3,9 +3,12 @@ import YTVidForm from "./YTVidForm";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withDecay, withSpring } from "react-native-reanimated";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import YTAssembler from "./YTAssembler";
+import { useState } from "react";
 
 
 export default  function SwipeArea({areaState}) {
+
+    const [refreshKey, setRefreshKey] = useState(0)
 
     const offSetY = useSharedValue(0);
     const translateY = useSharedValue(0);
@@ -60,7 +63,7 @@ export default  function SwipeArea({areaState}) {
                                 animatedStyle
                             ]}>
                                     
-                            <YTAssembler/>   
+                            <YTAssembler refreshKey={refreshKey}/>   
                                                
                         </Animated.View>
                     </View>
