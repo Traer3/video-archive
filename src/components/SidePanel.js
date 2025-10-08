@@ -2,7 +2,8 @@ import { useState } from "react";
 import { View, StyleSheet } from "react-native"
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
-
+import { scheduleOnRN } from "react-native-worklets";
+// scheduleOnRN(() => setRefreshKey(prev => prev + 1))();
 
 export default function SidePanel({children}){
 
@@ -16,12 +17,14 @@ export default function SidePanel({children}){
         .onEnd((event)=>{
             if(event.translationX > 100){
                 translateX.value = withSpring(0);
-                runOnJS(setIsOpen)(true);
+                
+                //runOnJS(setIsOpen)(true);
                 //runOnJS(alert)("Ты повернул вправо!")
                 
             }else if(event.translationX < 100){
                 translateX.value = withSpring(-85)
                 //runOnJS(alert)("Ты повернул влево!")
+                
                 runOnJS(setIsOpen)(false);
             } else {
                 translateX.value = withSpring(isOpen ? 0 : -85);

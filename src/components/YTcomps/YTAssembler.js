@@ -9,7 +9,7 @@ import placeholder from "../../../assets/AronaServer.jpg"
 import { DurationFetcher } from "./DurationFetcher";
 
 
-export default function YTAssembler ({refreshKey}) {
+export default function YTAssembler () {
 
     const BASE_URL = 'http://192.168.0.8:3001'
 
@@ -24,8 +24,8 @@ export default function YTAssembler ({refreshKey}) {
             }
         }
         getVids();
-       
-    },[refreshKey])
+
+    },[])
 
     const [videos, setVideos] = useState([])
 
