@@ -5,7 +5,8 @@ import * as VideoThumbnails from 'expo-video-thumbnails';
 import { VideoPlayer, VideoView, useVideoPlayer, } from "expo-video";
 import YTVidForm from "./YTVidForm";
 
-import placeholder from "../../../assets/AronaServer.jpg"
+//import placeholder from "../../../assets/AronaServer.jpg"
+import betterPlaceholder from "../../meme/arona.gif"
 import { DurationFetcher } from "./DurationFetcher";
 
 
@@ -104,7 +105,7 @@ export default function YTAssembler () {
                     //console.warn("Thumbnail error",vid.id);
                     enriched.push({
                         ...vid,
-                        thumbnail: Image.resolveAssetSource(placeholder).uri,
+                        thumbnail: Image.resolveAssetSource(betterPlaceholder).uri,
                     })
                     continue;
                 }
