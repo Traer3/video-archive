@@ -1,8 +1,13 @@
-import { View, StyleSheet, Text, Image } from "react-native"
+import { View, StyleSheet, Text, Image, Pressable } from "react-native"
 import creature from '../../meme/hoshino.png'
 import bratty from '../../meme/arona.gif'
+import shareIcon from '../../../assets/share.png'
+import { useState } from "react"
 
 export default function YTVidForm({thumbnail, name, date , duration}) {
+
+    const [buttonTest, setButtonTest] = useState(0)
+
     return(
         <View style={styles.baseForm}>
                 <Image
@@ -10,6 +15,7 @@ export default function YTVidForm({thumbnail, name, date , duration}) {
                     source={thumbnail}
                     resizeMode='stretch'
                 />
+                
                 <View 
                     style={{
                         flex:1,
@@ -25,6 +31,22 @@ export default function YTVidForm({thumbnail, name, date , duration}) {
                         {duration}
                     </Text>
                 </View>
+                <Pressable
+                    style={{
+                        marginRight:5,
+                        marginTop:50
+                    }}
+                    onPress={()=>{
+                        setButtonTest(prev => prev + 1)
+                        console.log(buttonTest)
+                    }}
+                >
+                    <Image
+                        source={shareIcon}
+                        style={{width:20, height:20}}
+                        resizeMode="contain"
+                    />
+                </Pressable>
         </View>
     );
 };
