@@ -4,8 +4,12 @@ import bratty from '../../meme/arona.gif'
 import shareIcon from '../../../assets/share.png'
 import { useState } from "react"
 
-export default function YTVidForm({thumbnail, name, date , duration}) {
+// создано для того чтобы определять уникальное видео , которое удалено из YT или TT
+let defineUnique = false  // состояние получем из базы данных
 
+export default function YTVidForm({thumbnail, name, date , duration,isItUnique}) {
+
+    defineUnique = isItUnique;
     const [buttonTest, setButtonTest] = useState(0)
 
     return(
@@ -58,7 +62,7 @@ const styles = StyleSheet.create({
         backgroundColor:'rgb(73,106,154)',
         height:'80',
         borderWidth:2,
-        borderColor:'rgb(43,75,123)',
+        borderColor: defineUnique ? 'red': 'rgb(43,75,123)',
         marginTop:8,
         marginLeft:10,
         marginRight:10,
