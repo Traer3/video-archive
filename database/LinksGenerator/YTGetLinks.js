@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const {google} = require('googleapis');
+const {UserRefreshClient} = require('google-auth-library')
 
 const SCOPES = ['https://www.googleapis.com/auth/youtube.readonly'];
 const TOKEN_PATH = path.join(__dirname, 'token.json');
@@ -43,8 +44,15 @@ const nameReader = (DBvideos) => {
 
 async function loadSavedCredentialsIfExist() {
     try{
-        const content = fs.readFileSync(TOKEN_PATH);
-        return google.auth.fromJSON(JSON.parse(content));
+        const content = fs.readFileSync(TOKEN_PATH, 'utf-8');
+        const credentials = JSON.parse(content);
+        
+        const client = new UserRefreshClient({
+            clientId: credentials.client_id,
+            clientSecret: credentials.client_secret,
+            refreshToken: credentials.refresh_token,
+        });
+        return client;
     }catch(err){
         return null;
     }
