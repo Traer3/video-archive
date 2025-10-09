@@ -34,7 +34,8 @@ export default function YTAssembler () {
        const parsedVideos = DBvideos.map((vid)=>({
         ...vid,
         url: vid.url,
-        duration: vid.duration
+        duration: vid.duration,
+        isitunique: vid.isitunique
        }))
         setVideos(parsedVideos)
         
@@ -122,7 +123,7 @@ export default function YTAssembler () {
 
     const renderItem = ({item}) => (
             <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
-                <YTVidForm thumbnail={{uri: item.thumbnail}} name={item.name} date={item.date} duration={item.duration}/>
+                <YTVidForm thumbnail={{uri: item.thumbnail}} name={item.name} date={item.date} duration={item.duration} isItUnique={item.isitunique}/>
             </TouchableOpacity>
         )
 
