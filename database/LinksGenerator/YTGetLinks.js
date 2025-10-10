@@ -13,33 +13,64 @@ const getVids = async () => {
     try{
         const responce = await fetch("http://192.168.0.8:3001/videos");
         const data = await responce.json();
-        nameReader(data)
+
+        videoReader(data)
+        newNameChecker()
     }catch(err){
         console.log("DB error: ", err)
     }
 }
 getVids();
 
-let videoNames = [];
+let videoFromDB = [];
 
-const nameReader = (DBvideos) => {
+const videoReader = (DBvideos) => {
     const parsedVideos = DBvideos.map((vid)=>({
      ...vid,
-     name: vid.name
+     name: vid.name,
+     duration: vid.duration,
+     size: vid.size_mb,
+     category: vid.category
     }))
-    videoNames = parsedVideos;
+    videoFromDB = parsedVideos;
      
  }
 
-/*
+
+/* тестовый вывод данных из базы данных
 (async () => {
     await getVids();
-    const names = videoNames.map((vid)=> vid.name)
-    console.log(names)
+    videoFromDB.map((vid)=>{
+     console.log("Video name : ",vid.name , "Video size: ", vid.size, "Video Category: ", vid.category)
+    })
 })();
 */
 
+const youTubeTestNames = [
+    'Kickstart My Heart (2024 Remaster)',
+    'Seia: I Drive【Blue Archive Animation】',
+    "A Homemade Live-Action of Max0r's Metal Gear Rising Summary | Part 1",
+    '【MAD】ワンパンマン THE HERO!!〜怒れる拳に火をつけろ〜[ほぼサイタマ] ＊リメイク',
+    'Turning Portal 2 into a Web Server',
+    'Anor - LO0K - Super Slowed',
+    'eiby - SIREN [Super Slowed] (𝓓𝓮𝔁𝓽𝓮𝓻 𝓮𝓭𝓲𝓽 𝓼𝓸𝓷𝓰)',
+    'Cell Transforms Into Perfect Cell | Perfect Cell Theme|Dragon Ball Z | Full HD |',
+    '“Eobard Thawne, The Reverse Flash” Reverse Flash EDIT | Shadows - Pastel Ghost #theflash #edit',
+    '🦈 エレン・ジョー #zzzero #ゼンゼロ #ブルーセチ',
+    '세이아와 드라이브 데이트, 시티 팝 【 1시간 끊김없이 loop 】',
+    '게임공선【블루아카이브】',
+  ];
 
+async function newNameChecker () {
+    const NamesFromDB = videoFromDB.map(video => video.name)
+
+    const newVids = youTubeTestNames.filter(
+        name => !NamesFromDB.includes(name)
+    );
+
+    // теперь тебе нужно разобраться с тем как скачать эти новые видео  
+    console.log("New vids: ", newVids)
+}
 
 
 async function loadSavedCredentialsIfExist() {
@@ -158,20 +189,17 @@ async function listLikedVideos(auth) {
     console.log(`✅ Saved: ${allVideos.length} vids in likes.txt`)
 }
 
+// записывает ссылки всех видео из YT 
 //authorize().then(listLikedVideos).catch(console.error);
 
+/* для получения 10 имен из YT
 (async ()=>{
     const auth = await authorize();
     const YTvidsName = await listLikedVideoTitles(auth);
     console.log(YTvidsName)
 })();
-
-/*
-(async () => {
-    await getVids();
-    const names = videoNames.map((vid)=> vid.name)
-    console.log(names)
-})();
 */
+
+
 
 
