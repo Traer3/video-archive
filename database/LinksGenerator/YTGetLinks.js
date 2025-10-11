@@ -69,6 +69,7 @@ async function newNameChecker () {
     );
 
     // теперь тебе нужно разобраться с тем как скачать эти новые видео  
+    // просто бери ссылки и имя, проверяй имена и записывай ссылки 
     console.log("New vids: ", newVids)
 }
 
@@ -142,6 +143,40 @@ async function authorize(){
 
     return oAuth2Client;
 }
+
+async function youTubeVideoData(auth){
+    const service = google.youtube('v3');
+    let nextPageToken = null;
+    const allVideos = [];
+
+    do{
+        const res = await service.playlistItems.list({
+            playlistId: 'LL',
+            part: ['snippet', 'contentDetails'],
+            maxResults: 50,
+            pageToken: nextPageToken || undefined,
+            auth,
+        });
+
+        res.data.items.forEach(item => {
+            const title = item.snippet.title;
+            const videoId = item.contentDetails.videoId;
+            const url = `htttps://youtu.be/${videoId}`;
+
+            allVideos.push({title, url});
+        });
+        nextPageToken = res.data.nextPageToken;
+        console.log(`📥 Loaded: ${allVideos.length} so far...`);
+    }while(nextPageToken);
+
+    const textOutput = allVideos.map(v => `${v.title} | ${v.url}`).join('\n');
+    fs.writeFileSync('likes.txt', textOutput);
+
+    console.log(`✅ Saved ${allVideos.length} videos in likes.txt`)
+    return allVideos;
+}
+
+authorize().then(youTubeVideoData).catch(console.error);
 
 async function listLikedVideoTitles(auth) {
     let allNamesYT = [];
