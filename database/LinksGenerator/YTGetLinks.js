@@ -32,6 +32,7 @@ const videoReader = (DBvideos) => {
      size: vid.size_mb,
      category: vid.category
     }))
+    
     videoFromDB = parsedVideos;
      
  }
@@ -46,31 +47,38 @@ const videoReader = (DBvideos) => {
 })();
 */
 
-const youTubeTestNames = [
-    'Kickstart My Heart (2024 Remaster)',
-    'Seia: I Drive【Blue Archive Animation】',
-    "A Homemade Live-Action of Max0r's Metal Gear Rising Summary | Part 1",
-    '【MAD】ワンパンマン THE HERO!!〜怒れる拳に火をつけろ〜[ほぼサイタマ] ＊リメイク',
-    'Turning Portal 2 into a Web Server',
-    'Anor - LO0K - Super Slowed',
-    'eiby - SIREN [Super Slowed] (𝓓𝓮𝔁𝓽𝓮𝓻 𝓮𝓭𝓲𝓽 𝓼𝓸𝓷𝓰)',
-    'Cell Transforms Into Perfect Cell | Perfect Cell Theme|Dragon Ball Z | Full HD |',
-    '“Eobard Thawne, The Reverse Flash” Reverse Flash EDIT | Shadows - Pastel Ghost #theflash #edit',
-    '🦈 エレン・ジョー #zzzero #ゼンゼロ #ブルーセチ',
-    '세이아와 드라이브 데이트, 시티 팝 【 1시간 끊김없이 loop 】',
-    '게임공선【블루아카이브】',
-  ];
+
+const YTvidDataTest = [
+    {
+      name: "Taking What’s Not Yours (Animation)",
+      url: "https://youtu.be/tg2-0JnFqhU"
+    },
+    {
+      name: "Kickstart My Heart (2024 Remaster)",
+      url: "https://youtu.be/e17mr5ZtWPI"
+    },
+    {
+      name: "Seia: I Drive【Blue Archive Animation】",
+      url: "https://youtu.be/96cN_fzTMC8"
+    },
+    {
+        name: "i9zlMVYl-qkFHRth",
+        url: "https://youtu.be/ghi789QWE"
+    },
+  ]
 
 async function newNameChecker () {
+    const YTVideos = await authorize().then(youTubeVideoData).catch(console.error);
     const NamesFromDB = videoFromDB.map(video => video.name)
 
-    const newVids = youTubeTestNames.filter(
-        name => !NamesFromDB.includes(name)
+    const newVids = YTVideos.filter(
+        video => !NamesFromDB.includes(video.name)
     );
 
-    // теперь тебе нужно разобраться с тем как скачать эти новые видео  
-    // просто бери ссылки и имя, проверяй имена и записывай ссылки 
-    console.log("New vids: ", newVids)
+    const textOutput = newVids.map(v => `${v.url}`).join('\n');
+    fs.writeFileSync('VideoForDownload.txt', textOutput);
+
+
 }
 
 
@@ -159,24 +167,24 @@ async function youTubeVideoData(auth){
         });
 
         res.data.items.forEach(item => {
-            const title = item.snippet.title;
+            const name = item.snippet.title;
             const videoId = item.contentDetails.videoId;
-            const url = `htttps://youtu.be/${videoId}`;
+            const url = `https://youtu.be/${videoId}`;
 
-            allVideos.push({title, url});
+            allVideos.push({name, url});
         });
         nextPageToken = res.data.nextPageToken;
         console.log(`📥 Loaded: ${allVideos.length} so far...`);
     }while(nextPageToken);
 
-    const textOutput = allVideos.map(v => `${v.title} | ${v.url}`).join('\n');
+    const textOutput = allVideos.map(v => `${v.name} | ${v.url}`).join('\n');
     fs.writeFileSync('likes.txt', textOutput);
 
     console.log(`✅ Saved ${allVideos.length} videos in likes.txt`)
     return allVideos;
 }
 
-authorize().then(youTubeVideoData).catch(console.error);
+//authorize().then(youTubeVideoData).catch(console.error);
 
 async function listLikedVideoTitles(auth) {
     let allNamesYT = [];
