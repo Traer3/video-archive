@@ -175,6 +175,9 @@ async function youTubeVideoData(auth){
         });
         nextPageToken = res.data.nextPageToken;
         console.log(`📥 Loaded: ${allVideos.length} so far...`);
+
+        if(allVideos.length >= 100) break; //ссылки для первых 100 видео 
+
     }while(nextPageToken);
 
     const textOutput = allVideos.map(v => `${v.name} | ${v.url}`).join('\n');

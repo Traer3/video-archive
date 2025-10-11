@@ -3,7 +3,7 @@ const { ChildProcess, exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-const VIDEOS_LINKS_PATH = path.join(__dirname, "links.txt")
+const VIDEOS_LINKS_PATH = path.join(__dirname, 'LinksGenerator', 'VideoForDownload.txt')
 const FAILED_FILE = path.join(__dirname, "failed.txt")
 const OUT_DIR = path.join(__dirname, "videos")
 
