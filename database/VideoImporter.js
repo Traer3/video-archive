@@ -27,10 +27,11 @@ async function VideoImporter(listPath){
     const lines = fs.readFileSync(listPath, 'utf-8')
         .split("\n")
         .map(line => line.trim())
-        .filter(Boolean);
-    const list = lines.reverse();
+        .filter(Boolean)
+        .reverse();
 
-    console.log(`Video in list: ${list.length}`);
+    console.log(`Video in list: ${lines.length}`);
+
 
     const existingVideos = await getExistingVideos();
     console.log(`DB already have this vid : ${existingVideos.length}`);
@@ -38,54 +39,42 @@ async function VideoImporter(listPath){
     let importedCount = 0;
     let skippedCount = 0;
 
-    for(const file of list){
-        const filePath = file;
-        const fileName = path.basename(filePath);
-
+    for(const name of lines){
         try{
-            if(!fs.existsSync(filePath)){
-                console.log(`File not found: ${filePath}`);
+            const fileName = path.basename(name);
+            const originalName = path.parse(fileName).name
+            const sizeMB = 0;
+            const duration =  0;
+
+            const duplicate = existingVideos.find(v => v.name === originalName);
+            if(duplicate){
+                console.log(`⏭️ Scip duplicate: ${originalName}`);
+                skippedCount++;
                 continue;
             }
 
-            const stat = fs.statSync(filePath);
+            const finalName =await generateUniqueName(existingVideos, originalName);
+            const requirePath = generateRequirePath(fileName);
 
-            if(stat.isFile() && isVideoFile(fileName)){
-                const originalName = path.parse(file).name;
-                const sizeBM = (stat.size / (1024 * 1024)).toFixed(2);
+            await pool.query(
+                `INSERT INTO videos (name, url, duration, size_mb, category, thumbnail)
+                 VALUES ($1, $2, $3, $4, $5, $6)`,
+                 [
+                    finalName,
+                    requirePath,
+                    duration,
+                    sizeMB,
+                    'YouTube',
+                    'default-thumbnail.jpg'
+                 ]
+            );
 
-                const duplicate = findDuplicate(existingVideos, originalName, sizeBM);
+            existingVideos.push({name: finalName});
+            console.log(`✅ Added: ${finalName}`)
+            importedCount++
 
-                if(duplicate){
-                    console.log(`⏭️ Scip duplicate: ${originalName} (${sizeBM} MB)`);
-                    skippedCount++;
-                    continue;
-                }
-
-                const finalName = await generateUniqueName(existingVideos, originalName);
-                const duration = 0;
-
-                const requirePath = generateRequirePath(fileName);
-
-                await pool.query(
-                    `INSERT INTO videos (name, url, duration, size_mb, category, thumbnail)
-                     VALUES ($1, $2, $3, $4, $5, $6)`,
-                     [
-                        finalName,
-                        requirePath,
-                        duration,
-                        sizeBM,
-                        'YouTube',
-                        'default-thumbnail.jpg'
-                     ]
-                );
-
-                existingVideos.push({name: finalName , size_mb: sizeBM});
-                console.log(`✅ Added: ${finalName} (${sizeBM} MB)`);
-                importedCount++;
-            }
         }catch(err){
-            console.error(`ERROR: ` , err.message);
+            console.error(`ERROR adding video : ` , err.message);
         }
     }
 
@@ -95,7 +84,7 @@ async function VideoImporter(listPath){
     console.log('Import end')
 
    }catch(err){
-        console.log(`Error file ${file} :`, err.message)
+        console.log(`Error file file :`, err.message)
    } finally {
     await pool.end();
    }
@@ -111,13 +100,6 @@ async function getExistingVideos() {
     }
 }
 
-
-
-function findDuplicate(existingVideos, name, sizeBM){
-    return existingVideos.find(video => 
-        video.name === name && video.size_mb === sizeBM
-    );
-}
 
 async function generateUniqueName(existingVideos, baseName) {
     const sameNameVideos = existingVideos.filter(video =>
@@ -146,15 +128,6 @@ async function generateUniqueName(existingVideos, baseName) {
         maxNumber = 1;
     }
     return maxNumber > 0 ? `${baseName} (${maxNumber + 1})` : baseName;
-}
-
-
-
-
-
-function isVideoFile(fileName){
-    const videoExtensions = ['.mp4'];
-    return videoExtensions.includes(path.extname(fileName).toLocaleLowerCase());
 }
 
 const VIDEOS_LIST_PATH = path.join(__dirname, "likes.txt") 
