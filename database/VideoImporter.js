@@ -16,16 +16,21 @@ function generateRequirePath(fileName){
     return "http://192.168.0.8:3004/" + encodeURIComponent(fileName); //vm ip
 }
 
-async function VideoImporter(folderPath){
+async function VideoImporter(listPath){
    try {
 
-    if(!fs.existsSync(folderPath)){
-        console.log(`Folder dose not exists: ${folderPath}`)
+    if(!fs.existsSync(listPath)){
+        console.log(`List dose not exists: ${listPath}`)
         return;
     }
 
-    const files = fs.readdirSync(folderPath);
-    console.log(`Files amount: ${files.length}`);
+    const lines = fs.readFileSync(listPath, 'utf-8')
+        .split("\n")
+        .map(line => line.trim())
+        .filter(Boolean);
+    const list = lines.reverse();
+
+    console.log(`Video in list: ${list.length}`);
 
     const existingVideos = await getExistingVideos();
     console.log(`DB already have this vid : ${existingVideos.length}`);
@@ -33,20 +38,26 @@ async function VideoImporter(folderPath){
     let importedCount = 0;
     let skippedCount = 0;
 
-    for(const file of files){
-        const filePath = path.join(folderPath, file);
+    for(const file of list){
+        const filePath = file;
+        const fileName = path.basename(filePath);
 
         try{
+            if(!fs.existsSync(filePath)){
+                console.log(`File not found: ${filePath}`);
+                continue;
+            }
+
             const stat = fs.statSync(filePath);
 
-            if(stat.isFile() && isVideoFile(file)){
+            if(stat.isFile() && isVideoFile(fileName)){
                 const originalName = path.parse(file).name;
                 const sizeBM = (stat.size / (1024 * 1024)).toFixed(2);
 
                 const duplicate = findDuplicate(existingVideos, originalName, sizeBM);
 
                 if(duplicate){
-                    console.log(`Scip duplicate: ${originalName} (${sizeBM} MB)`);
+                    console.log(`⏭️ Scip duplicate: ${originalName} (${sizeBM} MB)`);
                     skippedCount++;
                     continue;
                 }
@@ -54,7 +65,7 @@ async function VideoImporter(folderPath){
                 const finalName = await generateUniqueName(existingVideos, originalName);
                 const duration = 0;
 
-                const requirePath = generateRequirePath(file);
+                const requirePath = generateRequirePath(fileName);
 
                 await pool.query(
                     `INSERT INTO videos (name, url, duration, size_mb, category, thumbnail)
@@ -64,7 +75,7 @@ async function VideoImporter(folderPath){
                         requirePath,
                         duration,
                         sizeBM,
-                        'uncategorized',
+                        'YouTube',
                         'default-thumbnail.jpg'
                      ]
                 );
@@ -74,12 +85,12 @@ async function VideoImporter(folderPath){
                 importedCount++;
             }
         }catch(err){
-            console.error(`ERROR cant reed file ${file}:` , err.message);
+            console.error(`ERROR: ` , err.message);
         }
     }
 
     console.log('\n📊 RESULTS:');
-    console.log(`Added new files: ${importedCount}`);
+    console.log(`Added new list: ${importedCount}`);
     console.log(`Skiped duplicates: ${skippedCount}`);
     console.log('Import end')
 
@@ -146,5 +157,5 @@ function isVideoFile(fileName){
     return videoExtensions.includes(path.extname(fileName).toLocaleLowerCase());
 }
 
-const VIDEOS_FOLDER_PATH = '../vids' //linux const VIDEOS_FOLDER_PATH = path.join(__dirname, "videos")
-VideoImporter(VIDEOS_FOLDER_PATH);
+const VIDEOS_LIST_PATH = path.join(__dirname, "likes.txt") 
+VideoImporter(VIDEOS_LIST_PATH);

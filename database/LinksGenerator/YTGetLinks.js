@@ -15,7 +15,7 @@ const getVids = async () => {
         const data = await responce.json();
 
         videoReader(data)
-        newNameChecker()
+        //newNameChecker() 
     }catch(err){
         console.log("DB error: ", err)
     }
@@ -176,18 +176,18 @@ async function youTubeVideoData(auth){
         nextPageToken = res.data.nextPageToken;
         console.log(`📥 Loaded: ${allVideos.length} so far...`);
 
-        if(allVideos.length >= 100) break; //ссылки для первых 100 видео 
+       //if(allVideos.length >= 100) break; //ссылки для первых 100 видео 
 
     }while(nextPageToken);
 
-    const textOutput = allVideos.map(v => `${v.name} | ${v.url}`).join('\n');
+    const textOutput = allVideos.map(v => `${v.name}`).join('\n'); //allVideos.map(v => `${v.name} | ${v.url}`).join('\n')
     fs.writeFileSync('likes.txt', textOutput);
 
     console.log(`✅ Saved ${allVideos.length} videos in likes.txt`)
     return allVideos;
 }
 
-//authorize().then(youTubeVideoData).catch(console.error);
+authorize().then(youTubeVideoData).catch(console.error);
 
 async function listLikedVideoTitles(auth) {
     let allNamesYT = [];
