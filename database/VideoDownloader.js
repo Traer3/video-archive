@@ -1,4 +1,4 @@
-const { ChildProcess, exec } = require("child_process");
+const { exec } = require("child_process");
 
 const fs = require("fs");
 const path = require("path");
@@ -6,6 +6,7 @@ const path = require("path");
 const VIDEOS_LINKS_PATH = path.join(__dirname, 'LinksGenerator', 'VideoForDownload.txt')
 const FAILED_FILE = path.join(__dirname, "failed.txt")
 const OUT_DIR = path.join(__dirname, "videos")
+const VIDEO_IMPORTER = path.join(__dirname, "VideoImporter.js")
 
 if(!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR);
 
@@ -16,21 +17,37 @@ const links = fs.readFileSync(VIDEOS_LINKS_PATH, "utf-8")
     .map(line => line.trim())
     .filter(Boolean);
 
-function VideoDownloader(url,index){
-    return new Promise((resolve)=>{
-        console.log(`Downdloading: [${index +1}]/${links.length}: ${url}`);
-
-        const comand = `yt-dlp -o "${OUT_DIR}/%(title)s.%(ext)s" --merge-output-format mp4 "${url}"`;
-        exec(comand,(error, stdout,stderr) => {
-            if (error) {
-                console.log(`❌ error while downloaded: ${url}`);
-                fs.appendFileSync(FAILED_FILE, url + "\n");
+function runComand(comand){
+    return new Promise((resolve, reject)=>{
+        exec(comand,(error, stdout, stderr)=>{
+            if(error){
+                reject(error);
             }else{
-                console.log(`✅ Downloaded`);
+                resolve(stdout || stderr);
             }
-            resolve();
         });
     });
+}
+
+
+async function VideoDownloader(url,index){
+    console.log(`Downdloading: [${index +1}]/${links.length}: ${url}`);
+
+    const comand1 = `yt-dlp -o "${OUT_DIR}/%(title)s.%(ext)s" --merge-output-format mp4 "${url}"`;
+    const comand2 = `node "${VIDEO_IMPORTER}"`;
+
+    try{
+        await runComand(comand1);
+        console.log("✅ Downloaded");
+
+        console.log("📥 Importing downloaded video(s) to DB...");
+        await runComand(comand2);
+        console.log("✅ Imported successfully");
+    }catch(err){
+        console.log(`❌ error while processing ${url} :`,err.message);
+        fs.appendFileSync(FAILED_FILE, url + "\n");
+    }
+    
 }
 
 async function main() {

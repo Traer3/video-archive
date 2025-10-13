@@ -12,26 +12,21 @@ const pool = new Pool({
     port: 5432,
 });
 
+
 function generateRequirePath(fileName){
-    return "http://192.168.0.8:3004/" + encodeURIComponent(fileName); //vm ip
+   return "http://192.168.0.8:3004/" + encodeURIComponent(fileName);
 }
 
-async function VideoImporter(listPath){
+async function VideoImporter(folderPath){
    try {
 
-    if(!fs.existsSync(listPath)){
-        console.log(`List dose not exists: ${listPath}`)
+    if(!fs.existsSync(folderPath)){
+        console.log(`Folder dose not exists: ${folderPath}`)
         return;
     }
 
-    const lines = fs.readFileSync(listPath, 'utf-8')
-        .split("\n")
-        .map(line => line.trim())
-        .filter(Boolean)
-        .reverse();
-
-    console.log(`Video in list: ${lines.length}`);
-
+    const files = fs.readdirSync(folderPath);
+    console.log(`Files amount: ${files.length}`);
 
     const existingVideos = await getExistingVideos();
     console.log(`DB already have this vid : ${existingVideos.length}`);
@@ -39,56 +34,58 @@ async function VideoImporter(listPath){
     let importedCount = 0;
     let skippedCount = 0;
 
-    for(const name of lines){
+    for(const file of files){
+        const filePath = path.join(folderPath, file);
+
         try{
-            let fileName = path.basename(name);
-            if(!fileName.toLowerCase().endsWith('.mp4')){
-                fileName += '.mp4';
+            const stat = fs.statSync(filePath);
+
+            if(stat.isFile() && isVideoFile(file)){
+                const originalName = path.parse(file).name;
+                const sizeBM = (stat.size / (1024 * 1024)).toFixed(2);
+
+                const duplicate = findDuplicate(existingVideos, originalName, sizeBM);
+
+                if(duplicate){
+                    console.log(`Scip duplicate: ${originalName} (${sizeBM} MB)`);
+                    skippedCount++;
+                    continue;
+                }
+
+                const finalName = await generateUniqueName(existingVideos, originalName);
+                const duration = 0;
+
+                const requirePath = generateRequirePath(file);
+
+                await pool.query(
+                    `INSERT INTO videos (name, url, duration, size_mb, category, thumbnail)
+                     VALUES ($1, $2, $3, $4, $5, $6)`,
+                     [
+                        finalName,
+                        requirePath,
+                        duration,
+                        sizeBM,
+                        'uncategorized',
+                        'default-thumbnail.jpg'
+                     ]
+                );
+
+                existingVideos.push({name: finalName , size_mb: sizeBM});
+                console.log(`✅ Added: ${finalName} (${sizeBM} MB)`);
+                importedCount++;
             }
-            const originalName = fileName
-            const sizeMB = 0;
-            const duration =  0;
-
-            const duplicate = existingVideos.find(v => v.name === originalName);
-            
-            if(duplicate){
-                console.log(`⏭️ Scip duplicate: ${originalName}`);
-                skippedCount++;
-                continue;
-            }
-
-            const finalName =await generateUniqueName(existingVideos, originalName);
-            const requirePath = generateRequirePath(fileName);
-
-            await pool.query(
-                `INSERT INTO videos (name, url, duration, size_mb, category, thumbnail)
-                 VALUES ($1, $2, $3, $4, $5, $6)`,
-                 [
-                    finalName,
-                    requirePath,
-                    duration,
-                    sizeMB,
-                    'YouTube',
-                    'default-thumbnail.jpg'
-                 ]
-            );
-
-            existingVideos.push({name: finalName});
-            console.log(`✅ Added: ${finalName}`)
-            importedCount++
-
         }catch(err){
-            console.error(`ERROR adding video : ` , err.message);
+            console.error(`ERROR cant reed file ${file}:` , err.message);
         }
     }
 
     console.log('\n📊 RESULTS:');
-    console.log(`Added new list: ${importedCount}`);
+    console.log(`Added new files: ${importedCount}`);
     console.log(`Skiped duplicates: ${skippedCount}`);
     console.log('Import end')
 
    }catch(err){
-        console.log(`Error file file :`, err.message)
+        console.log(`Error file ${file} :`, err.message)
    } finally {
     await pool.end();
    }
@@ -104,6 +101,13 @@ async function getExistingVideos() {
     }
 }
 
+
+
+function findDuplicate(existingVideos, name, sizeBM){
+    return existingVideos.find(video => 
+        video.name === name && video.size_mb === sizeBM
+    );
+}
 
 async function generateUniqueName(existingVideos, baseName) {
     const sameNameVideos = existingVideos.filter(video =>
@@ -134,5 +138,14 @@ async function generateUniqueName(existingVideos, baseName) {
     return maxNumber > 0 ? `${baseName} (${maxNumber + 1})` : baseName;
 }
 
-const VIDEOS_LIST_PATH = path.join(__dirname, "likes.txt") 
-VideoImporter(VIDEOS_LIST_PATH);
+
+
+
+
+function isVideoFile(fileName){
+    const videoExtensions = ['.mp4'];
+    return videoExtensions.includes(path.extname(fileName).toLocaleLowerCase());
+}
+
+const VIDEOS_FOLDER_PATH = path.join(__dirname, "videos")
+VideoImporter(VIDEOS_FOLDER_PATH);
