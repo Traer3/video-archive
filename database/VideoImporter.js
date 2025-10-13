@@ -41,12 +41,16 @@ async function VideoImporter(listPath){
 
     for(const name of lines){
         try{
-            const fileName = path.basename(name);
-            const originalName = path.parse(fileName).name
+            let fileName = path.basename(name);
+            if(!fileName.toLowerCase().endsWith('.mp4')){
+                fileName += '.mp4';
+            }
+            const originalName = fileName
             const sizeMB = 0;
             const duration =  0;
 
             const duplicate = existingVideos.find(v => v.name === originalName);
+            
             if(duplicate){
                 console.log(`⏭️ Scip duplicate: ${originalName}`);
                 skippedCount++;
