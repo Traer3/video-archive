@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, Dimensions, Pressable,  } from "react-native"
+import { View, StyleSheet, Text, Dimensions, Pressable, ScrollView,  } from "react-native"
 import YTVidForm from "./YTVidForm";
 import Animated, { useAnimatedStyle, useSharedValue, withDecay, withSpring } from "react-native-reanimated";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
@@ -42,6 +42,7 @@ export default  function SwipeArea({areaState}) {
     
     const animatedStyle = useAnimatedStyle(()=>({
         transform:[{translateY: translateY.value}],
+        height:'100%'
     }))
 
     const onAreaPress = () =>{
@@ -51,44 +52,36 @@ export default  function SwipeArea({areaState}) {
 
 
     return(
-        <GestureHandlerRootView style={{borderWidth:0.1}} >
+        <View style={{borderWidth:0.1}} >
           <Pressable style={styles.outerArea} onPress={onAreaPress}/>
-            <GestureDetector gesture={panGesture}>
+           
                     <View style={styles.conteiner}>
-                        <Animated.View 
-                            style={[
-                                styles.content, 
-                                animatedStyle
-                            ]}>
-                                    
-                            <YTAssembler />   
-                                               
-                        </Animated.View>
+
+                       
+                             <YTAssembler />  
+                        
+                        
                     </View>
-            </GestureDetector>
+            
                 
                 
                 
            
-        </GestureHandlerRootView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     conteiner: {
+        flexGrow:1,
         width:'84%',
         height:'100%',
         backgroundColor:'rgb(71, 103, 151)',
         margin:'8%',
-        overflow:'hidden',
-      
-
-    },
-    content:{
-        flex:1,
-        flexDirection: 'column',
+        overflow:'visible',
         
     },
+    
     outerArea:{
         position:'absolute',
         width:'100%',

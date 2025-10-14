@@ -53,7 +53,7 @@ async function VideoImporter(folderPath){
                 }
 
                 const finalName = await generateUniqueName(existingVideos, originalName);
-                const duration = 0;
+                const duration = "";
 
                 const requirePath = generateRequirePath(file);
 
@@ -65,7 +65,7 @@ async function VideoImporter(folderPath){
                         requirePath,
                         duration,
                         sizeBM,
-                        'uncategorized',
+                        'YouTube',
                         'default-thumbnail.jpg'
                      ]
                 );

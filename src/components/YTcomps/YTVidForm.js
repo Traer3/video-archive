@@ -7,7 +7,7 @@ import { useState } from "react"
 export default function YTVidForm({thumbnail, name, date , duration,isItUnique}) {
 
     
-    console.log(isItUnique)
+    //console.log(isItUnique)
     const [buttonTest, setButtonTest] = useState(0)
 
     return(

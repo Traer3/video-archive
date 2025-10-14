@@ -19,6 +19,7 @@ export default function YTAssembler () {
             try{
                 const responce = await fetch(`${BASE_URL}/videos`);
                 const data = await responce.json();
+                //console.log("Videos form DB: ", data.lenght, data)
                 vidReader(data)
             }catch(err){
                 console.log("DB error: ", err)
@@ -42,6 +43,7 @@ export default function YTAssembler () {
     }
 
     const [videoData, setVideoData] = useState([]);
+
 
    const savedIds = new Set();
    const saveVideoData = async (vidId,vidDuration) =>{
@@ -91,6 +93,7 @@ export default function YTAssembler () {
                 try{
                     
                     let VideoUrl = String(vid.url)
+                   // console.log("Vid id: ", vid.id, "Vid url: ", vid.url)
 
                     const {uri} = await VideoThumbnails.getThumbnailAsync(VideoUrl, {time:100});
 
@@ -161,9 +164,14 @@ export default function YTAssembler () {
 
 
             <FlatList
+                style={{flex:1}}
+                contentContainerStyle={{paddingBottom: 105}}
                 data={videoData}
                 keyExtractor={(item)=>item.id.toString()}
                 renderItem={renderItem}
+                removeClippedSubviews={false}
+                initialNumToRender={10}
+                windowSize={10}
             />
             <Modal visible={!!selectedVideo} transparent={true} animationType="slide" onRequestClose={()=> setSelectedVideo(null)}>
                 <View style={styles.modalBackground}>
@@ -210,6 +218,7 @@ const styles = StyleSheet.create({
         justifyContent:'center',
         alignItems:'center',
         
+        
     },
     closeArea:{
         ...StyleSheet.absoluteFillObject,
@@ -217,6 +226,7 @@ const styles = StyleSheet.create({
     videoContainer:{
         width:'100%',
         height:'60%',
+        
         
     },
     video:{
