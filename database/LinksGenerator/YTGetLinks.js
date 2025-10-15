@@ -48,25 +48,6 @@ const videoReader = (DBvideos) => {
 */
 
 
-const YTvidDataTest = [
-    {
-      name: "Taking What’s Not Yours (Animation)",
-      url: "https://youtu.be/tg2-0JnFqhU"
-    },
-    {
-      name: "Kickstart My Heart (2024 Remaster)",
-      url: "https://youtu.be/e17mr5ZtWPI"
-    },
-    {
-      name: "Seia: I Drive【Blue Archive Animation】",
-      url: "https://youtu.be/96cN_fzTMC8"
-    },
-    {
-        name: "i9zlMVYl-qkFHRth",
-        url: "https://youtu.be/ghi789QWE"
-    },
-  ]
-
 async function newNameChecker () {
     const YTVideos = await authorize().then(youTubeVideoData).catch(console.error);
     const NamesFromDB = videoFromDB.map(video => video.name)

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image} from "react-native";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 
-import { VideoPlayer, VideoView, useVideoPlayer, } from "expo-video";
+import { VideoView, useVideoPlayer, } from "expo-video";
 import YTVidForm from "./YTVidForm";
 
 //import placeholder from "../../../assets/AronaServer.jpg"
@@ -18,6 +18,7 @@ export default function YTAssembler () {
         const getVids = async () => {
             try{
                 const responce = await fetch(`${BASE_URL}/videos`);
+            
                 const data = await responce.json();
                 //console.log("Videos form DB: ", data.lenght, data)
                 vidReader(data)
@@ -38,6 +39,7 @@ export default function YTAssembler () {
         duration: vid.duration,
         isitunique: vid.isitunique
        }))
+       .sort((a,b)=> b.id - a.id);
         setVideos(parsedVideos)
         
     }
@@ -126,7 +128,7 @@ export default function YTAssembler () {
 
     const renderItem = ({item}) => (
             <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
-                <YTVidForm thumbnail={{uri: item.thumbnail}} name={item.name} date={item.date} duration={item.duration} isItUnique={item.isitunique}/>
+                <YTVidForm thumbnail={{uri: item.thumbnail}} name={item.name} date={item.date} duration={item.duration} isItUnique={item.isitunique} id={item.id}/>
             </TouchableOpacity>
         )
 

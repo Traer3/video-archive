@@ -4,12 +4,12 @@ import bratty from '../../meme/arona.gif'
 import shareIcon from '../../../assets/share.png'
 import { useState } from "react"
 
-export default function YTVidForm({thumbnail, name, date , duration,isItUnique}) {
+export default function YTVidForm({thumbnail, name, date , duration,isItUnique,id}) {
 
     
     //console.log(isItUnique)
     const [buttonTest, setButtonTest] = useState(0)
-
+    console.log("Selected Vid id: ", id)
     return(
         <View 
             style={[
