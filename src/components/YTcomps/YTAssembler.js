@@ -95,7 +95,7 @@ export default function YTAssembler () {
                 try{
                     
                     let VideoUrl = String(vid.url)
-                   // console.log("Vid id: ", vid.id, "Vid url: ", vid.url)
+                    //console.log("Vid id: ", vid.id, "Vid url: ", vid.url)
 
                     const {uri} = await VideoThumbnails.getThumbnailAsync(VideoUrl, {time:100});
 
