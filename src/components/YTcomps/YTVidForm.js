@@ -9,7 +9,7 @@ export default function YTVidForm({thumbnail, name, date , duration,isItUnique,i
     
     //console.log(isItUnique)
     const [buttonTest, setButtonTest] = useState(0)
-    console.log("Selected Vid id: ", id)
+    //console.log("Selected Vid id: ", id)
     return(
         <View 
             style={[

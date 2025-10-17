@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image} from "react-native";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 
@@ -12,12 +12,41 @@ import { DurationFetcher } from "./DurationFetcher";
 
 export default function YTAssembler () {
 
-    const BASE_URL = 'http://192.168.0.8:3001'
+    const DB_URL = 'http://192.168.0.8:3001'
+    const VIDEO_URL = 'http://192.168.0.8:3004'
+    const [page, setPage]= useState(1);
+    const [hasNext, setHasNext] = useState(true);
+    const [loading, setLoading]  = useState (false);
+
+    const [videoData, setVideoData] = useState([]);
+
+    const getVids = useCallback(async(pageNum = 1 )=>{
+        if(loading || !hasNext) return;
+        setLoading(true);
+
+        try{
+            const responce = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=7`);
+            const data = await responce.json();
+
+            setVideoData((prev)=> [...prev, ...data.videos]);
+            setHasNext(data.hasNext);
+            setPage(pageNum);
+        }catch(err){
+            console.log("Node express servder ERROR: ", err);
+        }finally{
+            setLoading(false);
+        }
+    },[loading,hasNext]);
 
     useEffect(()=>{
-        const getVids = async () => {
+        getVids(1);
+    },[]);
+
+    const [videos, setVideos] = useState([])
+    useEffect(()=>{
+        const VideoFromDB = async () => {
             try{
-                const responce = await fetch(`${BASE_URL}/videos`);
+                const responce = await fetch(`${DB_URL}/videos`);
             
                 const data = await responce.json();
                 //console.log("Videos form DB: ", data.lenght, data)
@@ -26,16 +55,14 @@ export default function YTAssembler () {
                 console.log("DB error: ", err)
             }
         }
-        getVids();
+        VideoFromDB();
 
     },[])
-
-    const [videos, setVideos] = useState([])
 
     const vidReader = (DBvideos) => {
        const parsedVideos = DBvideos.map((vid)=>({
         ...vid,
-        url: vid.url,
+        id: vid.id,
         duration: vid.duration,
         isitunique: vid.isitunique
        }))
@@ -44,11 +71,28 @@ export default function YTAssembler () {
         
     }
 
-    const [videoData, setVideoData] = useState([]);
+    const findId = (vidName) => {
+        const match = videos.filter(video => {
+            console.log("Video name: ", video.name )
+            console.log("Video find: ", vidName )
+            video.name === vidName
+        });
+        if(match.length > 0){
+            //console.log("ID : " , match[0].id);
+            return match[0].id;
+        }else{
+            console.log("No vid found: ", vidName)
+            return null;
+        }
+    }
+
+    
 
 
    const savedIds = new Set();
    const saveVideoData = async (vidId,vidDuration) =>{
+        //console.log(vidId);
+        //console.log(vidDuration)
         try{
 
             if(!vidDuration){
@@ -61,7 +105,7 @@ export default function YTAssembler () {
                 return;
             }
 
-            const res = await fetch(`${BASE_URL}/saveVidDuration`,{
+            const res = await fetch(`${DB_URL}/saveVidDuration`,{
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -88,12 +132,15 @@ export default function YTAssembler () {
 
 
     useEffect(()=>{
-        const loadData = async () => {
+        if(videos.length === 0 || videoData.length === 0) return;
+        const loadThumbnails = async () => {
             const enriched = [];
 
-            for(let vid of videos){
+            for(let vid of videoData){
+                let vidId = findId(vid.name)
                 try{
                     
+                    console.log("Vid id: ", vidId)
                     let VideoUrl = String(vid.url)
                     //console.log("Vid id: ", vid.id, "Vid url: ", vid.url)
 
@@ -103,14 +150,17 @@ export default function YTAssembler () {
                     
                     enriched.push({
                         ...vid,
+                        id: vidId,
                         thumbnail: uri,
                     });
 
                     
                 } catch (e){
                     //console.warn("Thumbnail error",vid.id);
+                    
                     enriched.push({
                         ...vid,
+                        id: vidId,
                         thumbnail: Image.resolveAssetSource(betterPlaceholder).uri,
                     })
                     continue;
@@ -119,7 +169,7 @@ export default function YTAssembler () {
             setVideoData(enriched);
             
         };
-        loadData();
+        loadThumbnails();
         
     },[videos])
 
@@ -169,7 +219,7 @@ export default function YTAssembler () {
                 style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
                 data={videoData}
-                keyExtractor={(item)=>item.id.toString()}
+                keyExtractor={(item)=> (item.id ? item.id.toString() : item.url)}
                 renderItem={renderItem}
                 removeClippedSubviews={false}
                 initialNumToRender={10}
