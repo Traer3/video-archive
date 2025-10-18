@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image} from "react-native";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 
@@ -12,70 +12,43 @@ import { DurationFetcher } from "./DurationFetcher";
 
 export default function YTAssembler () {
 
-    const VIDEO_URL = 'http://192.168.0.8:3004'
-    const DB_URL = 'http://192.168.0.8:3001';
-    
-
-    const [videos, setVideos] = useState([])
+    const BASE_URL = 'http://192.168.0.8:3001'
 
     useEffect(()=>{
-        const fetchAllVideos = async () => {
+        const getVids = async () => {
             try{
-                const dbResponse = await fetch(`${DB_URL}/videos`);
-                const dbData = await dbResponse.json();
+                const responce = await fetch(`${BASE_URL}/videos`);
+            
+                const data = await responce.json();
                 //console.log("Videos form DB: ", data.lenght, data)
-
-                const urlResponse = await fetch(`${VIDEO_URL}/videos?page=1&limit=7`);
-                const urlData = await urlResponse.json();
-                
-                const dbVideos = dbData.map(v => ({
-                    id: v.id,
-                    name: v.name,
-                    duration: v.duration,
-                    isitunique: v.isitunique,
-                }));
-
-                const urls = urlData.videos;
-
-                const merged = dbVideos.map(dbVid => {
-                    const foundUrl = urls.find(u => u.name === dbVid.name);
-                    return{
-                        ...dbVid,
-                        url: foundUrl ? foundUrl.url : null,
-                    };
-                });
-
-                merged.sort((a,b)=>  b.id - a.id);
-                setVideos(merged);
-                
-               console.log("Merged videos: ", merged)
+                vidReader(data)
             }catch(err){
-                console.log("Error merging videos : ", err)
+                console.log("DB error: ", err)
             }
-        };
-        fetchAllVideos();
+        }
+        getVids();
 
     },[])
 
-    useEffect(()=>{
-        if (videos.length === 0) return
-        const showVidsDATA = () => videos.map(vid =>{
-           console.log("Video name: ", vid.name," Videos id:  ",vid.id, " Video duration: ",vid.duration, "Video URL : ", vid.url)
-        })
-        showVidsDATA();
-    },[videos])
+    const [videos, setVideos] = useState([])
 
-    
+    const vidReader = (DBvideos) => {
+       const parsedVideos = DBvideos.map((vid)=>({
+        ...vid,
+        url: vid.url,
+        duration: vid.duration,
+        isitunique: vid.isitunique
+       }))
+       .sort((a,b)=> b.id - a.id);
+        setVideos(parsedVideos)
+        
+    }
 
-
-   
-    
+    const [videoData, setVideoData] = useState([]);
 
 
    const savedIds = new Set();
    const saveVideoData = async (vidId,vidDuration) =>{
-        //console.log(vidId);
-        //console.log(vidDuration)
         try{
 
             if(!vidDuration){
@@ -88,7 +61,7 @@ export default function YTAssembler () {
                 return;
             }
 
-            const res = await fetch(`${DB_URL}/saveVidDuration`,{
+            const res = await fetch(`${BASE_URL}/saveVidDuration`,{
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -113,39 +86,40 @@ export default function YTAssembler () {
    }
     
 
-    const [thumbnailsLoaded, setThumbnailsLoaded] = useState(false);
+
     useEffect(()=>{
-        if(videos.length === 0 || thumbnailsLoaded) return;
-        const loadThumbnails = async () => {
+        const loadData = async () => {
             const enriched = [];
+
             for(let vid of videos){
                 try{
                     
                     let VideoUrl = String(vid.url)
-                    console.log(vid.id);
-                    console.log(vid.url)
+                    //console.log("Vid id: ", vid.id, "Vid url: ", vid.url)
+
                     const {uri} = await VideoThumbnails.getThumbnailAsync(VideoUrl, {time:100});
 
-                    enriched.push({
-                        ...vid,
-                        
-                        thumbnail: uri,
-                    }); 
-                } catch (e){
-                    enriched.push({
-                        ...vid,
                     
+                    
+                    enriched.push({
+                        ...vid,
+                        thumbnail: uri,
+                    });
+
+                    
+                } catch (e){
+                    //console.warn("Thumbnail error",vid.id);
+                    enriched.push({
+                        ...vid,
                         thumbnail: Image.resolveAssetSource(betterPlaceholder).uri,
                     })
                     continue;
                 }
             }
-            setVideos(enriched)
-            setThumbnailsLoaded(true);
-            //setVideoData(enriched);
+            setVideoData(enriched);
             
         };
-       loadThumbnails();
+        loadData();
         
     },[videos])
 
@@ -172,14 +146,14 @@ export default function YTAssembler () {
 
     return(
         <View style={{flex:1, }}>
-            {videos.map((vid)=>
+            {videoData.map((vid)=>
                 !vid.duration ? (
                     <DurationFetcher
                         key={vid.id}
                         url={vid.url}
                         onDurationReady={(dur)=>{     
                             saveVideoData(vid.id, dur)
-                            setVideos((prev)=> 
+                            setVideoData((prev)=> 
                                 prev.map((video)=> 
                                 video.id === vid.id ? {...video, duration: dur}: video
                                 )
@@ -194,7 +168,7 @@ export default function YTAssembler () {
             <FlatList
                 style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
-                data={videos}
+                data={videoData}
                 keyExtractor={(item)=>item.id.toString()}
                 renderItem={renderItem}
                 removeClippedSubviews={false}
