@@ -20,15 +20,19 @@ export default function YTAssembler () {
     const [hasNext, setHasNext] = useState(true);
     const [loading, setLoading] = useState(false);
 
-    useEffect(()=>{
-        const fetchAllVideos = async () => {
+    const fetchAllVideos = useCallback(async (pageNum = 1) => {
+        if(loading || !hasNext) return;
+        setLoading(true);
+
             try{
                 const dbResponse = await fetch(`${DB_URL}/videos`);
                 const dbData = await dbResponse.json();
                 //console.log("Videos form DB: ", data.lenght, data)
 
-                const urlResponse = await fetch(`${VIDEO_URL}/videos?page=1&limit=100`);
+                const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=7`);
                 const urlData = await urlResponse.json();
+
+                setHasNext(urlData.hasNext);
                 
                 const dbVideos = dbData.map(v => ({
                     id: v.id,
@@ -53,6 +57,8 @@ export default function YTAssembler () {
                     };
                 });
 
+                
+
                 merged.forEach(v=>{
                     if(!v.url){
                        // console.warn("⚠️ No url found ! ", v.name)
@@ -60,30 +66,57 @@ export default function YTAssembler () {
                 })
 
                 merged.sort((a,b)=>  b.id - a.id);
-                setVideos(merged);
+
+                const enriched = await Promise.all(
+                    merged.map(async(vid)=>{
+                        if(vid.thumbnail) return vid;
+                        try{
+                            
+                            let VideoUrl = String(vid.url)
+                            
+                           // console.log(vid.id);
+                           console.log("URL для thumbnail: ",VideoUrl)
+                            const {uri} = await VideoThumbnails.getThumbnailAsync(VideoUrl, {time:100});
+                            return { ...vid, thumbnail: uri,};
+    
+                        } catch (e){
+                            console.warn("Fail to get thumdnail for: ", vid.name, e.massage)
+                            return{
+                                ...vid,
+                                thumbnail: Image.resolveAssetSource(betterPlaceholder).uri,
+                            };
+                        }
+                    })
+                );
+
+
+
+                setVideos(prev => {
+                    const existiongIds = new Set(prev.map(v => v.id));
+                    const uniqueMeged = enriched.filter(v=> !existiongIds.has(v.id));
+                    return [...prev, ...uniqueMeged]
+                });
+                setPage(pageNum);
                 
               // console.log("Merged videos: ", merged)
             }catch(err){
                 console.log("Error merging videos : ", err)
+            }finally{
+                setLoading(false);
             }
-        };
-        fetchAllVideos();
-
-    },[])
+        },[loading,hasNext]);
 
     useEffect(()=>{
-        if (videos.length === 0) return
-        const showVidsDATA = () => videos.map(vid =>{
-           //console.log("Video name: ", vid.name," Videos id:  ",vid.id, " Video duration: ",vid.duration, "Video URL : ", vid.url)
-        })
-        showVidsDATA();
-    },[videos])
-
+        fetchAllVideos(1);
+    },[]);
     
-
+    const loadMore = () => {
+        if(hasNext && !loading){
+            fetchAllVideos(page + 1);
+        }
+    };
 
    
-    
 
 
    const savedIds = new Set();
@@ -125,45 +158,6 @@ export default function YTAssembler () {
         }
         
    }
-    
-
-    const [thumbnailsLoaded, setThumbnailsLoaded] = useState(false);
-    useEffect(()=>{
-        if(videos.length === 0 || thumbnailsLoaded) return;
-        const loadThumbnails = async () => {
-            const enriched = [];
-            for(let vid of videos){
-                try{
-                    
-                    let VideoUrl = String(vid.url)
-                   // console.log(vid.id);
-                   //console.log("URL для thumbnail: ",vid.url)
-                    const {uri} = await VideoThumbnails.getThumbnailAsync(VideoUrl, {time:100});
-
-                    enriched.push({
-                        ...vid,
-                        
-                        thumbnail: uri,
-                    }); 
-                } catch (e){
-                    enriched.push({
-                        ...vid,
-                    
-                        thumbnail: Image.resolveAssetSource(betterPlaceholder).uri,
-                    })
-                    continue;
-                }
-            }
-            setVideos(enriched)
-            setThumbnailsLoaded(true);
-            //setVideoData(enriched);
-            
-        };
-       loadThumbnails();
-        
-    },[videos])
-
-    
 
 
     const renderItem = ({item}) => (
@@ -211,6 +205,8 @@ export default function YTAssembler () {
                 data={videos}
                 keyExtractor={(item)=>item.id.toString()}
                 renderItem={renderItem}
+                onEndReached={loadMore}
+                onEndReachedThreshold={0.5}
                 removeClippedSubviews={false}
                 initialNumToRender={10}
                 windowSize={10}
