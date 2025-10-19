@@ -15,8 +15,10 @@ export default function YTAssembler () {
     const VIDEO_URL = 'http://192.168.0.8:3004'
     const DB_URL = 'http://192.168.0.8:3001';
     
-
-    const [videos, setVideos] = useState([])
+    const [videos, setVideos] = useState([]);
+    const [page, setPage] = useState(1);
+    const [hasNext, setHasNext] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     useEffect(()=>{
         const fetchAllVideos = async () => {
@@ -25,7 +27,7 @@ export default function YTAssembler () {
                 const dbData = await dbResponse.json();
                 //console.log("Videos form DB: ", data.lenght, data)
 
-                const urlResponse = await fetch(`${VIDEO_URL}/videos?page=1&limit=7`);
+                const urlResponse = await fetch(`${VIDEO_URL}/videos?page=1&limit=100`);
                 const urlData = await urlResponse.json();
                 
                 const dbVideos = dbData.map(v => ({
@@ -38,17 +40,29 @@ export default function YTAssembler () {
                 const urls = urlData.videos;
 
                 const merged = dbVideos.map(dbVid => {
-                    const foundUrl = urls.find(u => u.name === dbVid.name);
+                    const foundUrl = urls.find(u => {
+                        const urlsWithoutExt = u.name.replace(/\.mp4$/i, '');
+                        //console.log("name from express: ",urlsWithoutExt)
+                        //console.log("name from DB: ",dbVid.name)
+                       return urlsWithoutExt === dbVid.name
+                    });
+                    
                     return{
                         ...dbVid,
                         url: foundUrl ? foundUrl.url : null,
                     };
                 });
 
+                merged.forEach(v=>{
+                    if(!v.url){
+                       // console.warn("⚠️ No url found ! ", v.name)
+                    }
+                })
+
                 merged.sort((a,b)=>  b.id - a.id);
                 setVideos(merged);
                 
-               console.log("Merged videos: ", merged)
+              // console.log("Merged videos: ", merged)
             }catch(err){
                 console.log("Error merging videos : ", err)
             }
@@ -60,7 +74,7 @@ export default function YTAssembler () {
     useEffect(()=>{
         if (videos.length === 0) return
         const showVidsDATA = () => videos.map(vid =>{
-           console.log("Video name: ", vid.name," Videos id:  ",vid.id, " Video duration: ",vid.duration, "Video URL : ", vid.url)
+           //console.log("Video name: ", vid.name," Videos id:  ",vid.id, " Video duration: ",vid.duration, "Video URL : ", vid.url)
         })
         showVidsDATA();
     },[videos])
@@ -122,8 +136,8 @@ export default function YTAssembler () {
                 try{
                     
                     let VideoUrl = String(vid.url)
-                    console.log(vid.id);
-                    console.log(vid.url)
+                   // console.log(vid.id);
+                   //console.log("URL для thumbnail: ",vid.url)
                     const {uri} = await VideoThumbnails.getThumbnailAsync(VideoUrl, {time:100});
 
                     enriched.push({
