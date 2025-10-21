@@ -30,13 +30,15 @@ export default function YTAssembler () {
                 //console.log("Videos form DB: ", data.lenght, data)
 
                 const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=7`);
-                const urlData = await urlResponse.json();
+                
+                const urlData = await urlResponse.json()
 
                 setHasNext(urlData.hasNext);
                 
                 const dbVideos = dbData.map(v => ({
                     id: v.id,
                     name: v.name,
+                    thumbnail: v.thumbnail,
                     duration: v.duration,
                     isitunique: v.isitunique,
                 }));
@@ -67,33 +69,9 @@ export default function YTAssembler () {
 
                 merged.sort((a,b)=>  b.id - a.id);
 
-                const enriched = await Promise.all(
-                    merged.map(async(vid)=>{
-                        if(vid.thumbnail) return vid;
-                        try{
-                            
-                            let VideoUrl = String(vid.url)
-                            
-                           // console.log(vid.id);
-                           console.log("URL для thumbnail: ",VideoUrl)
-                            const {uri} = await VideoThumbnails.getThumbnailAsync(VideoUrl, {time:100});
-                            return { ...vid, thumbnail: uri,};
-    
-                        } catch (e){
-                            console.warn("Fail to get thumdnail for: ", vid.name, e.massage)
-                            return{
-                                ...vid,
-                                thumbnail: Image.resolveAssetSource(betterPlaceholder).uri,
-                            };
-                        }
-                    })
-                );
-
-
-
                 setVideos(prev => {
                     const existiongIds = new Set(prev.map(v => v.id));
-                    const uniqueMeged = enriched.filter(v=> !existiongIds.has(v.id));
+                    const uniqueMeged = merged.filter(v=> !existiongIds.has(v.id));
                     return [...prev, ...uniqueMeged]
                 });
                 setPage(pageNum);

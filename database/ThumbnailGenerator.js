@@ -1,28 +1,45 @@
 const fs = require('fs');
 const path = require('path');
+const ffmpeg = require('fluent-ffmpeg');
+//npm install fluent-ffmpeg
 
+const VIDEOS_DIR =  path.join(__dirname, "videos");
+const OUTPUT_DIR = path.join(__dirname, "./thumbnails");
 
-const VIDEO_URL = 'http://192.168.0.8:3004'
-//const FOLDER_PATH = path.join(__dirname, "videos")
-//const files = fs.readdirSync(FOLDER_PATH);
-//console.log(`Files amount: ${files.length}`)
-
-//const originalName = path.parse(file).name;
-//const clearName = originalName.replace(/\.mp4$/i, '');
-const thumbnailGenerator = async () => {
-    try{
-        const urlResponse = await fetch(`${VIDEO_URL}/videos?page=1&limit=1000000`);
-        const urlData = await urlResponse.json();
-        const urls = urlData.videos;
-        for(let vid of urls){
-            let VideoUrl = String(vid.url);
-            const {uri} = await VideoThumbnails
-        }
-        showDATA()
-    }catch(err){
-
-    }
-
+if(!fs.existsSync(OUTPUT_DIR)){
+    fs.mkdirSync(OUTPUT_DIR);
+}
+async function generateThumbnail(videoPath, outputPath){
+    return new Promise((resolve, reject)=>{
+        ffmpeg(videoPath)
+            .on('end', ()=> resolve(outputPath))
+            .on('error',(err)=> reject(err))
+            .screenshot({
+                count: 1,
+                timemarks: ['00:00:02.000'],
+                filename: path.basename(outputPath),
+                folder: OUTPUT_DIR,
+                size: '320x240',
+            });
+    });
 }
 
-thumbnailGenerator()
+async function processAllVideos() {
+    const files = fs.readdirSync(VIDEOS_DIR).filter(f => f.endsWith('.mp4'));
+
+    for(const file of files){
+        const videoPath = path.join(VIDEOS_DIR, file);
+        const outputPath = path.join(OUTPUT_DIR, `${path.parse(file).name}.jpg`);
+        
+
+        try{
+            console.log(`🎬 Generating thumbnail for: ${file}`);
+            await generateThumbnail(videoPath, outputPath);
+            console.log(`✅ Thumbnail generated : ${outputPath}`);
+        }catch(err){
+            console.error(`❌ error ${file}:`, err.message);
+        }
+    }
+}
+
+processAllVideos()
