@@ -5,8 +5,7 @@ import * as VideoThumbnails from 'expo-video-thumbnails';
 import { VideoView, useVideoPlayer, } from "expo-video";
 import YTVidForm from "./YTVidForm";
 
-//import placeholder from "../../../assets/AronaServer.jpg"
-import betterPlaceholder from "../../meme/arona.gif"
+
 import { DurationFetcher } from "./DurationFetcher";
 
 
@@ -45,17 +44,23 @@ export default function YTAssembler () {
 
                 const urls = urlData.videos;
 
+                const normolizeName = name => name.replace(/\.[^/.]+$/, '').trim().toLowerCase();
                 const merged = dbVideos.map(dbVid => {
+                    
                     const foundUrl = urls.find(u => {
                         const urlsWithoutExt = u.name.replace(/\.mp4$/i, '');
                         //console.log("name from express: ",urlsWithoutExt)
                         //console.log("name from DB: ",dbVid.name)
                        return urlsWithoutExt === dbVid.name
                     });
+                    console.log("Matchung names check: ");
+                    urls.forEach(u => console.log("Url name: ", u.name));
+                    dbVideos.forEach(v => console.log("DB name: ", v.name))
                     
                     return{
                         ...dbVid,
                         url: foundUrl ? foundUrl.url : null,
+                        thumbnail: foundUrl ? foundUrl.thumbnail : "no default.jpg" 
                     };
                 });
 
@@ -75,7 +80,7 @@ export default function YTAssembler () {
                     return [...prev, ...uniqueMeged]
                 });
                 setPage(pageNum);
-                
+                console.log("Loading page: ", pageNum)
               // console.log("Merged videos: ", merged)
             }catch(err){
                 console.log("Error merging videos : ", err)
@@ -86,15 +91,15 @@ export default function YTAssembler () {
 
     useEffect(()=>{
         fetchAllVideos(1);
-    },[]);
+    },[page]);
     
     const loadMore = () => {
         if(hasNext && !loading){
-            fetchAllVideos(page + 1);
+            setPage(prev => prev +1)
         }
     };
 
-   
+ 
 
 
    const savedIds = new Set();
@@ -140,7 +145,7 @@ export default function YTAssembler () {
 
     const renderItem = ({item}) => (
             <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
-                <YTVidForm thumbnail={{uri: item.thumbnail}} name={item.name} date={item.date} duration={item.duration} isItUnique={item.isitunique} id={item.id}/>
+                <YTVidForm thumbnail={item.thumbnail} name={item.name} date={item.date} duration={item.duration} isItUnique={item.isitunique} id={item.id}/>
             </TouchableOpacity>
         )
 
@@ -188,6 +193,7 @@ export default function YTAssembler () {
                 removeClippedSubviews={false}
                 initialNumToRender={10}
                 windowSize={10}
+                ListFooterComponent={loading ? <Text style={{textAlign:'center'}}>loading...</Text> : null}
             />
             <Modal visible={!!selectedVideo} transparent={true} animationType="slide" onRequestClose={()=> setSelectedVideo(null)}>
                 <View style={styles.modalBackground}>

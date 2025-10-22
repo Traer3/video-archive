@@ -61,14 +61,16 @@ app.get("/check/:filename",(req,res)=>{
     });
 });
 
+app.use("/thumbnails",express.static(THUMBNAILS_DIR,{
+    fallthrough: false,
+    maxAge: "1d",
+}))
+
 app.use(express.static(VIDEO_DIR,{
     fallthrough:false,
     maxAge: "1d"
 }));
 
-app.use("/thumbnails",express.static(THUMBNAILS_DIR,{
-    fallthrough: false,
-    maxAge: "1d",
-}))
+
 
 app.listen(3004, ()=> console.log("✅ Video server running on port 3004"))
