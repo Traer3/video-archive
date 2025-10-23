@@ -14,39 +14,77 @@ export default function YTAssembler () {
     const VIDEO_URL = 'http://192.168.0.8:3004'
     const DB_URL = 'http://192.168.0.8:3001';
     
+    const [dbVideos,setDbVideos] = useState([]);
     const [videos, setVideos] = useState([]);
     const [page, setPage] = useState(1);
     const [hasNext, setHasNext] = useState(true);
     const [loading, setLoading] = useState(false);
-
-    const fetchAllVideos = useCallback(async (pageNum = 1) => {
-        if(loading || !hasNext) return;
-        setLoading(true);
-
+    
+    useEffect(()=>{
+        const  loadDbVideos = async () => {
             try{
                 const dbResponse = await fetch(`${DB_URL}/videos`);
                 const dbData = await dbResponse.json();
+    
+            const formatted = dbData.map(v => ({
+                id: v.id,
+                name: v.name,
+                thumbnail: v.thumbnail,
+                duration: v.duration,
+                isitunique: v.isitunique,
+            }));
+    
+            setDbVideos(formatted);
+            console.log("DB videos loaded: ", formatted.length)
+            }catch(err){
+                console.log("Error loading DB videos: ", err);
+            }
+        }
+        loadDbVideos();
+    },[])
+
+   
+    
+
+    const fetchAllVideos = useCallback(async (pageNum = 1) => {
+        if(loading || !hasNext ) return;
+        setLoading(true);
+
+                
+            try{
+                //const dbResponse = await fetch(`${DB_URL}/videos`);
+                //const dbData = await dbResponse.json();
                 //console.log("Videos form DB: ", data.lenght, data)
 
-                const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=7`);
+                const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=9`);
                 
                 const urlData = await urlResponse.json()
 
                 setHasNext(urlData.hasNext);
-                
-                const dbVideos = dbData.map(v => ({
-                    id: v.id,
-                    name: v.name,
-                    thumbnail: v.thumbnail,
-                    duration: v.duration,
-                    isitunique: v.isitunique,
-                }));
 
+                const newVideos = urlData.videos.map(u => {
+                    const dbVid = dbVideos.find(db => db.name === u.name.replace(/\.mp4$/i, ''));
+                    return{
+                        id: dbVid ? dbVid.id : Date.now() + Math.random(),
+                        name: u.name,
+                        url: u.url,
+                        thumbnail:  u.thumbnail,
+                        duration: dbVid ? dbVid.duration: null,
+                        isitunique: dbVid ? dbVid.isitunique: false,
+                    };
+                });
+
+                setVideos(prev => {
+                    const existingNames = new Set(prev.map(v => v.name));
+                    const unique = newVideos.filter(v => !existingNames.has(v.name));
+                    return[...prev,  ...unique];
+                })
+
+                /*
                 const urls = urlData.videos;
-
-                const normolizeName = name => name.replace(/\.[^/.]+$/, '').trim().toLowerCase();
+                
                 const merged = dbVideos.map(dbVid => {
-                    
+                   // const normolizeName = name => name.replace(/\.[^/.]+$/, '').trim().toLowerCase();
                     const foundUrl = urls.find(u => {
                         const urlsWithoutExt = u.name.replace(/\.mp4$/i, '');
                         //console.log("name from express: ",urlsWithoutExt)
@@ -54,8 +92,9 @@ export default function YTAssembler () {
                        return urlsWithoutExt === dbVid.name
                     });
                     console.log("Matchung names check: ");
-                    urls.forEach(u => console.log("Url name: ", u.name));
-                    dbVideos.forEach(v => console.log("DB name: ", v.name))
+                    //urls.forEach(u => console.log("Url name: ", u.name));
+                    //urls.forEach(u => console.log("Url thumbnail: ", u.thumbnail));
+                    //dbVideos.forEach(v => console.log("DB name: ", v.name))
                     
                     return{
                         ...dbVid,
@@ -82,15 +121,18 @@ export default function YTAssembler () {
                 setPage(pageNum);
                 console.log("Loading page: ", pageNum)
               // console.log("Merged videos: ", merged)
+                */
+                
+                
             }catch(err){
                 console.log("Error merging videos : ", err)
             }finally{
                 setLoading(false);
             }
-        },[loading,hasNext]);
+        },[loading,hasNext,dbVideos]);
 
     useEffect(()=>{
-        fetchAllVideos(1);
+        fetchAllVideos(page);
     },[page]);
     
     const loadMore = () => {
@@ -163,7 +205,9 @@ export default function YTAssembler () {
 
     return(
         <View style={{flex:1, }}>
-            {videos.map((vid)=>
+
+            {/*
+            videos.map((vid)=>
                 !vid.duration ? (
                     <DurationFetcher
                         key={vid.id}
@@ -179,7 +223,8 @@ export default function YTAssembler () {
                         }}
                     />
                 ): null
-            )}
+            )*/
+            }
 
 
             <FlatList
