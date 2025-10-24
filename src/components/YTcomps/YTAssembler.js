@@ -45,6 +45,7 @@ export default function YTAssembler () {
 
    
     
+    const [dbVidId, setDbVidId] = useState(0);
 
     const fetchAllVideos = useCallback(async (pageNum = 1) => {
         if(loading || !hasNext ) return;
@@ -52,26 +53,38 @@ export default function YTAssembler () {
 
                 
             try{
-                //const dbResponse = await fetch(`${DB_URL}/videos`);
-                //const dbData = await dbResponse.json();
-                //console.log("Videos form DB: ", data.lenght, data)
-
                 const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=9`);
-                
                 const urlData = await urlResponse.json()
 
                 setHasNext(urlData.hasNext);
 
+                const normolizeName = (name) => name.replace(/\.mp4$/i, '');
+                
+                
+
                 const newVideos = urlData.videos.map(u => {
-                    const dbVid = dbVideos.find(db => db.name === u.name.replace(/\.mp4$/i, ''));
-                    return{
-                        id: dbVid ? dbVid.id : Date.now() + Math.random(),
+
+                    const urlName = normolizeName(u.name);
+                    console.log("🎬URL name: ",  JSON.stringify(urlName))
+                    
+                   
+
+                    const dbVid = dbVideos.find(db => db.name === urlName);
+
+                    console.log("📥 DB name: ",JSON.stringify(dbVid))
+                    //setDbVidId(db.id);
+                    
+                    console.log("dbVidId: " , dbVidId)
+
+                    const newVideoObject ={
+                        id: dbVidId,
                         name: u.name,
                         url: u.url,
-                        thumbnail:  u.thumbnail,
-                        duration: dbVid ? dbVid.duration: null,
-                        isitunique: dbVid ? dbVid.isitunique: false,
-                    };
+                        thumbnail: u.thumbnail,
+                        duration: dbVid ? dbVid.duration : null,
+                        isitunique: dbVid ? dbVid.isitunique : false,
+                    }
+                    return newVideoObject;
                 });
 
                 setVideos(prev => {
@@ -146,8 +159,8 @@ export default function YTAssembler () {
 
    const savedIds = new Set();
    const saveVideoData = async (vidId,vidDuration) =>{
-        //console.log(vidId);
-        //console.log(vidDuration)
+        console.log(vidId);
+        console.log(vidDuration)
         try{
 
             if(!vidDuration){
@@ -206,8 +219,7 @@ export default function YTAssembler () {
     return(
         <View style={{flex:1, }}>
 
-            {/*
-            videos.map((vid)=>
+            {videos.map((vid)=>
                 !vid.duration ? (
                     <DurationFetcher
                         key={vid.id}
@@ -223,8 +235,7 @@ export default function YTAssembler () {
                         }}
                     />
                 ): null
-            )*/
-            }
+            )}
 
 
             <FlatList
