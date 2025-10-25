@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image} from "react-native";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 
@@ -21,37 +21,42 @@ export default function YTAssembler () {
     const [loading, setLoading] = useState(false);
     
     useEffect(()=>{
-        const  loadDbVideos = async () => {
+        let mounted = true;
+        (async ()=>{
             try{
-                const dbResponse = await fetch(`${DB_URL}/videos`);
-                const dbData = await dbResponse.json();
-    
-            const formatted = dbData.map(v => ({
-                id: v.id,
-                name: v.name,
-                thumbnail: v.thumbnail,
-                duration: v.duration,
-                isitunique: v.isitunique,
-            }));
-    
-            setDbVideos(formatted);
-            console.log("DB videos loaded: ", formatted.length)
+                const res = await fetch(`${DB_URL}/videos`);
+                const arr = await res.json();
+                if(!mounted) return;
+                const formatted = arr.map(v => ({
+                    id: v.id,
+                    name: v.name,
+                    tumbnail: v.thumbnail,
+                    duration: v.duration,
+                    isitunique: v.isitunique,
+                }));
+                setDbVideos(formatted);
+                console.log('DB videos loaded:',formatted.length);
             }catch(err){
-                console.log("Error loading DB videos: ", err);
+                console.log("Error loading DB videos:", err);
             }
-        }
-        loadDbVideos();
-    },[])
+        })();
+        return () => {mounted = false;};
+    },[]);
 
-   
-    
-    const [dbVidId, setDbVidId] = useState(0);
+    const [initialLoadDone, setInitialLoadDone] = useState(false);
+    useEffect(()=>{
+        if(dbVideos.length === 0 || initialLoadDone) return;
+        fetchAllVideos(1).then(()=>{
+            setPage(2);
+            setInitialLoadDone(true);
+        });
+       
+    },[dbVideos,initialLoadDone,page]);
 
     const fetchAllVideos = useCallback(async (pageNum = 1) => {
+        console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
         if(loading || !hasNext ) return;
         setLoading(true);
-
-                
             try{
                 const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=9`);
                 const urlData = await urlResponse.json()
@@ -59,84 +64,29 @@ export default function YTAssembler () {
                 setHasNext(urlData.hasNext);
 
                 const normolizeName = (name) => name.replace(/\.mp4$/i, '');
-                
-                
-
-                const newVideos = urlData.videos.map(u => {
-
+                const newFormPage = urlData.videos.map(u => {
                     const urlName = normolizeName(u.name);
-                    console.log("🎬URL name: ",  JSON.stringify(urlName))
-                    
-                   
-
                     const dbVid = dbVideos.find(db => db.name === urlName);
 
-                    console.log("📥 DB name: ",JSON.stringify(dbVid))
-                    //setDbVidId(db.id);
-                    
-                    console.log("dbVidId: " , dbVidId)
-
-                    const newVideoObject ={
-                        id: dbVidId,
+                    return{
+                        id: dbVid ? dbVid.id : null,
                         name: u.name,
                         url: u.url,
                         thumbnail: u.thumbnail,
                         duration: dbVid ? dbVid.duration : null,
                         isitunique: dbVid ? dbVid.isitunique : false,
-                    }
-                    return newVideoObject;
-                });
-
-                setVideos(prev => {
-                    const existingNames = new Set(prev.map(v => v.name));
-                    const unique = newVideos.filter(v => !existingNames.has(v.name));
-                    return[...prev,  ...unique];
-                })
-
-                /*
-                const urls = urlData.videos;
-                
-                const merged = dbVideos.map(dbVid => {
-                   // const normolizeName = name => name.replace(/\.[^/.]+$/, '').trim().toLowerCase();
-                    const foundUrl = urls.find(u => {
-                        const urlsWithoutExt = u.name.replace(/\.mp4$/i, '');
-                        //console.log("name from express: ",urlsWithoutExt)
-                        //console.log("name from DB: ",dbVid.name)
-                       return urlsWithoutExt === dbVid.name
-                    });
-                    console.log("Matchung names check: ");
-                    //urls.forEach(u => console.log("Url name: ", u.name));
-                    //urls.forEach(u => console.log("Url thumbnail: ", u.thumbnail));
-                    //dbVideos.forEach(v => console.log("DB name: ", v.name))
-                    
-                    return{
-                        ...dbVid,
-                        url: foundUrl ? foundUrl.url : null,
-                        thumbnail: foundUrl ? foundUrl.thumbnail : "no default.jpg" 
                     };
                 });
 
-                
-
-                merged.forEach(v=>{
-                    if(!v.url){
-                       // console.warn("⚠️ No url found ! ", v.name)
-                    }
-                })
-
-                merged.sort((a,b)=>  b.id - a.id);
-
                 setVideos(prev => {
-                    const existiongIds = new Set(prev.map(v => v.id));
-                    const uniqueMeged = merged.filter(v=> !existiongIds.has(v.id));
-                    return [...prev, ...uniqueMeged]
+                    const existingIds = new Set(prev.map(p => p.id));
+                    const unique = newFormPage.filter(v => !existingIds.has(v.id));
+                    return[...prev, ...unique];
                 });
+
                 setPage(pageNum);
-                console.log("Loading page: ", pageNum)
-              // console.log("Merged videos: ", merged)
-                */
-                
-                
+                console.log('Loaded page ', pageNum, 'items:', newFormPage.length);
+
             }catch(err){
                 console.log("Error merging videos : ", err)
             }finally{
@@ -144,20 +94,21 @@ export default function YTAssembler () {
             }
         },[loading,hasNext,dbVideos]);
 
-    useEffect(()=>{
-        fetchAllVideos(page);
-    },[page]);
+  
     
     const loadMore = () => {
         if(hasNext && !loading){
-            setPage(prev => prev +1)
+            fetchAllVideos(page).then(()=>{
+                setPage(prev => prev +1)
+            })
         }
     };
 
- 
+    //id всегда есть в базе , я не отображаю видео без id или вне базы 
+    const keyExtractor = item => (item.id ? item.id.toString() : item.url);
 
 
-   const savedIds = new Set();
+   const savedIds = useRef(new Set());
    const saveVideoData = async (vidId,vidDuration) =>{
         console.log(vidId);
         console.log(vidDuration)
@@ -168,7 +119,7 @@ export default function YTAssembler () {
                 return;
             }
 
-            if(savedIds.has(vidId)){
+            if(savedIds.current.has(vidId)){
                 console.log(`⏭ Video ${vidId} already saved, skipping...`);
                 return;
             }
@@ -242,7 +193,7 @@ export default function YTAssembler () {
                 style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
                 data={videos}
-                keyExtractor={(item)=>item.id.toString()}
+                keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 onEndReached={loadMore}
                 onEndReachedThreshold={0.5}

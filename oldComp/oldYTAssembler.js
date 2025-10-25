@@ -236,3 +236,112 @@ const styles = StyleSheet.create({
         height:'100%',
     },
 });
+
+/*
+OLD STUFF
+
+const normolizeName = (name = '') =>
+        name
+            .replace(/\.mp4$/i, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .normalize('NFC');
+
+const  loadDbVideos = async () => {
+            try{
+                const dbResponse = await fetch(`${DB_URL}/videos`);
+                const dbData = await dbResponse.json();
+    
+            const formatted = dbData.map(v => ({
+                id: v.id,
+                name: v.name,
+                thumbnail: v.thumbnail,
+                duration: v.duration,
+                isitunique: v.isitunique,
+            }));
+    
+            setDbVideos(formatted);
+            console.log("DB videos loaded: ", formatted.length)
+            }catch(err){
+                console.log("Error loading DB videos: ", err);
+            }
+        }
+        loadDbVideos();
+
+ const newVideos = urlData.videos.map(u => {
+
+                    const urlName = normolizeName(u.name);
+                    console.log("🎬URL name: ",  JSON.stringify(urlName))
+                    
+                   
+
+                    const dbVid = dbVideos.find(db => db.name === urlName);
+
+                    console.log("📥 DB name: ",JSON.stringify(dbVid))
+                    //setDbVidId(db.id);
+                    
+                    console.log("dbVidId: " , dbVidId)
+
+                    const newVideoObject ={
+                        id: dbVidId,
+                        name: u.name,
+                        url: u.url,
+                        thumbnail: u.thumbnail,
+                        duration: dbVid ? dbVid.duration : null,
+                        isitunique: dbVid ? dbVid.isitunique : false,
+                    }
+                    return newVideoObject;
+                });
+
+                setVideos(prev => {
+                    const existingNames = new Set(prev.map(v => v.name));
+                    const unique = newVideos.filter(v => !existingNames.has(v.name));
+                    return[...prev,  ...unique];
+                })
+
+                
+                SUPPER OLD STUFF
+                /*
+                const urls = urlData.videos;
+                
+                const merged = dbVideos.map(dbVid => {
+                   // const normolizeName = name => name.replace(/\.[^/.]+$/, '').trim().toLowerCase();
+                    const foundUrl = urls.find(u => {
+                        const urlsWithoutExt = u.name.replace(/\.mp4$/i, '');
+                        //console.log("name from express: ",urlsWithoutExt)
+                        //console.log("name from DB: ",dbVid.name)
+                       return urlsWithoutExt === dbVid.name
+                    });
+                    console.log("Matchung names check: ");
+                    //urls.forEach(u => console.log("Url name: ", u.name));
+                    //urls.forEach(u => console.log("Url thumbnail: ", u.thumbnail));
+                    //dbVideos.forEach(v => console.log("DB name: ", v.name))
+                    
+                    return{
+                        ...dbVid,
+                        url: foundUrl ? foundUrl.url : null,
+                        thumbnail: foundUrl ? foundUrl.thumbnail : "no default.jpg" 
+                    };
+                });
+
+                
+
+                merged.forEach(v=>{
+                    if(!v.url){
+                       // console.warn("⚠️ No url found ! ", v.name)
+                    }
+                })
+
+                merged.sort((a,b)=>  b.id - a.id);
+
+                setVideos(prev => {
+                    const existiongIds = new Set(prev.map(v => v.id));
+                    const uniqueMeged = merged.filter(v=> !existiongIds.has(v.id));
+                    return [...prev, ...uniqueMeged]
+                });
+                setPage(pageNum);
+                console.log("Loading page: ", pageNum)
+              // console.log("Merged videos: ", merged)
+                
+                
+*/
