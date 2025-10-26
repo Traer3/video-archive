@@ -149,11 +149,14 @@ export default function YTAssembler () {
    }
 
 
-    const renderItem = ({item}) => (
+    const renderItem = ({item}) => {
+        if(!item.duration || !item.thumbnail) return null
+        return(
             <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
                 <YTVidForm thumbnail={item.thumbnail} name={item.name} date={item.date} duration={item.duration} isItUnique={item.isitunique} id={item.id}/>
             </TouchableOpacity>
         )
+    }
 
 
 
@@ -170,7 +173,9 @@ export default function YTAssembler () {
     return(
         <View style={{flex:1, }}>
 
-            {videos.map((vid)=>
+            {
+            /*
+            videos.map((vid)=>
                 !vid.duration ? (
                     <DurationFetcher
                         key={vid.id}
@@ -186,7 +191,9 @@ export default function YTAssembler () {
                         }}
                     />
                 ): null
-            )}
+            )
+            */
+            }
 
 
             <FlatList
