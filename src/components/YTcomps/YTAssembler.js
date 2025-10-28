@@ -53,12 +53,14 @@ export default function YTAssembler () {
        
     },[dbVideos,initialLoadDone,page]);
 
+    const [readyToMeasure, setReadyToMeasure] = useState(false);
+
     const fetchAllVideos = useCallback(async (pageNum = 1) => {
         console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
         if(loading || !hasNext ) return;
         setLoading(true);
             try{
-                const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=9`);
+                const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=7`);
                 const urlData = await urlResponse.json()
 
                 setHasNext(urlData.hasNext);
@@ -84,7 +86,11 @@ export default function YTAssembler () {
                     return[...prev, ...unique];
                 });
 
-                setPage(pageNum);
+                if(pageNum === 2){
+                    setReadyToMeasure(true);
+                }
+
+               // setPage(pageNum);
                 console.log('Loaded page ', pageNum, 'items:', newFormPage.length);
 
             }catch(err){
@@ -97,9 +103,10 @@ export default function YTAssembler () {
   
     
     const loadMore = () => {
+        const nextPage = page + 1;
         if(hasNext && !loading){
-            fetchAllVideos(page).then(()=>{
-                setPage(prev => prev +1)
+            fetchAllVideos(nextPage).then(()=>{
+               setPage(nextPage)
             })
         }
     };
@@ -110,6 +117,7 @@ export default function YTAssembler () {
 
    const savedIds = useRef(new Set());
    const saveVideoData = async (vidId,vidDuration) =>{
+        if(!vidId  || vidId === 0) return
         console.log(vidId);
         console.log(vidDuration)
         try{
@@ -148,9 +156,58 @@ export default function YTAssembler () {
         
    }
 
+   /*
+   useEffect(()=>{
+    const nextToMeasure = videos.find((v)=> !v.duration);
+    if(!nextToMeasure) return;
+
+    console.log("⏱ Measuring duration for:", nextToMeasure.name);
+
+    const VideoUrl = String(nextToMeasure.url)
+
+    const player = useVideoPlayer(VideoUrl, 
+        (player) => {
+            player.muted = true;
+            player.loop = false;
+            player.play();
+    });
+
+    const check = setInterval(()=>{
+        if(player?.duration && player.duration > 0){
+            const totalSec = Math.floor(player.duration);
+            const minutes = Math.floor(totalSec / 60);
+            const seconds = totalSec % 60;
+            const formatted = `${minutes}:${seconds.toString().padStart(2,"0")}`
+            saveVideoData(nextToMeasure.id, formatted);
+            setVideos((prev) =>
+                prev.map((video)=>
+                    video.id === nextToMeasure.id
+                        ? {...video, duration: formatted}
+                        : video
+                )
+            );
+            clearInterval(check);
+        }
+    },300);
+    return ()=> clearInterval(check);
+   },[videos])
+
+   */
+
 
     const renderItem = ({item}) => {
-        if(!item.duration || !item.thumbnail) return null
+        if(!item.id) return null;
+
+        if(!item.duration || !item.thumbnail) {
+            return(
+                <View style={styles.placeholderContainer}>
+                    <Text style={styles.placeholderText}>
+                        {item.name} - loading....
+                    </Text>
+                    {/* Ебануть блок анимации тип 7 пустых блоков которые переливаються сверху вниз как загрузка*/}
+                </View>
+            );
+        }
         return(
             <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
                 <YTVidForm thumbnail={item.thumbnail} name={item.name} date={item.date} duration={item.duration} isItUnique={item.isitunique} id={item.id}/>
@@ -173,9 +230,24 @@ export default function YTAssembler () {
     return(
         <View style={{flex:1, }}>
 
-            {
-            /*
-            videos.map((vid)=>
+            {readyToMeasure && videos.find(v => !v.duration) && (
+                <DurationFetcher
+                    key={videos.find(v => !v.duration).id}
+                    url={videos.find(v => !v.duration).url}
+                    onDurationReady={(dur)=>{
+                        const target = videos.find(v => !v.duration);
+                        saveVideoData(target.id, dur);
+                        setVideos(prev =>
+                            prev.map(v=>
+                                v.id === target.id ? {...v, duration: dur} : v
+                            )
+                        );
+                    }}
+                />
+            )
+
+           /*
+             videos.map((vid)=>
                 !vid.duration ? (
                     <DurationFetcher
                         key={vid.id}
@@ -192,7 +264,8 @@ export default function YTAssembler () {
                     />
                 ): null
             )
-            */
+
+           */
             }
 
 

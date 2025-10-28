@@ -2,8 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const {Pool} = require('pg');
 
-
-
 const pool = new Pool({
     user: "postgres",
     host: "localhost",
@@ -11,7 +9,6 @@ const pool = new Pool({
     password: "Wedfvb01",
     port: 5432,
 });
-
 
 function generateRequirePath(fileName){
    return "http://192.168.0.8:3004/" + encodeURIComponent(fileName);
@@ -102,7 +99,6 @@ async function getExistingVideos() {
 }
 
 
-
 function findDuplicate(existingVideos, name, sizeBM){
     return existingVideos.find(video => 
         video.name === name && video.size_mb === sizeBM
@@ -137,10 +133,6 @@ async function generateUniqueName(existingVideos, baseName) {
     }
     return maxNumber > 0 ? `${baseName} (${maxNumber + 1})` : baseName;
 }
-
-
-
-
 
 function isVideoFile(fileName){
     const videoExtensions = ['.mp4'];
