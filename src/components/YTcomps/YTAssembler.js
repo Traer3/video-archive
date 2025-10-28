@@ -16,7 +16,7 @@ export default function YTAssembler () {
     
     const [dbVideos,setDbVideos] = useState([]);
     const [videos, setVideos] = useState([]);
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(0);
     const [hasNext, setHasNext] = useState(true);
     const [loading, setLoading] = useState(false);
     
@@ -47,7 +47,7 @@ export default function YTAssembler () {
     useEffect(()=>{
         if(dbVideos.length === 0 || initialLoadDone) return;
         fetchAllVideos(1).then(()=>{
-            setPage(2);
+            //setPage(page + 1);
             setInitialLoadDone(true);
         });
        
@@ -106,7 +106,7 @@ export default function YTAssembler () {
         const nextPage = page + 1;
         if(hasNext && !loading){
             fetchAllVideos(nextPage).then(()=>{
-               setPage(nextPage)
+                 setPage(nextPage) 
             })
         }
     };
