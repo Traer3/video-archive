@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image} from "react-native";
-import * as VideoThumbnails from 'expo-video-thumbnails';
-
 import { VideoView, useVideoPlayer, } from "expo-video";
+
 import YTVidForm from "./YTVidForm";
-
-
 import { DurationFetcher } from "./DurationFetcher";
+import YTLoading from "./YTLoading";
 
+const DB_URL = 'http://192.168.0.8:3001';
+const VIDEO_URL = 'http://192.168.0.8:3004'
 
 export default function YTAssembler () {
 
-    const VIDEO_URL = 'http://192.168.0.8:3004'
-    const DB_URL = 'http://192.168.0.8:3001';
     
     const [dbVideos,setDbVideos] = useState([]);
     const [videos, setVideos] = useState([]);
@@ -35,7 +33,7 @@ export default function YTAssembler () {
                     isitunique: v.isitunique,
                 }));
                 setDbVideos(formatted);
-                console.log('DB videos loaded:',formatted.length);
+                //console.log('DB videos loaded:',formatted.length);
             }catch(err){
                 console.log("Error loading DB videos:", err);
             }
@@ -43,17 +41,14 @@ export default function YTAssembler () {
         return () => {mounted = false;};
     },[]);
 
-    const [initialLoadDone, setInitialLoadDone] = useState(false);
+    
     useEffect(()=>{
-        if(dbVideos.length === 0 || initialLoadDone) return;
-        fetchAllVideos(1).then(()=>{
-            //setPage(page + 1);
-            setInitialLoadDone(true);
-        });
-       
-    },[dbVideos,initialLoadDone,page]);
+        if(dbVideos.length === 0 ) return;
+        fetchAllVideos(1)
+    },[dbVideos,page]);
 
-    const [readyToMeasure, setReadyToMeasure] = useState(false);
+  
+
 
     const fetchAllVideos = useCallback(async (pageNum = 1) => {
         console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
@@ -86,11 +81,6 @@ export default function YTAssembler () {
                     return[...prev, ...unique];
                 });
 
-                if(pageNum === 2){
-                    setReadyToMeasure(true);
-                }
-
-               // setPage(pageNum);
                 console.log('Loaded page ', pageNum, 'items:', newFormPage.length);
 
             }catch(err){
@@ -111,15 +101,11 @@ export default function YTAssembler () {
         }
     };
 
-    //id всегда есть в базе , я не отображаю видео без id или вне базы 
     const keyExtractor = item => (item.id ? item.id.toString() : item.url);
-
 
    const savedIds = useRef(new Set());
    const saveVideoData = async (vidId,vidDuration) =>{
         if(!vidId  || vidId === 0) return
-        console.log(vidId);
-        console.log(vidDuration)
         try{
 
             if(!vidDuration){
@@ -147,8 +133,8 @@ export default function YTAssembler () {
            
             const data = await res.json();
             savedIds.add(vidId);
-            console.log(`✅ Duration saved for video ${vidId} : ${vidDuration}`)
-            console.log("Updated video: ", data.updatedVideo);
+            console.log(`⏱ Duration saved for video ${vidId} : ${vidDuration}`)
+            console.log("✅Updated video: ", data.updatedVideo);
                        
         }catch(err){
             console.error('❌ Error saving video: ', err);
@@ -156,58 +142,19 @@ export default function YTAssembler () {
         
    }
 
-   /*
-   useEffect(()=>{
-    const nextToMeasure = videos.find((v)=> !v.duration);
-    if(!nextToMeasure) return;
-
-    console.log("⏱ Measuring duration for:", nextToMeasure.name);
-
-    const VideoUrl = String(nextToMeasure.url)
-
-    const player = useVideoPlayer(VideoUrl, 
-        (player) => {
-            player.muted = true;
-            player.loop = false;
-            player.play();
-    });
-
-    const check = setInterval(()=>{
-        if(player?.duration && player.duration > 0){
-            const totalSec = Math.floor(player.duration);
-            const minutes = Math.floor(totalSec / 60);
-            const seconds = totalSec % 60;
-            const formatted = `${minutes}:${seconds.toString().padStart(2,"0")}`
-            saveVideoData(nextToMeasure.id, formatted);
-            setVideos((prev) =>
-                prev.map((video)=>
-                    video.id === nextToMeasure.id
-                        ? {...video, duration: formatted}
-                        : video
-                )
-            );
-            clearInterval(check);
-        }
-    },300);
-    return ()=> clearInterval(check);
-   },[videos])
-
-   */
-
 
     const renderItem = ({item}) => {
         if(!item.id) return null;
 
         if(!item.duration || !item.thumbnail) {
+            const placeholder = Array.from({length: 7}, (_,i)=>(
+                <YTLoading key={i} delay={i * 150}/>
+            ))
             return(
-                <View style={styles.placeholderContainer}>
-                    <Text style={styles.placeholderText}>
-                        {item.name} - loading....
-                    </Text>
-                    {/* Ебануть блок анимации тип 7 пустых блоков которые переливаються сверху вниз как загрузка*/}
-                </View>
+                <>{placeholder}</>
             );
         }
+        
         return(
             <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
                 <YTVidForm thumbnail={item.thumbnail} name={item.name} date={item.date} duration={item.duration} isItUnique={item.isitunique} id={item.id}/>
@@ -229,8 +176,7 @@ export default function YTAssembler () {
 
     return(
         <View style={{flex:1, }}>
-
-            {readyToMeasure && videos.find(v => !v.duration) && (
+            {videos.find(v => !v.duration) && (
                 <DurationFetcher
                     key={videos.find(v => !v.duration).id}
                     url={videos.find(v => !v.duration).url}
@@ -244,31 +190,7 @@ export default function YTAssembler () {
                         );
                     }}
                 />
-            )
-
-           /*
-             videos.map((vid)=>
-                !vid.duration ? (
-                    <DurationFetcher
-                        key={vid.id}
-                        url={vid.url}
-                        onDurationReady={(dur)=>{     
-                            saveVideoData(vid.id, dur)
-                            setVideos((prev)=> 
-                                prev.map((video)=> 
-                                video.id === vid.id ? {...video, duration: dur}: video
-                                )
-                            );
-                            //console.log(`Video ${vid.id} duration: ${dur}`);
-                        }}
-                    />
-                ): null
-            )
-
-           */
-            }
-
-
+            )}
             <FlatList
                 style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
