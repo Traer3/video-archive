@@ -9,19 +9,25 @@ const icons = {
     more : More,
 }
 
-export default ToolButton = ({buttonSetState, buttonState, iconName}) => {
+export default function ToolButton ({buttonSetState, buttonState, iconName})  {
     return(
         <Pressable
             onPress={()=> buttonSetState(!buttonState)}
             style={{
                 borderRadius: 2,
-                backgroundColor:'rgba(0,0,0,0.1)',
+                backgroundColor:'transparent'
+              // backgroundColor:'rgba(0,0,0,0.1)', // это не прозрачность , а затемнение 
             }}
         >
             {iconName && 
                 <Image
                     source={icons[iconName]}
-                    style={{width:20, height:20}}
+                    style={{
+                        width:40, 
+                        height:40,
+                        //borderColor:'green',
+                        //borderWidth:2
+                    }}
                     resizeMode="contain"
                 />
             }

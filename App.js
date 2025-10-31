@@ -18,6 +18,12 @@ export default function App() {
       <Background/>
      
       <View style={styles.baseTheme}>
+        <>
+          {showYT && <SwipeArea areaState={setShowYT}/>}
+        </>
+        <>
+          {showMenu && <Menu areaState={setShowMenu}/>}
+        </>
         <SidePanel>
             
             <CustomButton iconsName="TTLogo" buttonSetState={setShowTT} buttonState={showTT}/>
@@ -25,10 +31,7 @@ export default function App() {
             <CustomButton iconsName="YTLogo" buttonSetState={setShowYT} buttonState={showYT}/>
         </SidePanel>
 
-        <>
-          {showYT && <SwipeArea areaState={setShowYT}/>}
-          {showMenu && <Menu areaState={setShowMenu}/>}
-        </>
+        
         
         
       </View>
