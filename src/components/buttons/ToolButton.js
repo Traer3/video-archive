@@ -1,7 +1,8 @@
-import { Image, Pressable } from "react-native"
+import { Image, Pressable,ImageBackground, StyleSheet } from "react-native"
 import CheckButton from "./buttonIcons/check-button.png"
 import DeleteButton from "./buttonIcons/delete-button.png"
 import More from "./buttonIcons/more.png"
+
 
 const icons = {
     checkButton : CheckButton,
@@ -9,28 +10,45 @@ const icons = {
     more : More,
 }
 
-export default function ToolButton ({buttonSetState, buttonState, iconName})  {
+export default function ToolButton ({buttonFunction, iconName})  {
     return(
-        <Pressable
-            onPress={()=> buttonSetState(!buttonState)}
-            style={{
-                borderRadius: 2,
-                backgroundColor:'transparent'
-              // backgroundColor:'rgba(0,0,0,0.1)', // это не прозрачность , а затемнение 
-            }}
-        >
+        <>
+       
             {iconName && 
-                <Image
+                <ImageBackground
                     source={icons[iconName]}
-                    style={{
-                        width:40, 
-                        height:40,
-                        //borderColor:'green',
-                        //borderWidth:2
-                    }}
+                    style={styles.image}
                     resizeMode="contain"
-                />
+                >
+                     {buttonFunction && 
+                        <Pressable
+                            onPress={buttonFunction}
+                            style={styles.presArea}
+                        >
+                            
+                        </Pressable>
+                    }
+                </ImageBackground>
             }
-        </Pressable>
+        
+        </>
     )
 }
+const styles = StyleSheet.create({
+    image:{
+        width:40, 
+        height:40,
+        //borderColor:'green',
+        //borderWidth:2
+    },
+    presArea:{
+        borderRadius: 2,
+        width:40, 
+        height:40,
+        //borderColor:'red',
+        //borderWidth:2,
+        backgroundColor:'transparent'
+        //backgroundColor:'rgba(0,0,0,0.1)', // это не прозрачность , а затемнение 
+    }
+
+})

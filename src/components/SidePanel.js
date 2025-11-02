@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
 
     wrapper:{
         flex:1,
+        zIndex:0,
         //borderColor:'red',
         //borderWidth:2
     },
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
     conteiner:{
         flex:1,
 
-        //borderColor:'green',
+       // borderColor:'yellow',
         //borderWidth:2
     }
 })

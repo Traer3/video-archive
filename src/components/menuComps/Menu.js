@@ -9,11 +9,13 @@ export default function Menu ({areaState}) {
     const [logout, setLogout] = useState(false);
     
     const onLogout = () => {
+        alert('by by')
         setLogout(!logout);
     }
     const onAuthorize = () => {
+        alert('click more')
         console.log('click more')
-        setAuthorized(!authorized) // это будет функция для авторизации 
+        setAuthorized(!authorized)
     }
 
     const onAreaPress = () => {
@@ -21,33 +23,27 @@ export default function Menu ({areaState}) {
         areaState(false)
     }
 
-    `
-    <View style={styles.conteiner}> 
-                    <View style={styles.buttonPlacement}>
-                        
-                            {logout ? 
-                                (
-                                    <Pressable onPress={onLogout} style={{borderColor:'red',borderWidth:2}}>
-                                        <ToolButton iconName={'deleteButton'}/>
-                                    </Pressable>   
-                                )
-                                :
-                                authorized ? 
-                                    <ToolButton iconName={'checkButton'}/>
-                                    :
-                                    <Pressable onPress={onAuthorize} style={{borderColor:'green',borderWidth:2}}>
-                                        <ToolButton iconName={ 'more'}/>
-                                    </Pressable>
-                                    
-
-                            }
-                       
-                    </View>
-                </View>
-    `
 
     return(
         <View style={styles.wrapper}>
+            <View style={styles.conteiner}>
+                <View style={styles.buttonPlacement}>
+                    
+                    {authorized ? 
+                        (
+                            <ToolButton buttonFunction={onLogout} iconName={logout ? 'deleteButton' : 'checkButton'} />
+                        ): (
+                            <ToolButton buttonFunction={onAuthorize} iconName={'more'} />
+                        )}
+                                
+                                    
+                                    
+
+
+                    
+
+                </View>
+            </View>
                 
         </View>
     )
@@ -56,29 +52,31 @@ export default function Menu ({areaState}) {
 const styles = StyleSheet.create({
     wrapper:{ 
         flex:1,
-       
-        //borderWidth:0.1,
-        borderColor:'green',
-        borderWidth:2
-    },
-    conteiner: {
         position:'absolute',
         width: '100%',
+        height: '92%',
+        zIndex:1,
+        borderWidth:0.1,
+        //borderColor:'green',
+        //borderWidth:2
+    },
+    conteiner: {
+        width: '100%',
         height: '8%',
-        bottom:70,
-        //backgroundColor:'rgb(71, 103, 151)',
+        top:765,
+        backgroundColor:'rgb(71, 103, 151)',
         //backgroundColor:'rgb(255, 255, 0)',
-        borderColor:'yellow',
-        borderWidth:2
+        //borderColor:'yellow',
+        //borderWidth:2
     },
     buttonPlacement:{
         flex:1,
-        justifyContent:'center',
+        padding:10,
+        justifyContent:'space-between',
         alignItems:'center',
-        height:'100%',
-        width:'100%',
-        borderColor:'red',
-        borderWidth:2
+        
+        //borderColor:'red',
+        //borderWidth:2
     },
     outerArea:{
         width:'100%',
