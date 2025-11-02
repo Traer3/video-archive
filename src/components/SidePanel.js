@@ -39,22 +39,24 @@ export default function SidePanel({children}){
     }));
 
     return(
-        <GestureHandlerRootView>
-            <View style={{flex:1}}>
-                <GestureDetector gesture={panGesture}>
-                    <Animated.View 
-                        style={[styles.conteiner, animatedStyle]}>
+            <View style={styles.wrapper}>
+                    <View 
+                        style={styles.conteiner}>
                             <View style={styles.panel}>
                                 {children}
                             </View>
-                    </Animated.View>
-                </GestureDetector>
+                    </View>
             </View>
-        </GestureHandlerRootView>
     )
 }
 
 const styles = StyleSheet.create({
+
+    wrapper:{
+        flex:1,
+        //borderColor:'red',
+        //borderWidth:2
+    },
 
     panel:{
         flex:1,
@@ -76,6 +78,8 @@ const styles = StyleSheet.create({
     },
     conteiner:{
         flex:1,
-       
+
+        //borderColor:'green',
+        //borderWidth:2
     }
 })
