@@ -1,50 +1,82 @@
-import { View, StyleSheet, Pressable } from "react-native"
+import { View, StyleSheet, Pressable, Text } from "react-native"
 import ToolButton from "../buttons/ToolButton"
 import { useState } from "react"
 
 
 
 export default function Menu ({areaState}) {
-    const [authorized,setAuthorized] = useState(false); //будем передовать в компонент для авторизации
+    const [authorized,setAuthorized] = useState(true); //будем передовать в компонент для авторизации
     const [logout, setLogout] = useState(false);
+    const [question, setQuestion] = useState(false);
+    
     
     const onLogout = () => {
-        alert('by by')
+        
         setLogout(!logout);
+        setQuestion(true)
     }
     const onAuthorize = () => {
-        alert('click more')
-        console.log('click more')
         setAuthorized(!authorized)
     }
 
+    const onRethink = () => {
+        setQuestion(false);
+        setAuthorized(true)
+        setLogout(false)
+    }
+
+    const onExit = () => {
+        areaState(false)
+        setAuthorized(false)
+        setLogout(false)
+    }
+
     const onAreaPress = () => {
-        console.log("used")
+
         areaState(false)
     }
 
 
     return(
         <View style={styles.wrapper}>
-            <View style={styles.conteiner}>
-                <View style={styles.buttonPlacement}>
+            <Pressable onPress={onAreaPress} style={{borderColor:'green',borderWidth:2}}>
+                <View style={styles.conteiner}>
+                    <View style={styles.buttonPlacement}>
+                        
                     
-                    {authorized ? 
-                        (
-                            <ToolButton buttonFunction={onLogout} iconName={logout ? 'deleteButton' : 'checkButton'} />
-                        ): (
-                            <ToolButton buttonFunction={onAuthorize} iconName={'more'} />
-                        )}
+                        {question ?
+                            <View style={{alignItems:'center',flexDirection:'column'}}>
+                                <View style={styles.containerAnser}>
+                                    <Text style={{fontSize:18, fontWeight:'600'}}>
+                                        do you want to exit ? 
+                                    </Text>
+                                </View>
+                                <View style={{flexDirection:'row', gap:30, padding:2}}>
+                                    <ToolButton buttonFunction={onExit} iconName={'checkButton'} CHeight={30} CWidth={30}/>
+                                    <ToolButton buttonFunction={onRethink} iconName={'deleteButton'} CHeight={30} CWidth={30}/>
+                                </View>
                                 
+
+                            </View>
+                            :
+                            <>{authorized ? 
+                                (
+                                    <ToolButton buttonFunction={onLogout} iconName={logout ? 'deleteButton' : 'checkButton'} />
                                     
+                                ):(
+                                    <ToolButton buttonFunction={onAuthorize} iconName={'more'} />
+                            )}</>
+                        }
                                     
+                                        
+                                        
 
 
-                    
+                        
 
+                    </View>
                 </View>
-            </View>
-                
+            </Pressable>
         </View>
     )
 }
@@ -68,6 +100,12 @@ const styles = StyleSheet.create({
         //backgroundColor:'rgb(255, 255, 0)',
         //borderColor:'yellow',
         //borderWidth:2
+    },
+    containerAnser:{
+        //backgroundColor:'rgb(71, 103, 151)',
+        //borderColor:'rgb(43,75,123)',
+        //borderRadius:2,
+        //borderWidth:1,
     },
     buttonPlacement:{
         flex:1,

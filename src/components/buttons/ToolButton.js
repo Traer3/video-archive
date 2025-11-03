@@ -1,29 +1,44 @@
-import { Image, Pressable,ImageBackground, StyleSheet } from "react-native"
+import {Pressable,ImageBackground, StyleSheet } from "react-native"
 import CheckButton from "./buttonIcons/check-button.png"
 import DeleteButton from "./buttonIcons/delete-button.png"
 import More from "./buttonIcons/more.png"
+import Def from "../../meme/arona.gif"
 
 
 const icons = {
     checkButton : CheckButton,
     deleteButton: DeleteButton,
     more : More,
+    def: Def,
 }
 
-export default function ToolButton ({buttonFunction, iconName})  {
+export default function ToolButton ({buttonFunction, iconName,CHeight, CWidth})  {
+
+    const iconsSource = icons[iconName];
+    if(!iconsSource) {
+        console.warn(`Unknow icon name: ${iconName}`)
+        return null;
+    }
+
     return(
         <>
        
             {iconName && 
                 <ImageBackground
-                    source={icons[iconName]}
-                    style={styles.image}
+                    source={icons[iconName] || icons.def}
+                    style={[styles.image, {
+                        width : CWidth ? CWidth : 40,
+                        height: CHeight ? CHeight : 40,
+                    }]}
                     resizeMode="contain"
                 >
                      {buttonFunction && 
                         <Pressable
                             onPress={buttonFunction}
-                            style={styles.presArea}
+                            style={[styles.presArea, {
+                                width : CWidth ? CWidth : 40,
+                                height: CHeight ? CHeight : 40,
+                            }]}
                         >
                             
                         </Pressable>
@@ -36,15 +51,14 @@ export default function ToolButton ({buttonFunction, iconName})  {
 }
 const styles = StyleSheet.create({
     image:{
-        width:40, 
-        height:40,
+        
+        
         //borderColor:'green',
         //borderWidth:2
     },
     presArea:{
         borderRadius: 2,
-        width:40, 
-        height:40,
+        
         //borderColor:'red',
         //borderWidth:2,
         backgroundColor:'transparent'
