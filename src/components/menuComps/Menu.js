@@ -1,13 +1,15 @@
 import { View, StyleSheet, Pressable, Text } from "react-native"
 import ToolButton from "../buttons/ToolButton"
 import { useState } from "react"
+import GAuthenticator from "../../../database/Autnification/GAuthenticator";
 
 
 
 export default function Menu ({areaState}) {
-    const [authorized,setAuthorized] = useState(true); //будем передовать в компонент для авторизации
+    const [authorized,setAuthorized] = useState(false); //будем передовать в компонент для авторизации
     const [logout, setLogout] = useState(false);
     const [question, setQuestion] = useState(false);
+    const [autnification,setAutnification] = useState(false);
     
     
     const onLogout = () => {
@@ -17,6 +19,7 @@ export default function Menu ({areaState}) {
     }
     const onAuthorize = () => {
         setAuthorized(!authorized)
+        setAutnification(true);
     }
 
     const onRethink = () => {
@@ -39,7 +42,16 @@ export default function Menu ({areaState}) {
 
     return(
         <View style={styles.wrapper}>
-            <Pressable onPress={onAreaPress} style={{borderColor:'green',borderWidth:2}}>
+            <Pressable 
+                onPress={onAreaPress} 
+                style={{
+                    //borderColor:'green',
+                    //borderWidth:2,
+                    flex:1,
+                    position:'absolute',
+                    width: '100%',
+                    height: '92%',
+                    }}>
                 <View style={styles.conteiner}>
                     <View style={styles.buttonPlacement}>
                         
@@ -68,7 +80,7 @@ export default function Menu ({areaState}) {
                             )}</>
                         }
                                     
-                                        
+                        {autnification && <GAuthenticator/>}               
                                         
 
 
@@ -95,7 +107,7 @@ const styles = StyleSheet.create({
     conteiner: {
         width: '100%',
         height: '8%',
-        top:765,
+        top:771,
         backgroundColor:'rgb(71, 103, 151)',
         //backgroundColor:'rgb(255, 255, 0)',
         //borderColor:'yellow',
@@ -109,7 +121,7 @@ const styles = StyleSheet.create({
     },
     buttonPlacement:{
         flex:1,
-        padding:10,
+        padding:2,
         justifyContent:'space-between',
         alignItems:'center',
         
