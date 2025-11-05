@@ -19,6 +19,7 @@ assets/videos/*
 
 /database/LinksGenerator/*
 !database/LinksGenerator/YTGetLinks.js
+!database/LinksGenerator/Authorize.js
 
 # Native
 .kotlin/
