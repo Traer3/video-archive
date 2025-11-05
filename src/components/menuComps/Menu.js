@@ -80,7 +80,9 @@ export default function Menu ({areaState}) {
                             )}</>
                         }
                                     
-                        {autnification && <GAuthenticator/>}               
+                        {
+                        //autnification && <GAuthenticator/>
+                        }               
                                         
 
 
