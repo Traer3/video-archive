@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline')
 const {google} = require('googleapis');
 const {UserRefreshClient} = require('google-auth-library');
 const { default: open } = require('open');
@@ -74,13 +73,8 @@ async function authorize() {
             scope: SCOPES,
         });
 
-        //Flag 1
-        //console.log(`🔑 Log in using google:\n ${authUrl}`);
-
         await open(authUrl)
         //await open(authUrl, {app:{name:'chrome'}}).catch(()=>  open(authUrl));
-
-        //Flag 2
 
         const code = await new Promise((resolve, reject)=>{
             const server = http.createServer(async (req,res)=>{
@@ -89,24 +83,10 @@ async function authorize() {
                     const code = url.searchParams.get('code');
 
                     res.writeHead(200,{'Content-Type': 'text/html'});
-                    res.end(`
-                        <html>
-                            <head><title>Authorization Complete</title></head>
-                            <body style="font-family:sans-serif; text-align:center; padding-top:50px;">
-                            <h2>✅ Authorization successful!</h2>
-                            <p>You can close this window now.</p>
-                            <script>
-                                window.close();
-                                setTimeout(() => {
-                                document.body.innerHTML += '<p>(If this tab did not close automatically, please close it manually.)</p>';
-                                }, 1000);
-                            </script>
-                            </body>
-                        </html>
-                        `);
+                    res.end('<h2>Authorization successful!</h2>');
 
-                    server.close();
-                    resolve(code);
+                    server.close(); //потребуется минута перед закрытием , мне лень исправлять ) 
+                    resolve(code)
                 }else{
                     res.writeHead(404);
                     res.end();
