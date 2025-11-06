@@ -2,7 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline')
 const {google} = require('googleapis');
-const {UserRefreshClient} = require('google-auth-library')
+const {UserRefreshClient} = require('google-auth-library');
+const { default: open } = require('open');
+
 
 const SCOPES = ['https://www.googleapis.com/auth/youtube.readonly'];
 const TOKEN_PATH = path.join(__dirname, 'token.json');
@@ -71,13 +73,19 @@ async function authorize() {
         });
 
         //Flag 1
-        console.log(`🔑 Log in using google:\n ${authUrl}`);
+        //console.log(`🔑 Log in using google:\n ${authUrl}`);
+
+        await open(authUrl)
+        //await open(authUrl, {app:{name:'chrome'}}).catch(()=>  open(authUrl));
 
         //Flag 2
+
         const readL = readline.createInterface({
             input: process.stdin,
             output: process.stdout,
         });
+
+
         const code = await new Promise((resolve) => {
             readL.question('Enter the code from that page here: ', (answer)=>{
                 readL.close();
@@ -88,6 +96,8 @@ async function authorize() {
             console.error('❌ No code =(');
             process.exit(1);
         }
+
+        
         const {tokens} = await oAuth2Client.getToken(code);
         oAuth2Client.setCredentials(tokens);
     

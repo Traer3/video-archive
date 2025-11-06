@@ -9,7 +9,7 @@ const getVids = async () => {
         const data = await responce.json();
 
         videoReader(data)
-        newNameChecker() 
+        //newNameChecker() 
     }catch(err){
         console.log("DB error: ", err)
     }
