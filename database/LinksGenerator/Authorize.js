@@ -4,6 +4,7 @@ const readline = require('readline')
 const {google} = require('googleapis');
 const {UserRefreshClient} = require('google-auth-library');
 const { default: open } = require('open');
+const http = require('http');
 
 
 const SCOPES = ['https://www.googleapis.com/auth/youtube.readonly'];
@@ -63,9 +64,10 @@ async function authorize() {
         const content = fs.readFileSync(CREDENTIALS_PATH);
         const credentials = JSON.parse(content);
         const {client_secret, client_id, redirect_uris} = credentials.installed;
-    
+        
+        const redirectUri = redirect_uris[0];
         const oAuth2Client = new google.auth.OAuth2(
-            client_id, client_secret, redirect_uris[0]
+            client_id, client_secret, redirectUri
         );
         const authUrl = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
@@ -80,24 +82,41 @@ async function authorize() {
 
         //Flag 2
 
-        const readL = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-        });
+        const code = await new Promise((resolve, reject)=>{
+            const server = http.createServer(async (req,res)=>{
+                if(req.url.startsWith('/?code=')){
+                    const url = new URL(req.url, `http://localhost:8080`);
+                    const code = url.searchParams.get('code');
 
+                    res.writeHead(200,{'Content-Type': 'text/html'});
+                    res.end(`
+                        <html>
+                            <head><title>Authorization Complete</title></head>
+                            <body style="font-family:sans-serif; text-align:center; padding-top:50px;">
+                            <h2>✅ Authorization successful!</h2>
+                            <p>You can close this window now.</p>
+                            <script>
+                                window.close();
+                                setTimeout(() => {
+                                document.body.innerHTML += '<p>(If this tab did not close automatically, please close it manually.)</p>';
+                                }, 1000);
+                            </script>
+                            </body>
+                        </html>
+                        `);
 
-        const code = await new Promise((resolve) => {
-            readL.question('Enter the code from that page here: ', (answer)=>{
-                readL.close();
-                resolve(answer.trim());
+                    server.close();
+                    resolve(code);
+                }else{
+                    res.writeHead(404);
+                    res.end();
+                }
             });
+            server.listen(8080, ()=> console.log('Listening on http://localhost:8080/ for Google OAuth...'));
         });
-        if(!code){
-            console.error('❌ No code =(');
-            process.exit(1);
-        }
 
-        
+        console.log(`Received code: ${code}`);
+
         const {tokens} = await oAuth2Client.getToken(code);
         oAuth2Client.setCredentials(tokens);
     
