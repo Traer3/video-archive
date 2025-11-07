@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const {google} = require('googleapis');
 const {UserRefreshClient} = require('google-auth-library');
-const { default: open } = require('open');
+//const { default: open } = require('open');
 const http = require('http');
 
 
@@ -73,7 +73,8 @@ async function authorize() {
             scope: SCOPES,
         });
 
-        await open(authUrl)
+        
+        //await open(authUrl)
         //await open(authUrl, {app:{name:'chrome'}}).catch(()=>  open(authUrl));
 
         const code = await new Promise((resolve, reject)=>{
@@ -92,17 +93,19 @@ async function authorize() {
                     res.end();
                 }
             });
-            server.listen(8080, ()=> console.log('Listening on http://localhost:8080/ for Google OAuth...'));
+            server.listen(8080, ()=> {
+                //console.log('Listening on http://localhost:8080/ for Google OAuth...')
+            });
         });
 
-        console.log(`Received code: ${code}`);
+        //console.log(`Received code: ${code}`);
 
         const {tokens} = await oAuth2Client.getToken(code);
         oAuth2Client.setCredentials(tokens);
     
         await saveCredentials(oAuth2Client);
     
-        return oAuth2Client;
+        return authUrl;
     })();
     return authorizePromise;
 }

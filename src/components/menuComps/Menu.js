@@ -1,6 +1,6 @@
 import { View, StyleSheet, Pressable, Text } from "react-native"
 import ToolButton from "../buttons/ToolButton"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import GAuthenticator from "../../../database/Autnification/GAuthenticator";
 
 
@@ -10,6 +10,19 @@ export default function Menu ({areaState}) {
     const [logout, setLogout] = useState(false);
     const [question, setQuestion] = useState(false);
     const [autnification,setAutnification] = useState(false);
+
+    useEffect(()=>{
+        const getServer = async () => {
+            try{
+                const responce = await fetch("http://192.168.0.8:3004/authorize");
+                const text = await responce.text();
+                console.log(text);
+            }catch(err){
+                console.log("Server error:", err)
+            }
+        }
+        getServer();
+    },[])
     
     
     const onLogout = () => {
