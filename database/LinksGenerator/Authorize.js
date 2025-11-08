@@ -73,7 +73,7 @@ async function authorize() {
             scope: SCOPES,
         });
 
-        
+        console.log(authUrl)
         //await open(authUrl)
         //await open(authUrl, {app:{name:'chrome'}}).catch(()=>  open(authUrl));
 
