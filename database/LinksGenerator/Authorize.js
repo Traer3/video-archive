@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline')
 const {google} = require('googleapis');
 const {UserRefreshClient} = require('google-auth-library');
 //const { default: open } = require('open');
@@ -12,6 +13,7 @@ const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
 
 let authorizePromise = null;
 
+console.log("WE IN authorize");
 async function loadCredentials() {
     try{
         const content = fs.readFileSync(TOKEN_PATH, 'utf-8');
@@ -49,6 +51,7 @@ async function saveCredentials(client) {
 }
 
 async function authorize() {
+    console.log("WE IN authorize 2");
     if(authorizePromise) return authorizePromise;
     authorizePromise = (async ()=>{
         let client = await loadCredentials()
@@ -73,7 +76,29 @@ async function authorize() {
             scope: SCOPES,
         });
 
-        console.log(authUrl)
+        //FLAG 1
+        console.log(`Go to this URL ${authUrl}`);
+
+        const readL = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+        const code = await new Promise((resolve)=>{
+            readL.question('Enter code from that page here: ',(answer)=>{
+                readL.close();
+
+                resolve(answer.trim());
+            });
+        });
+        if(!code){
+            console.log('❌ no code ');
+            process.exit(1);
+        }
+
+
+
+
+/* ОПЕЧАТАН пока нужно затестить передачу данных юзеру во время активной авторизации 
         //await open(authUrl)
         //await open(authUrl, {app:{name:'chrome'}}).catch(()=>  open(authUrl));
 
@@ -99,15 +124,34 @@ async function authorize() {
         });
 
         //console.log(`Received code: ${code}`);
+*/
 
         const {tokens} = await oAuth2Client.getToken(code);
         oAuth2Client.setCredentials(tokens);
     
         await saveCredentials(oAuth2Client);
     
-        return authUrl;
+        return oAuth2Client;
     })();
     return authorizePromise;
 }
 
+
+
 module.exports = {authorize}
+
+if(require.main === module){
+    const arg = process.argv[2];
+
+    if(arg === 'authorize'){
+        authorize().then(()=>{
+            console.log("✅Auth test start");
+            process.exit(0);
+        }).catch(err=>{
+            console.error("❌ Error during starting Auth", err);
+            process.exit(1);
+        });
+    }else{
+        console.log("ℹ️ No valid command provided. Try: \n node Authorize.js authorize");
+    }
+}

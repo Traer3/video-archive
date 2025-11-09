@@ -1,8 +1,7 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const {exec} = require("child_process");
-
+const {spawn} = require("child_process");
 const app = express();
 //const VIDEO_DIR = "/home/dbvidsserver/VideoArchive/videos";
 //const THUMBNAILS_DIR = "/home/dbvidsserver/VideoArchive/thumbnails";
@@ -12,35 +11,32 @@ const AUTHNIFICATION = path.join(__dirname,"LinksGenerator","Authorize.js")
 
 app.use(express.json());
 
-function runComand(comand){
+function runComand(comand, args=[]){
     return new Promise((resolve, reject)=>{
-        exec(comand,(error, stdout, stderr)=>{
-            if(error){
-                reject(error);
-            }else{
-                resolve(stdout || stderr);
-            }
-        });
-    });
-}
+        const proc = spawn(comand, args, {shell: true});
 
-async function Authentication(comand) {
-    try{
-        const output = await runComand(comand);
-        console.log("Comand executed")
-        return output;
-    }catch(err){
-        console.log("❌ error while processing comand")
-        throw err;
-    }
+        proc.stdout.on('data',data => {
+            console.log(`[stdout] ${data}`);
+        });
+
+        proc.stderr.on('data', data=>{
+            console.error(`[stderr] ${data}`);
+        });
+
+        proc.on('close', code =>{
+            console.log(`Process exited with code ${code}`);
+            resolve(code);
+        })
+
+        proc.on('error', reject);
+    });
 }
 
 
 app.get("/authorize", async (req,res)=>{
-    const comand1 = `node "${AUTHNIFICATION}"`
     try{
-        const output = await Authentication(comand1);
-        res.status(200).send(`✅ Authorization script executed\n${output}`);
+        await runComand('node', [AUTHNIFICATION, 'authorize']);
+        res.send(`✅ Authorization script executed`);
     }catch(err){
         res.status(500).send(`❌ Error executing script: ${err.message}`)
     }
