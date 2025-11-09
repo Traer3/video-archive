@@ -14,6 +14,8 @@ const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
 let authorizePromise = null;
 
 console.log("WE IN authorize");
+const [,, command, maybeCode] = process.argv;
+
 async function loadCredentials() {
     try{
         const content = fs.readFileSync(TOKEN_PATH, 'utf-8');
@@ -50,6 +52,101 @@ async function saveCredentials(client) {
     fs.writeFileSync(TOKEN_PATH, payload);
 }
 
+async function getAuthUrl() {
+    const content = fs.readFileSync(CREDENTIALS_PATH);
+    const credentials = JSON.parse(content);
+    const {client_secret, client_id, redirect_uris} = credentials.installed;
+        
+    const redirectUri = redirect_uris[0];
+
+    const oAuth2Client = new google.auth.OAuth2(
+            client_id, client_secret, redirectUri
+    );
+
+    const authUrl = oAuth2Client.generateAuthUrl({
+            access_type: 'offline',
+            scope: SCOPES,
+    });
+    console.log(`Go to this URL ${authUrl}`);
+    return authUrl;
+};
+
+async function finishAuth(code) {
+    const content = fs.readFileSync(CREDENTIALS_PATH);
+    const credentials = JSON.parse(content);
+    const {client_secret, client_id, redirect_uris} = credentials.installed;
+        
+    const redirectUri = redirect_uris[0];
+
+    const oAuth2Client = new google.auth.OAuth2(
+            client_id, client_secret, redirectUri
+    );
+
+    try{
+        const {tokens} = await oAuth2Client.getToken(code);
+        oAuth2Client.setCredentials(tokens);
+        
+        await saveCredentials(oAuth2Client);
+        console.log('✅ Authorization completed, token saved!')
+
+        return oAuth2Client;
+    }catch(err){
+        console.error('❌ Error exchanging code for token:', err.message);
+        process.exit(1);
+    }
+}
+
+async function authorizeConsole() {
+    console.log("📥 Starting full auth mode...");
+
+    const existing = await loadCredentials();
+    if(existing){
+        console.log('✅ Existing token works.');
+        return existing;
+    }
+
+    const authUrl = await getAuthUrl();
+    console.log(`\nPlease visit: ${authUrl}`);
+    console.log('Enter code form that page below:\n');
+
+    const readL = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    const code = await new Promise((resolve)=>{
+        readL.question('Code: ',(answer)=>{
+            readL.close();
+            resolve(answer.trim());
+        });
+    });
+
+    await finishAuth(code);
+}    
+
+
+if(require.main === module){
+    (async ()=>{
+        if(command === 'getUrl'){
+            await getAuthUrl();
+        }else if(command === 'finish'){
+            if(!maybeCode){
+                console.error('❌ No code provided for finish');
+                process.exit(1);
+            }
+            await finishAuth(maybeCode);
+        }else if(command === 'authorize'){
+            await authorizeConsole();
+        }else{
+            console.log('ℹ️ No valid command provided.\nTry one of:');
+            console.log('   node Authorize.js getUrl');
+            console.log('   node Authorize.js finish <code>');
+            console.log('   node Authorize.js authorize');
+        }
+    })();
+}
+
+
 async function authorize() {
     console.log("WE IN authorize 2");
     if(authorizePromise) return authorizePromise;
@@ -83,10 +180,10 @@ async function authorize() {
             input: process.stdin,
             output: process.stdout,
         });
+        
         const code = await new Promise((resolve)=>{
             readL.question('Enter code from that page here: ',(answer)=>{
                 readL.close();
-
                 resolve(answer.trim());
             });
         });
@@ -137,9 +234,12 @@ async function authorize() {
 }
 
 
+//пока проверяем через Express server
+//module.exports = {authorize}
 
-module.exports = {authorize}
 
+ 
+/* старая модель команд
 if(require.main === module){
     const arg = process.argv[2];
 
@@ -155,3 +255,4 @@ if(require.main === module){
         console.log("ℹ️ No valid command provided. Try: \n node Authorize.js authorize");
     }
 }
+*/

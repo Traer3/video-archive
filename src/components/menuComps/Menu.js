@@ -11,19 +11,33 @@ export default function Menu ({areaState}) {
     const [question, setQuestion] = useState(false);
     const [autnification,setAutnification] = useState(false);
 
+    const [authUrl, setAuthUrl] = useState("");
+    const [code, setCode] =  useState("");
+
     useEffect(()=>{
-        const getServer = async () => {
+        const getAuthUrl = async () => {
             try{
                 const responce = await fetch("http://192.168.0.8:3004/authorize");
-                const text = await responce.text();
-                console.log(text);
+                const data = await responce.json();
+                setAuthUrl(data.url);
             }catch(err){
                 console.log("Server error:", err)
             }
         }
-        getServer();
+        getAuthUrl();
     },[])
+
+    const sendCode = async () => {
+        const res =  await fetch("http://192.168.0.8:3004/authorize/callback",{
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({code})
+        });
+        const data = await res.json();
+        console.log(data);
+    };
     
+    console.log(authUrl)
     
     const onLogout = () => {
         

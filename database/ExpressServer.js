@@ -35,12 +35,48 @@ function runComand(comand, args=[]){
 
 app.get("/authorize", async (req,res)=>{
     try{
-        await runComand('node', [AUTHNIFICATION, 'authorize']);
-        res.send(`✅ Authorization script executed`);
+        //await runComand('node', [AUTHNIFICATION, 'authorize']);
+        //res.send(`✅ Authorization script executed`);
+        const proc = spawn('node',[AUTHNIFICATION, 'getUrl'],{shell: true});
+
+        let output = '';
+        proc.stdout.on('data',data=>{
+            output += data.toString();
+        });
+
+        proc.on('close',code => {
+            const urlMatch = output.match(/https?:\/\/[^\s]+/);
+            if(urlMatch){
+                res.json({url: urlMatch[0]});
+            }else{
+                res.status(500).json({error: 'URL not received', raw: output});
+            }
+        });
+
+        proc.on('error',err=>{
+            res.status(500).json({error: err.message});
+        });
     }catch(err){
         res.status(500).send(`❌ Error executing script: ${err.message}`)
     }
-})
+});
+
+app.get("/authorize/callback",async(req,res)=>{
+    const {code} = req.body;
+    if(!code) return res.status(400).json({error: 'Code is required'});
+
+    const proc = spawn('node', [AUTHNIFICATION, 'finish',code],{shell:true});
+    let output = '';
+
+    proc.stdout.on('data',data => output += data.toString());
+    proc.stderr.on('data',data => console.error(data.toString()));
+
+    proc.on('close',code => {
+        res.json({message: 'Authorization completed', output});
+    });
+});
+
+
 
 app.get("/videos",(req, res)=>{
     const page = parseInt(req.query.page) || 1;
