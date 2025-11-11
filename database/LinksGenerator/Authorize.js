@@ -3,7 +3,6 @@ const path = require('path');
 const readline = require('readline')
 const {google} = require('googleapis');
 const {UserRefreshClient} = require('google-auth-library');
-//const { default: open } = require('open');
 const http = require('http');
 
 

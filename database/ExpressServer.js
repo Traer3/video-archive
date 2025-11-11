@@ -63,6 +63,7 @@ app.get("/authorize", async (req,res)=>{
 
 app.get("/authorize/callback",async(req,res)=>{
     const {code} = req.body;
+    //console.log(code)
     if(!code) return res.status(400).json({error: 'Code is required'});
 
     const proc = spawn('node', [AUTHNIFICATION, 'finish',code],{shell:true});

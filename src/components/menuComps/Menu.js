@@ -2,6 +2,9 @@ import { View, StyleSheet, Pressable, Text } from "react-native"
 import ToolButton from "../buttons/ToolButton"
 import { useEffect, useState } from "react"
 import GAuthenticator from "../../../database/Autnification/GAuthenticator";
+import { Linking } from "react-native";
+
+
 
 
 
@@ -11,9 +14,10 @@ export default function Menu ({areaState}) {
     const [question, setQuestion] = useState(false);
     const [autnification,setAutnification] = useState(false);
 
-    const [authUrl, setAuthUrl] = useState("");
+    //const [authUrl, setAuthUrl] = useState("");
     const [code, setCode] =  useState("");
 
+    /*
     useEffect(()=>{
         const getAuthUrl = async () => {
             try{
@@ -24,7 +28,51 @@ export default function Menu ({areaState}) {
                 console.log("Server error:", err)
             }
         }
-        getAuthUrl();
+       //getAuthUrl();
+    },[])
+    */
+
+    const onAuthorize =  async () => {
+        setAuthorized(!authorized)
+
+        try{
+            const responce = await fetch("http://192.168.0.8:3004/authorize");
+            const data = await responce.json();
+            if(data.url){
+                Autnification(data.url)
+            }
+        }catch(err){
+            console.log("Cant get url from server: ", err)
+        }
+        
+        //setAutnification(true);
+        
+    }
+
+    
+    useEffect(()=>{
+        const hadlerUrl = (event) =>{
+            const url = event.url;
+            console.log("Received redirect: ",url);
+
+            const params = new URLSearchParams(url.split('?')[1]);
+            const authCode = params.get('code');
+
+            if(authCode){
+                console.log("Google auth code:",authCode);
+                setCode(authCode);
+                //sendCode(authCode)
+            }
+
+        };
+
+        const subscription = Linking.addEventListener("url",hadlerUrl);
+
+        Linking.getInitialURL().then((url)=>{
+            if(url) hadlerUrl({url});
+        });
+
+        return () => subscription.remove();
     },[])
 
     const sendCode = async () => {
@@ -37,17 +85,13 @@ export default function Menu ({areaState}) {
         console.log(data);
     };
     
-    console.log(authUrl)
     
     const onLogout = () => {
         
         setLogout(!logout);
         setQuestion(true)
     }
-    const onAuthorize = () => {
-        setAuthorized(!authorized)
-        setAutnification(true);
-    }
+    
 
     const onRethink = () => {
         setQuestion(false);
@@ -66,7 +110,15 @@ export default function Menu ({areaState}) {
         areaState(false)
     }
 
+    const  Autnification = async (link) => {
+       try{
+         await Linking.openURL(link);
+       }catch(err){
+            console.log("❌ Error opening links", err);
+       }
+    };
 
+    
     return(
         <View style={styles.wrapper}>
             <Pressable 
