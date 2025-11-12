@@ -17,20 +17,6 @@ export default function Menu ({areaState}) {
     //const [authUrl, setAuthUrl] = useState("");
     const [code, setCode] =  useState("");
 
-    /*
-    useEffect(()=>{
-        const getAuthUrl = async () => {
-            try{
-                const responce = await fetch("http://192.168.0.8:3004/authorize");
-                const data = await responce.json();
-                setAuthUrl(data.url);
-            }catch(err){
-                console.log("Server error:", err)
-            }
-        }
-       //getAuthUrl();
-    },[])
-    */
 
     const onAuthorize =  async () => {
         setAuthorized(!authorized)
