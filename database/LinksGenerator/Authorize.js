@@ -54,7 +54,7 @@ async function saveCredentials(client) {
 async function getAuthUrl() {
     const content = fs.readFileSync(CREDENTIALS_PATH);
     const credentials = JSON.parse(content);
-    const {client_secret, client_id, redirect_uris} = credentials.installed;
+    const {client_secret, client_id, redirect_uris} = credentials.web;
         
     const redirectUri = redirect_uris[0];
 
@@ -73,7 +73,7 @@ async function getAuthUrl() {
 async function finishAuth(code) {
     const content = fs.readFileSync(CREDENTIALS_PATH);
     const credentials = JSON.parse(content);
-    const {client_secret, client_id, redirect_uris} = credentials.installed;
+    const {client_secret, client_id, redirect_uris} = credentials.web;
         
     const redirectUri = redirect_uris[0];
 
@@ -161,7 +161,7 @@ async function authorize() {
         }
         const content = fs.readFileSync(CREDENTIALS_PATH);
         const credentials = JSON.parse(content);
-        const {client_secret, client_id, redirect_uris} = credentials.installed;
+        const {client_secret, client_id, redirect_uris} = credentials.web;
         
         const redirectUri = redirect_uris[0];
         const oAuth2Client = new google.auth.OAuth2(
