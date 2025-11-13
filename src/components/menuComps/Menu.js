@@ -1,4 +1,4 @@
-import { View, StyleSheet, Pressable, Text } from "react-native"
+import { View, StyleSheet, Pressable, Text, TextInput } from "react-native"
 import ToolButton from "../buttons/ToolButton"
 import { useEffect, useState } from "react"
 import GAuthenticator from "../../../database/Autnification/GAuthenticator";
@@ -13,6 +13,7 @@ export default function Menu ({areaState}) {
     const [logout, setLogout] = useState(false);
     const [question, setQuestion] = useState(false);
     const [autnification,setAutnification] = useState(false);
+    const [answer, setAnswer] = useState(true);
 
     //const [authUrl, setAuthUrl] = useState("");
     const [code, setCode] =  useState("");
@@ -34,32 +35,6 @@ export default function Menu ({areaState}) {
         //setAutnification(true);
         
     }
-
-    
-    useEffect(()=>{
-        const hadlerUrl = (event) =>{
-            const url = event.url;
-            console.log("Received redirect: ",url);
-
-            const params = new URLSearchParams(url.split('?')[1]);
-            const authCode = params.get('code');
-
-            if(authCode){
-                console.log("Google auth code:",authCode);
-                setCode(authCode);
-                //sendCode(authCode)
-            }
-
-        };
-
-        const subscription = Linking.addEventListener("url",hadlerUrl);
-
-        Linking.getInitialURL().then((url)=>{
-            if(url) hadlerUrl({url});
-        });
-
-        return () => subscription.remove();
-    },[])
 
     const sendCode = async () => {
         const res =  await fetch("http://192.168.0.8:3004/authorize/callback",{
@@ -117,8 +92,25 @@ export default function Menu ({areaState}) {
                     width: '100%',
                     height: '92%',
                     }}>
+                        {answer && 
+                            <View style={styles.answer}>
+                                <Text style={{fontSize:18, fontWeight:'600', }}>
+                                    Enter url here
+                                </Text>
+                                <TextInput 
+                                    style={{width:'90%', height:'40%', backgroundColor:'rgba(0,0,0,0.3)', borderColor:'rgb(43,75,123)', borderWidth:2, borderRadius: 2, }}
+                                    
+                                    >
+
+                                </TextInput>
+                            </View>
+                        }
                 <View style={styles.conteiner}>
+                    
+
                     <View style={styles.buttonPlacement}>
+
+                        
                         
                     
                         {question ?
@@ -168,8 +160,8 @@ const styles = StyleSheet.create({
         height: '92%',
         zIndex:1,
         borderWidth:0.1,
-        //borderColor:'green',
-        //borderWidth:2
+        borderColor:'green',
+        borderWidth:2
     },
     conteiner: {
         width: '100%',
@@ -201,5 +193,17 @@ const styles = StyleSheet.create({
         backgroundColor:'rgba(0,0,0,0.5)', // затемнение , а не прозрачность 
        // borderColor:'red',
        // borderWidth:2
+    },
+    answer:{
+        position:'absolute',
+        width: '80%',
+        height: '15%',
+        top:450,
+        marginLeft:"10%",
+        backgroundColor:'rgb(71, 103, 151)',
+        borderColor:'rgb(43,75,123)',
+        borderWidth:2,
+        borderRadius: 2,
+        alignItems:'center',
     }
 })
