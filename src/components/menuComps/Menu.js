@@ -13,14 +13,16 @@ export default function Menu ({areaState}) {
     const [logout, setLogout] = useState(false);
     const [question, setQuestion] = useState(false);
     const [autnification,setAutnification] = useState(false);
-    const [answer, setAnswer] = useState(true);
+    const [answer, setAnswer] = useState(false);
+    const [userInput, setUserInput] = useState("")
 
     //const [authUrl, setAuthUrl] = useState("");
     const [code, setCode] =  useState("");
 
 
     const onAuthorize =  async () => {
-        setAuthorized(!authorized)
+        setAuthorized(!authorized);
+        setAnswer(true)
 
         try{
             const responce = await fetch("http://192.168.0.8:3004/authorize");
@@ -36,11 +38,11 @@ export default function Menu ({areaState}) {
         
     }
 
-    const sendCode = async () => {
+    const sendCode = async (realCode) => {
         const res =  await fetch("http://192.168.0.8:3004/authorize/callback",{
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({code})
+            body: JSON.stringify({realCode})
         });
         const data = await res.json();
         console.log(data);
@@ -71,6 +73,35 @@ export default function Menu ({areaState}) {
         areaState(false)
     }
 
+    const userAnswer = () => {
+        console.log(userInput);
+        const url = userInput.trim();
+
+        if(!url.startsWith("http://localhost:8080/?")){
+            console.log("Invalid URL format");
+            return;
+        }
+
+        try{
+            const parsed = new URL(url);
+            const codeParam = parsed.searchParams.get("code");
+
+            if(!codeParam){
+                console.log("Code parameter not found");
+                return;
+            }
+
+            setCode(codeParam);
+
+            console.log("Extracted code",codeParam);
+
+            sendCode(codeParam);
+        }catch(err){
+            console.log("Error parsing URL",err)
+        }
+
+    }
+
     const  Autnification = async (link) => {
        try{
          await Linking.openURL(link);
@@ -85,12 +116,13 @@ export default function Menu ({areaState}) {
             <Pressable 
                 onPress={onAreaPress} 
                 style={{
-                    //borderColor:'green',
-                    //borderWidth:2,
+                    borderColor:'green',
+                    borderWidth:2,
                     flex:1,
-                    position:'absolute',
+                   
                     width: '100%',
                     height: '92%',
+                    
                     }}>
                         {answer && 
                             <View style={styles.answer}>
@@ -99,10 +131,18 @@ export default function Menu ({areaState}) {
                                 </Text>
                                 <TextInput 
                                     style={{width:'90%', height:'40%', backgroundColor:'rgba(0,0,0,0.3)', borderColor:'rgb(43,75,123)', borderWidth:2, borderRadius: 2, }}
-                                    
+                                    value={userInput}
+                                    onChangeText={setUserInput}
                                     >
 
                                 </TextInput>
+                                <View style={{width:'90%', height:'30%',marginTop:10,}}>
+                                {userInput && 
+                                    <Pressable onPress={userAnswer} style={{position:'absolute',width:'100%', height:'100%',justifyContent:'center',alignItems:'center',zIndex:100}}>
+                                        <Text style={{fontSize:18, fontWeight:'600', }}>Send Code</Text>
+                                    </Pressable>
+                                }
+                                </View>
                             </View>
                         }
                 <View style={styles.conteiner}>
@@ -160,8 +200,8 @@ const styles = StyleSheet.create({
         height: '92%',
         zIndex:1,
         borderWidth:0.1,
-        borderColor:'green',
-        borderWidth:2
+        //borderColor:'green',
+        //borderWidth:2
     },
     conteiner: {
         width: '100%',
@@ -169,8 +209,8 @@ const styles = StyleSheet.create({
         top:771,
         backgroundColor:'rgb(71, 103, 151)',
         //backgroundColor:'rgb(255, 255, 0)',
-        //borderColor:'yellow',
-        //borderWidth:2
+        borderColor:'yellow',
+        borderWidth:2
     },
     containerAnser:{
         //backgroundColor:'rgb(71, 103, 151)',
@@ -184,8 +224,8 @@ const styles = StyleSheet.create({
         justifyContent:'space-between',
         alignItems:'center',
         
-        //borderColor:'red',
-        //borderWidth:2
+        borderColor:'red',
+        borderWidth:2
     },
     outerArea:{
         width:'100%',
@@ -205,5 +245,6 @@ const styles = StyleSheet.create({
         borderWidth:2,
         borderRadius: 2,
         alignItems:'center',
+        
     }
 })

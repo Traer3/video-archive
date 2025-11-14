@@ -45,7 +45,7 @@ app.get("/authorize", async (req,res)=>{
         });
 
         proc.on('close',code => {
-            const urlMatch = output.match(/https?:\/\/[^\s]+/);
+            const urlMatch = output.match(/http?:\/\/[^\s]+/);
             if(urlMatch){
                 res.json({url: urlMatch[0]});
             }else{
