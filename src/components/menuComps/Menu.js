@@ -113,46 +113,48 @@ export default function Menu ({areaState}) {
     
     return(
         <View style={styles.wrapper}>
-            <Pressable 
-                onPress={onAreaPress} 
-                style={{
-                    borderColor:'green',
-                    borderWidth:2,
-                    flex:1,
-                   
-                    width: '100%',
-                    height: '92%',
-                    
-                    }}>
-                        {answer && 
+            
+              {
+                        //answer 
+                        true && 
                             <View style={styles.answer}>
                                 <Text style={{fontSize:18, fontWeight:'600', }}>
                                     Enter url here
                                 </Text>
                                 <TextInput 
                                     style={{width:'90%', height:'40%', backgroundColor:'rgba(0,0,0,0.3)', borderColor:'rgb(43,75,123)', borderWidth:2, borderRadius: 2, }}
+                                    numberOfLines={1} 
+                                    ellipsizeMode="tail"
+                                    
                                     value={userInput}
                                     onChangeText={setUserInput}
                                     >
 
                                 </TextInput>
                                 <View style={{width:'90%', height:'30%',marginTop:10,}}>
-                                {userInput && 
-                                    <Pressable onPress={userAnswer} style={{position:'absolute',width:'100%', height:'100%',justifyContent:'center',alignItems:'center',zIndex:100}}>
-                                        <Text style={{fontSize:18, fontWeight:'600', }}>Send Code</Text>
+                                {
+                                //userInput 
+                                  true && 
+                                    <Pressable 
+                                        onPress={userAnswer} 
+                                        style={{
+                                            position:'absolute',
+                                            width:'100%', height:'100%',
+                                            justifyContent:'center',
+                                            alignItems:'center',
+                                            borderColor:'yellow', 
+                                            borderWidth:2, 
+                                            backgroundColor:'blue',}}>
+                                        <Text style={{fontSize:18, fontWeight:'600', borderColor:'green', borderWidth:2,}}>Send Code</Text>
                                     </Pressable>
                                 }
                                 </View>
                             </View>
                         }
+
+                        
                 <View style={styles.conteiner}>
-                    
-
                     <View style={styles.buttonPlacement}>
-
-                        
-                        
-                    
                         {question ?
                             <View style={{alignItems:'center',flexDirection:'column'}}>
                                 <View style={styles.containerAnser}>
@@ -187,7 +189,6 @@ export default function Menu ({areaState}) {
 
                     </View>
                 </View>
-            </Pressable>
         </View>
     )
 }
@@ -204,6 +205,7 @@ const styles = StyleSheet.create({
         //borderWidth:2
     },
     conteiner: {
+        position:'absolute',
         width: '100%',
         height: '8%',
         top:771,
@@ -240,7 +242,8 @@ const styles = StyleSheet.create({
         height: '15%',
         top:450,
         marginLeft:"10%",
-        backgroundColor:'rgb(71, 103, 151)',
+        //backgroundColor:'rgb(71, 103, 151)',
+        backgroundColor:'red',
         borderColor:'rgb(43,75,123)',
         borderWidth:2,
         borderRadius: 2,
