@@ -1,28 +1,28 @@
-import { View, StyleSheet, Pressable, Text, TextInput } from "react-native"
+import { View, StyleSheet, Pressable, Text, TextInput, AppState } from "react-native"
 import ToolButton from "../buttons/ToolButton"
 import { useEffect, useState } from "react"
-import GAuthenticator from "../../../database/Autnification/GAuthenticator";
 import { Linking } from "react-native";
 import QuestionForUser from "./QuestionForUser";
 
-
-
-
-
 export default function Menu ({areaState}) {
-    const [authorized,setAuthorized] = useState(false); //будем передовать в компонент для авторизации
+    const [authorized,setAuthorized] = useState(false);
     const [logout, setLogout] = useState(false);
     const [question, setQuestion] = useState(false);
-    const [autnification,setAutnification] = useState(false);
     const [answer, setAnswer] = useState(false);
     const [userInput, setUserInput] = useState("")
 
-    //const [authUrl, setAuthUrl] = useState("");
-    const [code, setCode] =  useState("");
-
+    const [rerender, setRerender] = useState(0)
+    useEffect(()=>{
+        const listener = AppState.addEventListener("change",(state)=>{
+            if(state === "active"){
+                setRerender(Date.now());
+            }
+        });
+        console.log(rerender)
+        return() => listener.remove()
+    },[])
 
     const onAuthorize =  async () => {
-        setAuthorized(true);
         setAnswer(true)
 
         try{
@@ -39,14 +39,17 @@ export default function Menu ({areaState}) {
         
     }
 
-    const sendCode = async (realCode) => {
+    const sendCode = async (code) => {
         const res =  await fetch("http://192.168.0.8:3004/authorize/callback",{
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({realCode})
+            body: JSON.stringify({code})
         });
         const data = await res.json();
+        setAuthorized(true);
+        setAnswer(false)
         console.log(data);
+        
     };
     
     
@@ -92,11 +95,9 @@ export default function Menu ({areaState}) {
                 return;
             }
 
-            setCode(codeParam);
-
+            sendCode(codeParam);
             console.log("Extracted code",codeParam);
 
-            sendCode(codeParam);
         }catch(err){
             console.log("Error parsing URL",err)
         }
@@ -114,7 +115,7 @@ export default function Menu ({areaState}) {
     
     return(
         <View style={styles.wrapper}>
-            <QuestionForUser answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer}/>
+            <QuestionForUser key={rerender} answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer}/>
                   
                 <View style={styles.conteiner}>
                     <View style={styles.buttonPlacement}>
@@ -142,9 +143,7 @@ export default function Menu ({areaState}) {
                             )}</>
                         }
                                     
-                        {
-                        //autnification && <GAuthenticator/>
-                        }               
+           
                     </View>
                 </View>
         </View>
@@ -159,8 +158,8 @@ const styles = StyleSheet.create({
         height: '92%',
         zIndex:1,
         borderWidth:0.1,
-        borderColor:'green',
-        borderWidth:2
+        //borderColor:'green',
+        //borderWidth:2
     },
     conteiner: {
         position:'absolute',
@@ -169,8 +168,8 @@ const styles = StyleSheet.create({
         top:771,
         backgroundColor:'rgb(71, 103, 151)',
         //backgroundColor:'rgb(255, 255, 0)',
-        borderColor:'yellow',
-        borderWidth:2
+        //borderColor:'yellow',
+        //borderWidth:2
     },
     containerAnser:{
         //backgroundColor:'rgb(71, 103, 151)',
@@ -184,8 +183,8 @@ const styles = StyleSheet.create({
         justifyContent:'space-between',
         alignItems:'center',
         
-        borderColor:'red',
-        borderWidth:2
+        //borderColor:'red',
+        //borderWidth:2
     },
     outerArea:{
         width:'100%',
