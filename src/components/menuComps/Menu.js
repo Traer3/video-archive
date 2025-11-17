@@ -3,6 +3,7 @@ import ToolButton from "../buttons/ToolButton"
 import { useEffect, useState } from "react"
 import GAuthenticator from "../../../database/Autnification/GAuthenticator";
 import { Linking } from "react-native";
+import QuestionForUser from "./QuestionForUser";
 
 
 
@@ -21,7 +22,7 @@ export default function Menu ({areaState}) {
 
 
     const onAuthorize =  async () => {
-        setAuthorized(!authorized);
+        setAuthorized(true);
         setAnswer(true)
 
         try{
@@ -113,46 +114,8 @@ export default function Menu ({areaState}) {
     
     return(
         <View style={styles.wrapper}>
-            
-              {
-                        //answer 
-                        true && 
-                            <View style={styles.answer}>
-                                <Text style={{fontSize:18, fontWeight:'600', }}>
-                                    Enter url here
-                                </Text>
-                                <TextInput 
-                                    style={{width:'90%', height:'40%', backgroundColor:'rgba(0,0,0,0.3)', borderColor:'rgb(43,75,123)', borderWidth:2, borderRadius: 2, }}
-                                    numberOfLines={1} 
-                                    ellipsizeMode="tail"
-                                    
-                                    value={userInput}
-                                    onChangeText={setUserInput}
-                                    >
-
-                                </TextInput>
-                                <View style={{width:'90%', height:'30%',marginTop:10,}}>
-                                {
-                                //userInput 
-                                  true && 
-                                    <Pressable 
-                                        onPress={userAnswer} 
-                                        style={{
-                                            position:'absolute',
-                                            width:'100%', height:'100%',
-                                            justifyContent:'center',
-                                            alignItems:'center',
-                                            borderColor:'yellow', 
-                                            borderWidth:2, 
-                                            backgroundColor:'blue',}}>
-                                        <Text style={{fontSize:18, fontWeight:'600', borderColor:'green', borderWidth:2,}}>Send Code</Text>
-                                    </Pressable>
-                                }
-                                </View>
-                            </View>
-                        }
-
-                        
+            <QuestionForUser answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer}/>
+                  
                 <View style={styles.conteiner}>
                     <View style={styles.buttonPlacement}>
                         {question ?
@@ -182,11 +145,6 @@ export default function Menu ({areaState}) {
                         {
                         //autnification && <GAuthenticator/>
                         }               
-                                        
-
-
-                        
-
                     </View>
                 </View>
         </View>
@@ -201,8 +159,8 @@ const styles = StyleSheet.create({
         height: '92%',
         zIndex:1,
         borderWidth:0.1,
-        //borderColor:'green',
-        //borderWidth:2
+        borderColor:'green',
+        borderWidth:2
     },
     conteiner: {
         position:'absolute',
