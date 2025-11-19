@@ -10,6 +10,8 @@ export default function Menu ({areaState}) {
     const [question, setQuestion] = useState(false);
     const [answer, setAnswer] = useState(false);
     const [userInput, setUserInput] = useState("")
+    const [deleteToken, setDeleteToken] = useState(false);
+   
 
     const [rerender, setRerender] = useState(0)
     useEffect(()=>{
@@ -22,12 +24,27 @@ export default function Menu ({areaState}) {
         return() => listener.remove()
     },[])
 
+    useEffect(()=>{
+        const checkToken = async () => {
+            try{
+                const responce = await fetch("http://192.168.0.8:3004/tokenCheck");
+                const answer = await responce.json();
+                setAuthorized(answer)
+            }catch(err){
+                console.error("Server failed to check token")
+            }
+        }
+        checkToken()
+    },[])
+
+
     const onAuthorize =  async () => {
         setAnswer(true)
 
         try{
             const responce = await fetch("http://192.168.0.8:3004/authorize");
             const data = await responce.json();
+            //console.log(data)
             if(data.url){
                 Autnification(data.url)
             }
@@ -46,11 +63,16 @@ export default function Menu ({areaState}) {
             body: JSON.stringify({code})
         });
         const data = await res.json();
-        setAuthorized(true);
         setAnswer(false)
         console.log(data);
         
     };
+
+    const onDeleteToken = async () => {
+        const responce = await fetch("http://192.168.0.8:3004/deleteToken");
+        const answer = await responce.json();
+        deleteToken(answer)
+    }
     
     
     const onLogout = () => {
@@ -67,6 +89,7 @@ export default function Menu ({areaState}) {
     }
 
     const onExit = () => {
+        onDeleteToken()
         areaState(false)
         setAuthorized(false)
         setLogout(false)

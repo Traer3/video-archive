@@ -4,6 +4,7 @@ const readline = require('readline')
 const {google} = require('googleapis');
 const {UserRefreshClient} = require('google-auth-library');
 const http = require('http');
+const { unlink } = require('fs/promises');
 
 
 const SCOPES = ['https://www.googleapis.com/auth/youtube.readonly'];
@@ -121,7 +122,30 @@ async function authorizeConsole() {
     });
 
     await finishAuth(code);
-}    
+}
+
+async function tokenCheck() {
+
+    fs.open(TOKEN_PATH,(err, data)=>{
+        if(err){
+            console.log("No token")
+            return false;
+        }
+        console.log("Yes token")
+        return true;
+    })
+}
+
+async function deleteToken() {
+    try{
+        await unlink(TOKEN_PATH);
+        console.log(`Successfuly deleted ${TOKEN_PATH}`);
+        return true
+    }catch(err){
+        console.error('There was an error:',err.message)
+        return false
+    }
+}
 
 
 if(require.main === module){
@@ -136,6 +160,10 @@ if(require.main === module){
             await finishAuth(maybeCode);
         }else if(command === 'authorize'){
             await authorizeConsole();
+        }else if(command === 'tokenCheck'){
+            await tokenCheck();
+        }else if(command === 'deleteToken'){
+            await deleteToken();
         }else{
             console.log('ℹ️ No valid command provided.\nTry one of:');
             console.log('   node Authorize.js getUrl');

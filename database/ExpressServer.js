@@ -32,6 +32,29 @@ function runComand(comand, args=[]){
     });
 }
 
+app.get("/tokenCheck",async(req,res)=>{
+    try{
+        const proc = spawn('node',[AUTHNIFICATION, 'tokenCheck'],{shell: true});
+        let output = '';
+        proc.stdout.on('data',data=>{
+            output += data.toString();
+        });
+
+        proc.on('close',check => {
+            if(output){
+                res.json(output)
+            }else{
+                res.status(500).json({error: 'Cant proceed with command tokenCheck',raw: output })
+            }
+        })
+
+        proc.on('error',err=>{
+            res.status(500).json({error: err.message});
+        });
+    }catch(err){
+        res.status(500).send(`❌ Error executing script: ${err.message}`)
+    }
+})
 
 app.get("/authorize", async (req,res)=>{
     try{
@@ -45,8 +68,9 @@ app.get("/authorize", async (req,res)=>{
         });
 
         proc.on('close',code => {
-            const urlMatch = output.match(/http?:\/\/[^\s]+/);
+            const urlMatch = output.match(/https?:\/\/[^\s]+/);
             if(urlMatch){
+                
                 res.json({url: urlMatch[0]});
             }else{
                 res.status(500).json({error: 'URL not received', raw: output});
@@ -76,6 +100,30 @@ app.post("/authorize/callback",async(req,res)=>{
         res.json({message: 'Authorization completed', output});
     });
 });
+
+app.get("/deleteToken",async(req,res)=>{
+    try{
+        const proc = spawn('node',[AUTHNIFICATION, 'deleteToken'],{shell: true});
+        let output = '';
+        proc.stdout.on('data',data=>{
+            output += data.toString();
+        });
+
+        proc.on('close',check => {
+            if(output){
+                res.json(output)
+            }else{
+                res.status(500).json({error: 'Cant proceed with command deleteToken',raw: output })
+            }
+        })
+
+        proc.on('error',err=>{
+            res.status(500).json({error: err.message});
+        });
+    }catch(err){
+        res.status(500).send(`❌ Error executing script: ${err.message}`)
+    }
+})
 
 
 
