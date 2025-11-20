@@ -13,7 +13,6 @@ const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
 
 let authorizePromise = null;
 
-console.log("WE IN authorize");
 const [,, command, maybeCode] = process.argv;
 
 async function loadCredentials() {
@@ -67,7 +66,7 @@ async function getAuthUrl() {
             access_type: 'offline',
             scope: SCOPES,
     });
-    console.log(`Go to this URL ${authUrl}`);
+    //console.log(`Go to this URL ${authUrl}`);
     return authUrl;
 };
 
@@ -147,35 +146,7 @@ async function deleteToken() {
     }
 }
 
-
-if(require.main === module){
-    (async ()=>{
-        if(command === 'getUrl'){
-            await getAuthUrl();
-        }else if(command === 'finish'){
-            if(!maybeCode){
-                console.error('❌ No code provided for finish');
-                process.exit(1);
-            }
-            await finishAuth(maybeCode);
-        }else if(command === 'authorize'){
-            await authorizeConsole();
-        }else if(command === 'tokenCheck'){
-            await tokenCheck();
-        }else if(command === 'deleteToken'){
-            await deleteToken();
-        }else{
-            console.log('ℹ️ No valid command provided.\nTry one of:');
-            console.log('   node Authorize.js getUrl');
-            console.log('   node Authorize.js finish <code>');
-            console.log('   node Authorize.js authorize');
-        }
-    })();
-}
-
-
 async function authorize() {
-    console.log("WE IN authorize 2");
     if(authorizePromise) return authorizePromise;
     authorizePromise = (async ()=>{
         let client = await loadCredentials()
@@ -200,7 +171,6 @@ async function authorize() {
             scope: SCOPES,
         });
 
-        //FLAG 1
         console.log(`Go to this URL ${authUrl}`);
 
         const readL = readline.createInterface({
@@ -219,8 +189,50 @@ async function authorize() {
             process.exit(1);
         }
 
+        const {tokens} = await oAuth2Client.getToken(code);
+        oAuth2Client.setCredentials(tokens);
+    
+        await saveCredentials(oAuth2Client);
+    
+        return oAuth2Client;
+    })();
+    return authorizePromise;
+}
 
 
+if(require.main === module){
+    (async ()=>{
+        if(command === 'getUrl'){
+            await getAuthUrl();
+        }else if(command === 'finish'){
+            if(!maybeCode){
+                console.error('❌ No code provided for finish');
+                process.exit(1);
+            }
+            await finishAuth(maybeCode);
+        }else if(command === 'authorize'){
+            await authorizeConsole();
+        }else if(command === 'authorizeByHand'){
+            await authorize();
+        }else if(command === 'tokenCheck'){
+            await tokenCheck();
+        }else if(command === 'deleteToken'){
+            await deleteToken();
+        }else{
+            console.log('ℹ️ No valid command provided.\nTry one of:');
+            console.log('   node Authorize.js getUrl');
+            console.log('   node Authorize.js finish <code>');
+            console.log('   node Authorize.js authorize');
+        }
+    })();
+}
+
+
+
+
+
+//пока проверяем через Express server
+module.exports = {authorize}
 
 /* ОПЕЧАТАН пока нужно затестить передачу данных юзеру во время активной авторизации 
         //await open(authUrl)
@@ -249,21 +261,6 @@ async function authorize() {
 
         //console.log(`Received code: ${code}`);
 */
-
-        const {tokens} = await oAuth2Client.getToken(code);
-        oAuth2Client.setCredentials(tokens);
-    
-        await saveCredentials(oAuth2Client);
-    
-        return oAuth2Client;
-    })();
-    return authorizePromise;
-}
-
-
-//пока проверяем через Express server
-//module.exports = {authorize}
-
 
  
 /* старая модель команд
