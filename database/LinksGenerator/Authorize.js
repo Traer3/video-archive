@@ -65,6 +65,7 @@ async function getAuthUrl() {
     const authUrl = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: SCOPES,
+            prompt: 'consent'
     });
     //console.log(`Go to this URL ${authUrl}`);
     return authUrl;
@@ -146,7 +147,7 @@ async function deleteToken() {
     }
 }
 
-async function authorize() {
+async function authorizeByHand() {
     if(authorizePromise) return authorizePromise;
     authorizePromise = (async ()=>{
         let client = await loadCredentials()
@@ -179,9 +180,22 @@ async function authorize() {
         });
         
         const code = await new Promise((resolve)=>{
-            readL.question('Enter code from that page here: ',(answer)=>{
+            readL.question('Enter FULL URL from that page here: ',(answer)=>{
                 readL.close();
-                resolve(answer.trim());
+                try{
+                    const parsed = new URL(answer);
+                    const codeParam = parsed.searchParams.get("code");
+                    if(!codeParam){
+                        console.log("Code parameter not found");
+                        return;
+                    }
+                    resolve(codeParam.trim());
+        
+                }catch(err){
+                    console.log("Error parsing URL",err)
+                }
+        
+                
             });
         });
         if(!code){
@@ -213,7 +227,7 @@ if(require.main === module){
         }else if(command === 'authorize'){
             await authorizeConsole();
         }else if(command === 'authorizeByHand'){
-            await authorize();
+            await authorizeByHand();
         }else if(command === 'tokenCheck'){
             await tokenCheck();
         }else if(command === 'deleteToken'){
@@ -232,7 +246,7 @@ if(require.main === module){
 
 
 //пока проверяем через Express server
-module.exports = {authorize}
+module.exports = {authorizeByHand}
 
 /* ОПЕЧАТАН пока нужно затестить передачу данных юзеру во время активной авторизации 
         //await open(authUrl)

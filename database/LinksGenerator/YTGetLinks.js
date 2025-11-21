@@ -1,6 +1,6 @@
 //You need credentials.json from Google Cloud Console  ->   OAuth client ID  
 const fs = require('fs');
-const {authorize} = require('./Authorize');
+const {authorizeByHand} = require('./Authorize');
 const {google} = require('googleapis');
 
 const getVids = async () => {
@@ -44,7 +44,7 @@ const videoReader = (DBvideos) => {
 
 async function newNameChecker () {
     //FLAG 3
-    const YTVideos = await authorize().then(youTubeVideoData).catch(console.error);
+    const YTVideos = await authorizeByHand().then(youTubeVideoData).catch(console.error);
     const NamesFromDB = videoFromDB.map(video => video.name)
 
     const newVids = YTVideos.filter(
@@ -95,7 +95,7 @@ async function youTubeVideoData(auth){
     return allVideos;
 }
 
-authorize().then(youTubeVideoData).catch(console.error);
+authorizeByHand().then(youTubeVideoData).catch(console.error);
 
 async function listLikedVideoTitles(auth) {
     let allNamesYT = [];
@@ -144,11 +144,11 @@ async function listLikedVideos(auth) {
 }
 
 // записывает ссылки всех видео из YT 
-//authorize().then(listLikedVideos).catch(console.error);
+//authorizeByHand().then(listLikedVideos).catch(console.error);
 
 /* для получения 10 имен из YT
 (async ()=>{
-    const auth = await authorize();
+    const auth = await authorizeByHand();
     const YTvidsName = await listLikedVideoTitles(auth);
     console.log(YTvidsName)
 })();

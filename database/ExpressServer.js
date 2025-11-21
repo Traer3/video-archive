@@ -11,27 +11,6 @@ const AUTHNIFICATION = path.join(__dirname,"LinksGenerator","Authorize.js")
 
 app.use(express.json());
 
-function runComand(comand, args=[]){
-    return new Promise((resolve, reject)=>{
-        const proc = spawn(comand, args, {shell: true});
-
-        proc.stdout.on('data',data => {
-            console.log(`[stdout] ${data}`);
-        });
-
-        proc.stderr.on('data', data=>{
-            console.error(`[stderr] ${data}`);
-        });
-
-        proc.on('close', code =>{
-            console.log(`Process exited with code ${code}`);
-            resolve(code);
-        })
-
-        proc.on('error', reject);
-    });
-}
-
 app.get("/tokenCheck",async(req,res)=>{
     try{
         const proc = spawn('node',[AUTHNIFICATION, 'tokenCheck'],{shell: true});
@@ -58,8 +37,6 @@ app.get("/tokenCheck",async(req,res)=>{
 
 app.get("/authorize", async (req,res)=>{
     try{
-        //await runComand('node', [AUTHNIFICATION, 'authorize']);
-        //res.send(`✅ Authorization script executed`);
         const proc = spawn('node',[AUTHNIFICATION, 'getUrl'],{shell: true});
 
         let output = '';
