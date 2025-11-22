@@ -9,7 +9,7 @@ const getVids = async () => {
         const data = await responce.json();
 
         videoReader(data)
-        //newNameChecker() 
+        newNameChecker() 
     }catch(err){
         console.log("DB error: ", err)
     }
@@ -43,7 +43,6 @@ const videoReader = (DBvideos) => {
 
 
 async function newNameChecker () {
-    //FLAG 3
     const YTVideos = await authorizeByHand().then(youTubeVideoData).catch(console.error);
     const NamesFromDB = videoFromDB.map(video => video.name)
 

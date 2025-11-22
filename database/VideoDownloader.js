@@ -54,7 +54,9 @@ async function main() {
     for (let i = 0; i < links.length; i++){
         await VideoDownloader(links[i], i);
     }
+    fs.writeFileSync(VIDEOS_LINKS_PATH, "");
     console.log("🔥 Completed")
+    
 }
 
 main();
