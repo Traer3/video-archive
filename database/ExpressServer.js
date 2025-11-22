@@ -42,10 +42,13 @@ app.get("/authorize", async (req,res)=>{
         let output = '';
         proc.stdout.on('data',data=>{
             output += data.toString();
+            
         });
 
         proc.on('close',code => {
+            
             const urlMatch = output.match(/https?:\/\/[^\s]+/);
+            console.log(urlMatch)
             if(urlMatch){
                 
                 res.json({url: urlMatch[0]});

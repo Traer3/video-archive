@@ -114,8 +114,24 @@ async function authorizeConsole() {
         output: process.stdout,
     });
 
+    
+
     const code = await new Promise((resolve)=>{
         readL.question('Code: ',(answer)=>{
+            /*
+            try{
+                const parsed = new URL(answer);
+                const codeParam = parsed.searchParams.get("code");
+                if(!codeParam){
+                    console.log("Code parameter not found");
+                    return;
+                }
+                resolve(codeParam.trim());
+    
+            }catch(err){
+                console.log("Error parsing URL",err)
+            }
+            */
             readL.close();
             resolve(answer.trim());
         });
@@ -170,6 +186,7 @@ async function authorizeByHand() {
         const authUrl = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: SCOPES,
+            
         });
 
         console.log(`Go to this URL ${authUrl}`);
