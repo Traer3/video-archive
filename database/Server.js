@@ -18,10 +18,10 @@ app.use(express.json());
 
 app.get("/videos", async(req, res) => {
     try{
-        console.log("Попытка взять данные ")
+        //console.log("Попытка взять данные ")
         const result = await pool.query("SELECT * FROM videos");
-        console.log("Результат ")
-        console.log(result)
+        //console.log("Результат ")
+        //console.log(result)
         res.json(result.rows);
     }catch(err){
         console.error(err);
@@ -56,7 +56,36 @@ app.post('/saveVidDuration', async(req,res)=>{
         res.status(500).json({message: 'Server error', error: e.message})
     }
    
-})
+});
+
+app.post('/importVideo',async(req,res)=>{
+    try{
+        const {name, url, duration, size_mb,category} = req.body;
+        if(!name || url) {
+            return res.status(400).json({message: "Missing video name & url"});
+        };
+
+        await pool.query(
+            `INSERT INTO videos (name, url, duration, size_mb, category, thumbnail)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+             [
+                name,
+                url,
+                duration,
+                size_mb, //хуета с название исправь 
+                category,
+                'default-thumbnail.jpg'
+             ]        
+        );
+
+        res.status(200).json({
+            message:  '✅ Video imported successfully',
+        })
+    }catch(err){
+        console.error('❌ Error importing video: ', err);
+        res.status(500).json({message: 'Server cant import vid', error: err.message})
+    }
+});
 
 app.listen(3001, ()=>{
     console.log("✅ API initiated")

@@ -1,7 +1,14 @@
 const fs = require('fs');
 const path = require('path');
+const {Pool} = require('pg');
 
-
+const pool = new Pool({
+    user: "postgres",
+    host: "localhost",
+    database: "Vids",
+    password: "Wedfvb01",
+    port: 5432,
+});
 
 function generateRequirePath(fileName){
    return "http://192.168.0.8:3004/" + encodeURIComponent(fileName);
@@ -19,7 +26,6 @@ async function VideoImporter(folderPath){
     console.log(`Files amount: ${files.length}`);
 
     const existingVideos = await getExistingVideos();
-    console.log(existingVideos)
     console.log(`DB already have this vid : ${existingVideos.length}`);
 
     let importedCount = 0;
@@ -48,13 +54,18 @@ async function VideoImporter(folderPath){
 
                 const requirePath = generateRequirePath(file);
 
-                importVideos({
-                    name: finalName,
-                    url: requirePath,
-                    duration: duration,
-                    size_mb: sizeBM,
-                    category: 'YouTube',
-                });
+                await pool.query(
+                    `INSERT INTO videos (name, url, duration, size_mb, category, thumbnail)
+                     VALUES ($1, $2, $3, $4, $5, $6)`,
+                     [
+                        finalName,
+                        requirePath,
+                        duration,
+                        sizeBM,
+                        'YouTube',
+                        'default-thumbnail.jpg'
+                     ]
+                );
 
                 existingVideos.push({name: finalName , size_mb: sizeBM});
                 console.log(`✅ Added: ${finalName} (${sizeBM} MB)`);
@@ -72,46 +83,18 @@ async function VideoImporter(folderPath){
 
    }catch(err){
         console.log(`Error file ${file} :`, err.message)
-   }
-   /*
-    finally {
+   } finally {
     await pool.end();
    }
-    */
 }
-
-const importVideos = async (videoData) => {
-    const res =  await fetch("http://192.168.0.8:3001/importVideo",{
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(videoData)
-    });
-    if(!res.ok){
-        const errorData = await res.json();
-        console.error(`❌ Imoirt failed: ${errorData.message}`);
-        return;
-    }
-
-    const data = await res.json();
-    console.log(data);
-};
-
 
 async function getExistingVideos() {
     try{
-        const responce = await fetch("http://192.168.0.8:3001/videos");
-        //console.log(responce.json())
-
-        if(!responce.ok){
-            throw new Error(`Cant get vids from server status: ${responce.status}`);
-        }
-
-        const data = await responce.json();
-
-        return data;
-
+        const result = await pool.query('SELECT name, size_mb FROM videos');
+        console.log(result.rows)
+        return result.rows;
     }catch(err){
-        console.log('Error! Cant get videos from Server 3001: ', err.message);
+        console.log('Error no data from server: ', err.message);
         return[];
     }
 }
