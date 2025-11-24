@@ -60,8 +60,9 @@ app.post('/saveVidDuration', async(req,res)=>{
 
 app.post('/importVideo',async(req,res)=>{
     try{
-        const {name, url, duration, size_mb,category} = req.body;
-        if(!name || url) {
+        const {name, url, duration, sizeMB,category} = req.body;
+        //console.log("Name: ",name , " Url: ", url, " Duration: ", duration , " Size: ", sizeMB , " Category: ", category)
+        if(!name || !url) {
             return res.status(400).json({message: "Missing video name & url"});
         };
 
@@ -72,7 +73,7 @@ app.post('/importVideo',async(req,res)=>{
                 name,
                 url,
                 duration,
-                size_mb, //хуета с название исправь 
+                sizeMB, 
                 category,
                 'default-thumbnail.jpg'
              ]        

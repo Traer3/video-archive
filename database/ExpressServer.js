@@ -7,7 +7,8 @@ const app = express();
 //const THUMBNAILS_DIR = "/home/dbvidsserver/VideoArchive/thumbnails";
 const VIDEO_DIR = path.join(__dirname, "videos");
 const THUMBNAILS_DIR = path.join(__dirname, "./thumbnails");
-const AUTHNIFICATION = path.join(__dirname,"LinksGenerator","Authorize.js")
+const AUTHNIFICATION = path.join(__dirname,"LinksGenerator","Authorize.js");
+const VIDEO_ERASER = path.join(__dirname,"VideoEraser.js");
 
 app.use(express.json());
 
@@ -64,6 +65,14 @@ app.get("/authorize", async (req,res)=>{
         res.status(500).send(`❌ Error executing script: ${err.message}`)
     }
 });
+
+app.post("/deleteVideo",async(req,res)=>{
+    const {videos} = res.body;
+    if(!videos) return res.status(400).json({error: 'No videos for erasing'});
+
+    const proc = spawn('node',[VIDEO_ERASER, 'fullErasing',videos],{shell:true});
+
+})
 
 app.post("/authorize/callback",async(req,res)=>{
     const {code} = req.body;

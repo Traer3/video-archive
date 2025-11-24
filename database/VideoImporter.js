@@ -33,12 +33,12 @@ async function VideoImporter(folderPath){
 
             if(stat.isFile() && isVideoFile(file)){
                 const originalName = path.parse(file).name;
-                const sizeBM = (stat.size / (1024 * 1024)).toFixed(2);
+                const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
 
-                const duplicate = findDuplicate(existingVideos, originalName, sizeBM);
+                const duplicate = findDuplicate(existingVideos, originalName, sizeMB);
 
                 if(duplicate){
-                    console.log(`Scip duplicate: ${originalName} (${sizeBM} MB)`);
+                    console.log(`Scip duplicate: ${originalName} (${sizeMB} MB)`);
                     skippedCount++;
                     continue;
                 }
@@ -48,16 +48,10 @@ async function VideoImporter(folderPath){
 
                 const requirePath = generateRequirePath(file);
 
-                importVideos({
-                    name: finalName,
-                    url: requirePath,
-                    duration: duration,
-                    size_mb: sizeBM,
-                    category: 'YouTube',
-                });
+                //importVideos({name: finalName,url: requirePath,duration: duration,sizeMB: sizeMB,category: 'YouTube',});
 
-                existingVideos.push({name: finalName , size_mb: sizeBM});
-                console.log(`✅ Added: ${finalName} (${sizeBM} MB)`);
+                existingVideos.push({name: finalName , size_mb: sizeMB});
+                console.log(`✅ Added: ${finalName} (${sizeMB} MB)`);
                 importedCount++;
             }
         }catch(err){
@@ -73,14 +67,11 @@ async function VideoImporter(folderPath){
    }catch(err){
         console.log(`Error file ${file} :`, err.message)
    }
-   /*
-    finally {
-    await pool.end();
-   }
-    */
 }
 
 const importVideos = async (videoData) => {
+    //console.log(videoData)
+
     const res =  await fetch("http://192.168.0.8:3001/importVideo",{
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -100,7 +91,7 @@ const importVideos = async (videoData) => {
 async function getExistingVideos() {
     try{
         const responce = await fetch("http://192.168.0.8:3001/videos");
-        //console.log(responce.json())
+       
 
         if(!responce.ok){
             throw new Error(`Cant get vids from server status: ${responce.status}`);
@@ -117,9 +108,9 @@ async function getExistingVideos() {
 }
 
 
-function findDuplicate(existingVideos, name, sizeBM){
+function findDuplicate(existingVideos, name, sizeMB){
     return existingVideos.find(video => 
-        video.name === name && video.size_mb === sizeBM
+        video.name === name && video.size_mb === sizeMB
     );
 }
 
