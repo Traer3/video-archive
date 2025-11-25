@@ -19,8 +19,8 @@ async function VideoImporter(folderPath){
     console.log(`Files amount: ${files.length}`);
 
     const existingVideos = await getExistingVideos();
-    console.log(existingVideos)
-    console.log(`DB already have this vid : ${existingVideos.length}`);
+    //console.log(existingVideos)
+    console.log(`DB already have ${existingVideos.length} vids`);
 
     let importedCount = 0;
     let skippedCount = 0;
@@ -48,6 +48,7 @@ async function VideoImporter(folderPath){
 
                 const requirePath = generateRequirePath(file);
 
+                // не забудь включить 
                 //importVideos({name: finalName,url: requirePath,duration: duration,sizeMB: sizeMB,category: 'YouTube',});
 
                 existingVideos.push({name: finalName , size_mb: sizeMB});

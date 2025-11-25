@@ -66,13 +66,6 @@ app.get("/authorize", async (req,res)=>{
     }
 });
 
-app.post("/deleteVideo",async(req,res)=>{
-    const {videos} = res.body;
-    if(!videos) return res.status(400).json({error: 'No videos for erasing'});
-
-    const proc = spawn('node',[VIDEO_ERASER, 'fullErasing',videos],{shell:true});
-
-})
 
 app.post("/authorize/callback",async(req,res)=>{
     const {code} = req.body;
@@ -171,12 +164,27 @@ app.use("/thumbnails",express.static(THUMBNAILS_DIR,{
     maxAge: "1d",
 }))
 
+app.post("/deleteVideo",async(req,res)=>{
+    const {videos} = res.body;
+    if(!videos) return res.status(400).json({error: 'No videos for erasing'});
+
+    const proc = spawn('node',[VIDEO_ERASER, 'fullErasing',videos],{shell:true});
+    let output = '';
+    
+    proc.stdout.on('data',data => output += data.toString());
+    proc.stderr.on('data',data => console.error(data.toString()));
+
+    proc.on('close',video => {
+        res.json({message: 'Deletion completed',output});
+    });
+
+});
+
+
 app.use(express.static(VIDEO_DIR,{
     fallthrough:false,
     maxAge: "1d"
 }));
-
-
 
 
 
