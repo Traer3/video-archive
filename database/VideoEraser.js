@@ -6,9 +6,7 @@ const THUMBNAILS_DIR = path.join(__dirname, "thumbnails");
 
 const [,, command, videos] = process.argv;
 
-const testIds = [
-    1,2,3,4,7,8,9 
-]
+const testIds = [4960]
 
 if(!fs.existsSync(VIDEOS_DIR)){
     console.error("Missing videos folder");
@@ -38,6 +36,7 @@ async function videoFromDB() {
 
 
 async function VideoEraser(videosId) {
+    const result = [];
     if(!videosId || videosId.length === 0) {
         console.log("No video for deletion") 
         return;
@@ -51,9 +50,28 @@ async function VideoEraser(videosId) {
 
     for(const id of videosId){
         const isVideoExited = findVideoFromDB(existingVideos, id)
-        console.log("Video id:",isVideoExited.id, "Video name: ", isVideoExited.name)
+        //deleteVideo(isVideoExited.id);
     }
+
+    //const videoFolder = fs.readFileSync(VIDEOS_DIR);
 };
+
+
+async function deleteVideo(videoId) {
+    
+    const res = await fetch("http://192.168.0.8:3001/deleteVideo",{
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({videoId: videoId})
+    });
+    if(!res.ok){
+        const errData = await res.json();
+        console.error(`Deletion failed: ${errData.message}`);
+        return;
+    }
+    const data = await res.json();
+    return data
+}
 
 async function thumbnailEraser(videoName) {
     

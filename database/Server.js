@@ -58,6 +58,7 @@ app.post('/saveVidDuration', async(req,res)=>{
    
 });
 
+
 app.post('/importVideo',async(req,res)=>{
     try{
         const {name, url, duration, sizeMB,category} = req.body;
@@ -87,6 +88,28 @@ app.post('/importVideo',async(req,res)=>{
         res.status(500).json({message: 'Server cant import vid', error: err.message})
     }
 });
+
+app.post('/deleteVideo',async(req,res)=>{
+    try{
+        const {videoId} = req.body;
+        if(!videoId) {
+            return(res.status(400).json({message: "Missing video id for deletion"}));
+        }
+
+        const result = await pool.query(
+            `DELETE FROM videos WHERE id = $1`,
+            [videoId]
+        );
+
+        if(result.rowCount > 0){
+            console.log(`Video with id ${videoId} deleted successfully`);
+        }else{
+            console.log(`Video with id ${videoId} not found`);
+        }
+    }catch(err){
+        console.error('Error wihle deleting video:',err.message);
+    }
+})
 
 app.listen(3001, ()=>{
     console.log("✅ API initiated")
