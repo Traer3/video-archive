@@ -93,7 +93,7 @@ app.post('/deleteVideo',async(req,res)=>{
     try{
         const {videoId} = req.body;
         if(!videoId) {
-            return(res.status(400).json({message: "Missing video id for deletion"}));
+            return(res.status(400).json({message: "Missing video id  for deletion"}));
         }
 
         const result = await pool.query(

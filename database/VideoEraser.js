@@ -6,7 +6,7 @@ const THUMBNAILS_DIR = path.join(__dirname, "thumbnails");
 
 const [,, command, videos] = process.argv;
 
-const testIds = [4960]
+const testIds = [4953]
 
 if(!fs.existsSync(VIDEOS_DIR)){
     console.error("Missing videos folder");
@@ -48,12 +48,18 @@ async function VideoEraser(videosId) {
     console.log(`DB have ${existingVideos.length} videos`);
     //console.log(existingVideos)
 
+    const videoFiles = fs.readdirSync(VIDEOS_DIR);
+    console.log(`Files amount ${videoFiles.length}`)
+
     for(const id of videosId){
         const isVideoExited = findVideoFromDB(existingVideos, id)
+        let videoName = isVideoExited.name
+        let formatedVideoName = videoName + ".mp4"
+        deleteVideoInFolder(videoFiles, formatedVideoName)
         //deleteVideo(isVideoExited.id);
     }
 
-    //const videoFolder = fs.readFileSync(VIDEOS_DIR);
+    
 };
 
 
@@ -78,10 +84,34 @@ async function thumbnailEraser(videoName) {
 }
 
 function findVideoFromDB(existingVideos, IDforDeletion){
-    return(existingVideos.find(video =>
-        video.id === IDforDeletion
-    ));
+    const video = existingVideos.find(vid =>
+        vid.id === IDforDeletion
+    )
+    if(!video){
+        return `DB dont have id ${IDforDeletion}`
+    }
+    return video;
 }
+
+function deleteVideoInFolder(videoFiles, videoForDeletion){
+    console.log("Video name",videoForDeletion)
+
+
+    for(const file of videoFiles){
+        const filePath = path.join(VIDEOS_DIR, file);
+
+        //console.log(filePath)
+        try{
+            const stat = fs.statSync(filePath);
+            const originalFileName = path.parse(file).name;
+            console.log("Original file name" , originalFileName)
+            //fs.rm(stat) это удалит всю папку 
+        }catch(err){
+
+        }
+    } 
+}
+
 
 VideoEraser(testIds)
 
