@@ -4,9 +4,14 @@ const fs = require('fs');
 const VIDEOS_DIR =  path.join(__dirname, "videos");
 const THUMBNAILS_DIR = path.join(__dirname, "thumbnails");
 
-const [,, command, videos] = process.argv;
+const [,, command, ...videosIdRaw] = process.argv;
+const videosId = videosIdRaw.map(id => parseInt(id)).filter(id => !isNaN(id));
+console.log("Как приходят ids ",videosId)
 
-const testIds = [4953]
+if(!videosId || videosId.length === 0) {
+    console.log("No video for deletion") 
+    return;
+}
 
 if(!fs.existsSync(VIDEOS_DIR)){
     console.error("Missing videos folder");
@@ -15,6 +20,12 @@ if(!fs.existsSync(VIDEOS_DIR)){
 if(!fs.existsSync(THUMBNAILS_DIR)){
     console.error("Missing thumbnails folder");
 };
+
+const videoFiles = fs.readdirSync(VIDEOS_DIR);
+console.log(`Videos amount ${videoFiles.length}`)
+
+const thumbnailFiles = fs.readdirSync(THUMBNAILS_DIR);
+console.log(`Thumbnails amount ${thumbnailFiles.length}`)
 
 async function videoFromDB() {
     try{
@@ -34,36 +45,35 @@ async function videoFromDB() {
 }
 
 
+const existingVideos = await videoFromDB();
 
-async function VideoEraser(videosId) {
-    const result = [];
-    if(!videosId || videosId.length === 0) {
-        console.log("No video for deletion") 
-        return;
-    }
-    console.log("Starting erasing videos");
+async function VideoEraser(existingVideos, videosId) {
     console.log("Ids for deletion: ", videosId)
 
-    const existingVideos = await videoFromDB();
-    console.log(`DB have ${existingVideos.length} videos`);
-    //console.log(existingVideos)
+    for(const id of videosId){
+        const isVideoExited = findVideoInDB(existingVideos, id)
+        let videoName = isVideoExited.name
+    
+        deleteVideoInFolder(videoFiles, videoName)
+        deleteThumbnailInFolder(thumbnailFiles, videoName)
+        deleteVideoInDB(isVideoExited.id);
+    }
+};
 
-    const videoFiles = fs.readdirSync(VIDEOS_DIR);
-    console.log(`Files amount ${videoFiles.length}`)
+async function ThumbnailEraser(existingVideos, videosId) {
+    console.log("Ids for deletion: ", videosId)
 
     for(const id of videosId){
-        const isVideoExited = findVideoFromDB(existingVideos, id)
+        const isVideoExited = findVideoInDB(existingVideos, id)
         let videoName = isVideoExited.name
-        let formatedVideoName = videoName + ".mp4"
-        deleteVideoInFolder(videoFiles, formatedVideoName)
-        //deleteVideo(isVideoExited.id);
-    }
-
     
+        deleteThumbnailInFolder(thumbnailFiles, videoName)
+
+    }
 };
 
 
-async function deleteVideo(videoId) {
+async function deleteVideoInDB(videoId) {
     
     const res = await fetch("http://192.168.0.8:3001/deleteVideo",{
         method: "POST",
@@ -79,11 +89,7 @@ async function deleteVideo(videoId) {
     return data
 }
 
-async function thumbnailEraser(videoName) {
-    
-}
-
-function findVideoFromDB(existingVideos, IDforDeletion){
+function findVideoInDB(existingVideos, IDforDeletion){
     const video = existingVideos.find(vid =>
         vid.id === IDforDeletion
     )
@@ -93,62 +99,60 @@ function findVideoFromDB(existingVideos, IDforDeletion){
     return video;
 }
 
-function deleteVideoInFolder(videoFiles, videoForDeletion){
-    console.log("Video name",videoForDeletion)
+async function deleteThumbnailInFolder(thumbnailFiles, videoName) {
+    console.log("Deleting thumbnail for: ", videoName);
 
+    for(const file of thumbnailFiles){
+        const filePath = path.join(THUMBNAILS_DIR, file);
+        try{
+            const originalFileName = path.parse(file).name
+            if(originalFileName === videoName){
+                
+                await fs.promises.rm(filePath,{recursive:true});
+                console.log(`File deleted: ${videoName}`)
+            }
+
+        }catch(err){
+            console.error("Error while executing deleteThumbnailInFolder ", err.message)
+        }
+    } 
+}
+
+async function deleteVideoInFolder(videoFiles, videoForDeletion){
+    console.log("Video name",videoForDeletion)
 
     for(const file of videoFiles){
         const filePath = path.join(VIDEOS_DIR, file);
-
-        //console.log(filePath)
         try{
-            const stat = fs.statSync(filePath);
-            const originalFileName = path.parse(file).name;
-            console.log("Original file name" , originalFileName)
-            //fs.rm(stat) это удалит всю папку 
-        }catch(err){
+            const originalFileName = path.parse(file).name
+            if(originalFileName === videoForDeletion){
+            
+                await fs.promises.rm(filePath,{recursive:true});
+                console.log(`File deleted: ${videoName}`)
+            }
 
+        }catch(err){
+            console.error("Error while executing deleteVideoInFolder ", err.message)
         }
     } 
 }
 
 
-VideoEraser(testIds)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+VideoEraser(existingVideos, videosId)
 
 
 
 
 if(require.main === module){
     (async ()=>{
-        if(!videos){
+        if(!videosId){
             console.error('❌ No video provided for deletion');
             process.exit(1);
         }
         if(command === 'fullErasing'){
-            //await fullErasing(videos);
+            await VideoEraser(existingVideos, videosId);
         }else if(command === 'thumbnailDeletion'){
-            //await thumbnailDeletion(videos);
+            await ThumbnailEraser(thumbnailFiles, videoName);
         }
     })
 }
