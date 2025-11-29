@@ -165,10 +165,10 @@ app.use("/thumbnails",express.static(THUMBNAILS_DIR,{
 }))
 
 app.post("/deleteVideo",async(req,res)=>{
-    const {videos} = res.body;
-    if(!videos) return res.status(400).json({error: 'No videos for erasing'});
+    const {videos} = req.body;
+    if(!videos || !Array.isArray(videos) || videos.length === 0) return res.status(400).json({error: 'No videos for erasing'});
 
-    const proc = spawn('node',[VIDEO_ERASER, 'fullErasing',videos],{shell:true});
+    const proc = spawn('node',[VIDEO_ERASER, 'fullErasing',...videos],{shell:true});
     let output = '';
     
     proc.stdout.on('data',data => output += data.toString());

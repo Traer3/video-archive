@@ -45,11 +45,12 @@ async function videoFromDB() {
 }
 
 
-const existingVideos = await videoFromDB();
 
-async function VideoEraser(existingVideos, videosId) {
+
+async function VideoEraser(videosId) {
+    const existingVideos = await videoFromDB();
     console.log("Ids for deletion: ", videosId)
-
+    
     for(const id of videosId){
         const isVideoExited = findVideoInDB(existingVideos, id)
         let videoName = isVideoExited.name
@@ -60,7 +61,8 @@ async function VideoEraser(existingVideos, videosId) {
     }
 };
 
-async function ThumbnailEraser(existingVideos, videosId) {
+async function ThumbnailEraser(thumbnailFiles,videosId) {
+    const existingVideos = await  videoFromDB();
     console.log("Ids for deletion: ", videosId)
 
     for(const id of videosId){
@@ -138,7 +140,7 @@ async function deleteVideoInFolder(videoFiles, videoForDeletion){
 }
 
 
-VideoEraser(existingVideos, videosId)
+VideoEraser(videosId)
 
 
 
@@ -150,7 +152,7 @@ if(require.main === module){
             process.exit(1);
         }
         if(command === 'fullErasing'){
-            await VideoEraser(existingVideos, videosId);
+            await VideoEraser(videosId);
         }else if(command === 'thumbnailDeletion'){
             await ThumbnailEraser(thumbnailFiles, videoName);
         }

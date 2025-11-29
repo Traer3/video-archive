@@ -234,7 +234,8 @@ async function authorizeByHand() {
 if(require.main === module){
     (async ()=>{
         if(command === 'getUrl'){
-            await getAuthUrl();
+           const url = await getAuthUrl();
+           console.log(url)
         }else if(command === 'finish'){
             if(!maybeCode){
                 console.error('❌ No code provided for finish');

@@ -44,7 +44,7 @@ export default function Menu ({areaState}) {
         try{
             const responce = await fetch("http://192.168.0.8:3004/authorize");
             const data = await responce.json();
-            console.log(data)
+            //console.log(data)
             if(data.url){
                 Autnification(data.url)
             }

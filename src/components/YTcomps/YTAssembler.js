@@ -157,7 +157,14 @@ export default function YTAssembler () {
         
         return(
             <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
-                <YTVidForm thumbnail={item.thumbnail} name={item.name} date={item.date} duration={item.duration} isItUnique={item.isitunique} id={item.id}/>
+                <YTVidForm 
+                    thumbnail={item.thumbnail} 
+                    name={item.name} 
+                    date={item.date} 
+                    duration={item.duration} 
+                    isItUnique={item.isitunique} 
+                    id={item.id}
+                />
             </TouchableOpacity>
         )
     }
