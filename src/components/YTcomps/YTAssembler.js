@@ -5,6 +5,7 @@ import { VideoView, useVideoPlayer, } from "expo-video";
 import YTVidForm from "./YTVidForm";
 import { DurationFetcher } from "./DurationFetcher";
 import YTLoading from "./YTLoading";
+import ModifiedYTVidForm from "./ModifiedYTVidForm";
 
 const DB_URL = 'http://192.168.0.8:3001';
 const VIDEO_URL = 'http://192.168.0.8:3004'
@@ -157,7 +158,7 @@ export default function YTAssembler () {
         
         return(
             <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
-                <YTVidForm 
+                <ModifiedYTVidForm 
                     thumbnail={item.thumbnail} 
                     name={item.name} 
                     date={item.date} 
@@ -165,6 +166,7 @@ export default function YTAssembler () {
                     isItUnique={item.isitunique} 
                     id={item.id}
                 />
+                
             </TouchableOpacity>
         )
     }
@@ -211,6 +213,7 @@ export default function YTAssembler () {
                 windowSize={10}
                 ListFooterComponent={loading ? <Text style={{textAlign:'center'}}>loading...</Text> : null}
             />
+            
             <Modal visible={!!selectedVideo} transparent={true} animationType="slide" onRequestClose={()=> setSelectedVideo(null)}>
                 <View style={styles.modalBackground}>
                     
