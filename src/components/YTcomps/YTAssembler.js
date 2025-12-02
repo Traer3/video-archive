@@ -204,6 +204,7 @@ export default function YTAssembler () {
                 style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
                 data={videos}
+                scrollEnabled={true}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 onEndReached={loadMore}

@@ -2,7 +2,7 @@ import { View, StyleSheet, Text, Image, Pressable } from "react-native"
 import creature from '../../meme/hoshino.png'
 import bratty from '../../meme/arona.gif'
 import shareIcon from '../../../assets/share.png'
-import { useState } from "react"
+import { useRef, useState } from "react"
 //import placeholder from "../../../assets/AronaServer.jpg"
 
 
@@ -16,6 +16,8 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     const [offset, setOffset] = useState({x:0})
     const [position, setPosition] = useState({x:0});
 
+    const [pressStartTime, setPressStartTime] = useState(null);
+    const [timeHeld, setTimeHeld] = useState(0);
 
 
     const hadleStart = (event)=> {
@@ -66,6 +68,34 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     const specialFunction = () =>{
         console.log("Я активировался! ")
     }
+
+
+    const getCurrentTimestamp = (event) => {
+        if(event && event.timeStamp){
+            return event.timeStamp;
+        }
+        return Date.now();
+    };
+
+    const hadlePressIn = (event) =>{
+        const startTime = getCurrentTimestamp(event);
+        setPressStartTime(startTime);
+        setTimeHeld(0);
+    };
+
+    const handlePressOut = (event) => {
+        if(pressStartTime === null) return;
+
+        const endTime = getCurrentTimestamp(event);
+        const calculatedDuration = Math.round(endTime - pressStartTime);
+
+        setTimeHeld(calculatedDuration);
+        setPressStartTime(null);
+
+        console.log(calculatedDuration)
+    }
+  
+    
     
 
     return(
@@ -77,13 +107,18 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
                 }
             ]}
             
-            onTouchStart={hadleStart}
-            onTouchMove={hadleMove}
-            onTouchEnd={hadleEnd}
+
+            //onTouchStart={hadleStart}
+            //onTouchMove={hadleMove}
+            //onTouchEnd={hadleEnd}
 
             
         >
-                <Image
+            <Pressable 
+            onPressIn={hadlePressIn}
+            onPressOut={handlePressOut}
+            >
+            <Image
                     style={styles.imageStyle}
                     source={thumbnail ? {uri: thumbnail} : bratty}
                     resizeMode='stretch'
@@ -120,6 +155,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
                         resizeMode="contain"
                     />
                 </Pressable>
+            </Pressable>
         </View>        
 
     );
