@@ -18,6 +18,7 @@ export default function YTAssembler () {
     const [page, setPage] = useState(0);
     const [hasNext, setHasNext] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [scrollAnimation, setScrollAnimation] = useState(true) 
     
     useEffect(()=>{
         let mounted = true;
@@ -165,6 +166,8 @@ export default function YTAssembler () {
                     duration={item.duration} 
                     isItUnique={item.isitunique} 
                     id={item.id}
+                    scrollAnimation={scrollAnimation}
+                    setScrollAnimation={setScrollAnimation}
                 />
                 
             </TouchableOpacity>
@@ -204,7 +207,7 @@ export default function YTAssembler () {
                 style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
                 data={videos}
-                scrollEnabled={true}
+                scrollEnabled={scrollAnimation}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 onEndReached={loadMore}

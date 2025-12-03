@@ -1,12 +1,13 @@
-import { View, StyleSheet, Text, Image, Pressable } from "react-native"
+import { View, StyleSheet, Text, Image, Pressable, ImageBackground } from "react-native"
 import creature from '../../meme/hoshino.png'
 import bratty from '../../meme/arona.gif'
 import shareIcon from '../../../assets/share.png'
 import { useRef, useState } from "react"
+import deleteIcon from "../buttons/buttonIcons/delete-button.png"
 //import placeholder from "../../../assets/AronaServer.jpg"
 
 
-export default function ModifiedYTVidForm({thumbnail, name, date , duration,isItUnique,id}) {
+export default function ModifiedYTVidForm({thumbnail, name, date , duration,isItUnique,id,scrollAnimation,setScrollAnimation}) {
 
 
     const [buttonTest, setButtonTest] = useState(0)
@@ -19,9 +20,14 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     const [pressStartTime, setPressStartTime] = useState(null);
     const [timeHeld, setTimeHeld] = useState(0);
 
+    const MIN_X_LIMIT = -101;
+    const MAX_X_LIMIT = 0;
+
 
     const hadleStart = (event)=> {
-        console.log("someone is touching me")
+        if(scrollAnimation) return;
+
+        //console.log("someone is touching me")
         setIsDragging(true);
 
         const eventSource = event.nativeEvent || event;
@@ -32,7 +38,9 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
             touchPoint = eventSource;
         }
 
-        const clientX = touchPoint.pageX || touchPoint.clientX;
+        const clientX = -touchPoint.pageX || -touchPoint.clientX;
+
+        
 
         setOffset({
             x: clientX - position.x,
@@ -40,7 +48,8 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     }
 
     const hadleMove = (event) =>{
-        console.log("move me ")
+        if(scrollAnimation) return;
+
         if(!isDragging) return;
 
         const eventSource = event.nativeEvent || event;
@@ -50,23 +59,33 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
         }else{
             touchPoint = eventSource;
         }
+       
 
-        const clientX = touchPoint.pageX || touchPoint.clientX;
+        const clientX = -touchPoint.pageX || -touchPoint.clientX;
+
+        const desiredX = clientX - offset.x;
+        console.log("desiredX:", desiredX)
+        const clampedX = Math.max(MIN_X_LIMIT, Math.min(desiredX, MAX_X_LIMIT))
+        console.log("clampedX:", clampedX)
 
         console.log("Moi cordi: ", clientX)
 
         setPosition({
-            x: clientX - offset.x,
+            x: clampedX
         });
     };
 
     const hadleEnd = () =>{
+        if(scrollAnimation) return;
+
         setIsDragging(false);
+        setScrollAnimation(true)
 
     }
 
     const specialFunction = () =>{
         console.log("Я активировался! ")
+        setScrollAnimation(false)
     }
 
 
@@ -78,6 +97,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     };
 
     const hadlePressIn = (event) =>{
+        //console.log("Item id",id)
         const startTime = getCurrentTimestamp(event);
         setPressStartTime(startTime);
         setTimeHeld(0);
@@ -89,6 +109,13 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
         const endTime = getCurrentTimestamp(event);
         const calculatedDuration = Math.round(endTime - pressStartTime);
 
+        if(calculatedDuration > 150){
+            specialFunction();
+        }
+        if(calculatedDuration < 150){
+            setScrollAnimation(true)
+        }
+
         setTimeHeld(calculatedDuration);
         setPressStartTime(null);
 
@@ -99,38 +126,59 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     
 
     return(
-        <View 
-            style={[
-                styles.baseForm,{
-                    borderColor: isItUnique ? 'red': 'rgb(43,75,123)', 
-                    right:`${position.x}`,
-                }
-            ]}
-            
-
-            //onTouchStart={hadleStart}
-            //onTouchMove={hadleMove}
-            //onTouchEnd={hadleEnd}
-
-            
-        >
-            <Pressable 
-            onPressIn={hadlePressIn}
-            onPressOut={handlePressOut}
+        <Pressable 
+                onPressIn={hadlePressIn}
+                onPressOut={handlePressOut}
+                >
+            <Pressable
+                style={[
+                    styles.baseForm,{
+                        position:'absolute',
+                        borderColor: 'red', 
+                        width:"30%",
+                        backgroundColor:'red'
+                    }
+                ]}
             >
-            <Image
+               <Text 
+                    style={{
+                        height:"100%",
+                        width:'100%',
+                        
+                        textAlign:'center',
+                        textAlignVertical:'center',
+                        fontWeight:'600',
+                        fontSize:20,
+                        color:'white'
+                    }}
+               >
+                delete
+               </Text>
+            </Pressable>
+            <View 
+                style={[
+                    styles.baseForm,{
+                        borderColor: isItUnique ? 'red': 'rgb(43,75,123)', 
+                        //borderColor: 'green', 
+                        right:`${position.x}`,
+                    }
+                ]}
+                onTouchStart={hadleStart}
+                onTouchMove={hadleMove}
+                onTouchEnd={hadleEnd}
+            >
+                <Image
                     style={styles.imageStyle}
                     source={thumbnail ? {uri: thumbnail} : bratty}
                     resizeMode='stretch'
                 />
-                
+
                 <View 
                     style={{
-                        flex:1,
-                        marginLeft:3
-                    }}>
+                    marginLeft:3,
+                }}>
                     <Text style={{width:'220',}} numberOfLines={1} ellipsizeMode="tail">
-                       {name}
+                        {name}
                     </Text>
                     <Text>
                         {date}
@@ -138,25 +186,30 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
                     <Text>
                         {duration}
                     </Text>
+
+                    <Pressable
+                        style={{
+                            //borderWidth:1,
+                            //borderColor:'red',
+                            alignItems:"flex-end"
+                        }}
+                        onPress={()=>{
+                            setButtonTest(prev => prev + 1)
+                            console.log(buttonTest)
+                        }}
+                    >
+                        <Image
+                            source={shareIcon}
+                            style={{width:20, height:20}}
+                            resizeMode="contain"
+                        />
+                    </Pressable>
                 </View>
-                <Pressable
-                    style={{
-                        marginRight:5,
-                        marginTop:50
-                    }}
-                    onPress={()=>{
-                        setButtonTest(prev => prev + 1)
-                        console.log(buttonTest)
-                    }}
-                >
-                    <Image
-                        source={shareIcon}
-                        style={{width:20, height:20}}
-                        resizeMode="contain"
-                    />
-                </Pressable>
-            </Pressable>
-        </View>        
+
+                
+                
+            </View>   
+        </Pressable>     
 
     );
 };
@@ -168,7 +221,7 @@ const styles = StyleSheet.create({
         backgroundColor:'rgb(73,106,154)',
         height:'80',
         borderWidth:2,
-        
+
         marginTop:8,
         marginLeft:10,
         marginRight:10,
@@ -182,169 +235,3 @@ const styles = StyleSheet.create({
         width:'30%'
     }
 })
-
-//Версия с pangestur
-/*
-import { View, StyleSheet, Text, Image, Pressable } from "react-native"
-import creature from '../../meme/hoshino.png'
-import bratty from '../../meme/arona.gif'
-import shareIcon from '../../../assets/share.png'
-import { useState } from "react"
-//import placeholder from "../../../assets/AronaServer.jpg"
-import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
-
-export default function ModifiedYTVidForm({thumbnail, name, date , duration,isItUnique,id}) {
-
-
-    const [buttonTest, setButtonTest] = useState(0)
-
-
-    const [isDragging, setIsDragging] = useState(false);
-    const [offset, setOffset] = useState({x:0})
-    const [position, setPosition] = useState({x:0});
-
-    const translateX = useSharedValue(0);
-
-    const hadleStart = (e)=> {
-        console.log("someone is touching me")
-        setIsDragging(true);
-        const clientX = e.touches ? e.touches[0].client.X : e.clientX;
-
-        setOffset({
-            x: clientX - position.x,
-        });
-    }
-
-    const hadleMove = (e) =>{
-        console.log("move me ")
-        if(!isDragging) return;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-
-        console.log("Cordinats: ",clientX)
-
-        setPosition({
-            x: clientX - offset.x,
-        });
-    };
-
-    const hadleEnd = () =>{
-        setIsDragging(false);
-
-    }
-
-    const specialFunction = () =>{
-        console.log("Я активировался! ")
-    }
-
-    //бля вся эта хуйня может не сработать нахуй в FlatListe , если не работает , удали withSpring , если нет
-    // УДАЛИ НАХУЙ FLATLIST и создай свой 
-    const panGesture = Gesture.Pan()
-        .onUpdate((event)=>{
-            translateX.value = 0 + event.translationX;
-        })
-
-        .onEnd((event)=>{
-            if(event.translationX > 100){
-                translateX.value = withSpring(0);
-                //сюда можно как раз добавить функцию которя будет запускаться
-                // для этого нужно ебануть новый runOnJS() 
-            }else{
-                translateX.value = withSpring(0);
-            }
-            translateX.value = withSpring(0, {damping: 10, stiffness: 100});
-        });
-    
-    const animatedStyle = useAnimatedStyle(()=>({
-        transform:[{translateX: translateX.value}],
-    }))
-
-    return(
-        <GestureHandlerRootView style={{flex:1}}>
-            <View 
-            style={styles.baseForm}
-            >
-                <GestureDetector gesture={panGesture}>
-                    <Animated.View>
-                                <View 
-                                    style={[
-                                        styles.baseForm,{
-                                            borderColor: isItUnique ? 'red': 'rgb(43,75,123)', 
-                                            
-                                            //right:`${position.x}`,
-                                            
-                                        }
-                                        ]}
-                                        //onTouchStart={(e)=>{hadleStart(e);}}
-                                        //onTouchMove={hadleMove}
-                                        //onTouchEnd={hadleEnd}
-                        
-                                    >
-                                        <Image
-                                            style={styles.imageStyle}
-                                            source={thumbnail ? {uri: thumbnail} : bratty}
-                                            resizeMode='stretch'
-                                        />
-                                        
-                                        <View 
-                                            style={{
-                                                flex:1,
-                                                marginLeft:3
-                                            }}>
-                                            <Text style={{width:'220',}} numberOfLines={1} ellipsizeMode="tail">
-                                            {name}
-                                            </Text>
-                                            <Text>
-                                                {date}
-                                            </Text>
-                                            <Text>
-                                                {duration}
-                                            </Text>
-                                        </View>
-                                        <Pressable
-                                            style={{
-                                                marginRight:5,
-                                                marginTop:50
-                                            }}
-                                            onPress={()=>{
-                                                setButtonTest(prev => prev + 1)
-                                                console.log(buttonTest)
-                                            }}
-                                        >
-                                            <Image
-                                                source={shareIcon}
-                                                style={{width:20, height:20}}
-                                                resizeMode="contain"
-                                            />
-                                        </Pressable>
-                                </View>
-                    </Animated.View>
-                </GestureDetector>
-            </View>
-        </GestureHandlerRootView>
-    );
-};
-
-const styles = StyleSheet.create({
-    baseForm:{
-        flex:1,
-        flexDirection:'row',
-        backgroundColor:'rgb(73,106,154)',
-        height:'80',
-        borderWidth:2,
-        
-        marginTop:8,
-        marginLeft:10,
-        marginRight:10,
-
-        
-    },
-    imageStyle:{
-        borderWidth:1,
-        borderRadius:2,
-        height:'100%',
-        width:'30%'
-    }
-})
-
-*/
