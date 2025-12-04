@@ -3,7 +3,7 @@ import creature from '../../meme/hoshino.png'
 import bratty from '../../meme/arona.gif'
 import shareIcon from '../../../assets/share.png'
 import { useRef, useState } from "react"
-import deleteIcon from "../buttons/buttonIcons/delete-button.png"
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
 //import placeholder from "../../../assets/AronaServer.jpg"
 
 
@@ -13,22 +13,29 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     const [buttonTest, setButtonTest] = useState(0)
 
 
-    const [isDragging, setIsDragging] = useState(false);
-    const [offset, setOffset] = useState({x:0})
-    const [position, setPosition] = useState({x:0});
+    //const [isDragging, setIsDragging] = useState(false);
+    //const [offset, setOffset] = useState({x:0})
+    //const [position, setPosition] = useState({x:0});
 
     const [pressStartTime, setPressStartTime] = useState(null);
     const [timeHeld, setTimeHeld] = useState(0);
 
     const MIN_X_LIMIT = -101;
     const MAX_X_LIMIT = 0;
+    
+    const translateX = useSharedValue(0);
+    const offsetRef = useRef(0);
+
+    const animatedContentStyles = useAnimatedStyle(()=>({
+        transform: [{translateX: translateX.value}],
+    }));
+
 
 
     const hadleStart = (event)=> {
         if(scrollAnimation) return;
 
         //console.log("someone is touching me")
-        setIsDragging(true);
 
         const eventSource = event.nativeEvent || event;
         let touchPoint;
@@ -38,19 +45,17 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
             touchPoint = eventSource;
         }
 
-        const clientX = -touchPoint.pageX || -touchPoint.clientX;
+        const clientX = touchPoint.pageX || touchPoint.clientX;
+        const initialClientX = -clientX
 
-        
-
-        setOffset({
-            x: clientX - position.x,
-        });
+        offsetRef.current = initialClientX - translateX.value;
+        //setOffset({x: clientX - position.x,});
     }
 
     const hadleMove = (event) =>{
         if(scrollAnimation) return;
 
-        if(!isDragging) return;
+        //if(!isDragging) return;
 
         const eventSource = event.nativeEvent || event;
         let touchPoint;
@@ -59,26 +64,29 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
         }else{
             touchPoint = eventSource;
         }
-       
 
-        const clientX = -touchPoint.pageX || -touchPoint.clientX;
+        const clientX = touchPoint.pageX || touchPoint.clientX;
 
-        const desiredX = clientX - offset.x;
-        console.log("desiredX:", desiredX)
+        const desiredX = (-clientX) - offsetRef.current;
         const clampedX = Math.max(MIN_X_LIMIT, Math.min(desiredX, MAX_X_LIMIT))
-        console.log("clampedX:", clampedX)
+        
+        translateX.value = clampedX
 
-        console.log("Moi cordi: ", clientX)
+        console.log("Moi cordi: ", desiredX)
 
-        setPosition({
-            x: clampedX
-        });
+        //setPosition({ x: clampedX});
     };
 
     const hadleEnd = () =>{
         if(scrollAnimation) return;
 
-        setIsDragging(false);
+        if(translateX.value < MIN_X_LIMIT / 2){
+            translateX.value = withSpring(MIN_X_LIMIT);
+        }else{
+            translateX.value = withSpring(MAX_X_LIMIT);
+        }
+
+        //setIsDragging(false);
         setScrollAnimation(true)
 
     }
@@ -109,11 +117,12 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
         const endTime = getCurrentTimestamp(event);
         const calculatedDuration = Math.round(endTime - pressStartTime);
 
-        if(calculatedDuration > 150){
-            specialFunction();
-        }
+        
         if(calculatedDuration < 150){
+            translateX.value = withSpring(MAX_X_LIMIT);
             setScrollAnimation(true)
+        }else{
+            specialFunction()
         }
 
         setTimeHeld(calculatedDuration);
@@ -121,47 +130,62 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
 
         console.log(calculatedDuration)
     }
-  
-    
-    
+
+    const deleteVideo = (id) => {
+        //setPosition({x:0})
+        translateX.value = withSpring(MAX_X_LIMIT);
+        console.log(`Video deleted ${id}`)
+    }
 
     return(
         <Pressable 
                 onPressIn={hadlePressIn}
                 onPressOut={handlePressOut}
                 >
-            <Pressable
+            <View
                 style={[
                     styles.baseForm,{
                         position:'absolute',
                         borderColor: 'red', 
                         width:"30%",
                         backgroundColor:'red'
-                    }
+                    },
                 ]}
             >
-               <Text 
-                    style={{
-                        height:"100%",
-                        width:'100%',
-                        
-                        textAlign:'center',
-                        textAlignVertical:'center',
-                        fontWeight:'600',
-                        fontSize:20,
-                        color:'white'
-                    }}
+               <Pressable 
+                 style={{
+                    borderColor:'green',
+                    borderWidth:2,
+                    height:"100%",
+                    width:'100%',
+                 }}
+                 onPress={()=>deleteVideo(id)}
                >
-                delete
-               </Text>
-            </Pressable>
-            <View 
+                <Text 
+                        style={{
+                            height:"100%",
+                            width:'100%',
+                            
+                            textAlign:'center',
+                            textAlignVertical:'center',
+                            fontWeight:'600',
+                            fontSize:20,
+                            color:'white'
+                        }}
+                >
+                    delete
+                </Text>
+               </Pressable>
+            </View>
+        
+            <Animated.View 
                 style={[
                     styles.baseForm,{
                         borderColor: isItUnique ? 'red': 'rgb(43,75,123)', 
                         //borderColor: 'green', 
-                        right:`${position.x}`,
-                    }
+                        //right:`${position.x}`,
+                    },
+                    animatedContentStyles,
                 ]}
                 onTouchStart={hadleStart}
                 onTouchMove={hadleMove}
@@ -208,7 +232,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
 
                 
                 
-            </View>   
+            </Animated.View >   
         </Pressable>     
 
     );
@@ -235,3 +259,44 @@ const styles = StyleSheet.create({
         width:'30%'
     }
 })
+
+
+//рабочая хуйня без анимки 
+/*
+<View
+                style={[
+                    styles.baseForm,{
+                        position:'absolute',
+                        borderColor: 'red', 
+                        width:"30%",
+                        backgroundColor:'red'
+                    }
+                ]}
+            >
+               <Pressable 
+                 style={{
+                    borderColor:'green',
+                    borderWidth:2,
+                    height:"100%",
+                    width:'100%',
+                 }}
+                 onPress={()=>deleteVideo(id)}
+               >
+                <Text 
+                        style={{
+                            height:"100%",
+                            width:'100%',
+                            
+                            textAlign:'center',
+                            textAlignVertical:'center',
+                            fontWeight:'600',
+                            fontSize:20,
+                            color:'white'
+                        }}
+                >
+                    delete
+                </Text>
+               </Pressable>
+            </View>
+
+*/

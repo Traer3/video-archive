@@ -6,6 +6,7 @@ import SidePanel from './src/components/SidePanel';
 import SwipeArea from './src/components/YTcomps/SwipeArea';
 import { useState } from 'react';
 import Menu from './src/components/menuComps/Menu';
+import MainTT from './src/components/TTComps/MainTT';
 export default function App() {
 
   const [showYT, setShowYT] = useState(false);
@@ -23,6 +24,9 @@ export default function App() {
         </>
         <>
           {showMenu && <Menu areaState={setShowMenu}/>}
+        </>
+        <>
+          {showTT && <MainTT/>}
         </>
         <SidePanel>
             
