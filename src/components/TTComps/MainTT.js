@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { View, Image,Pressable,Text } from "react-native";
-import { useEffect, useRef, useState } from "react";
+import {useRef, useState } from "react";
 import bratty from "../../meme/arona.gif"
 import shareIcon from "../../../assets/share.png"
 import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withRepeat, withSpring } from "react-native-reanimated";
@@ -17,17 +17,6 @@ export default function MainTT ({thumbnail, name, date , duration,id}) {
         transform: [{translateX: translateX.value}],
     }));
 
-    useEffect(()=>{
-        translateX.value = withRepeat(withSpring(-translateX.value,{
-            stiffness: 900,
-            damping:120,
-            mass:4,
-            overshootClamping:false,
-            energyThreshold:6e-9,
-            velocity:0,
-            reduceMotion: ReduceMotion.System
-        }));
-    },[]);
 
     const hadleStart = (event)=>{
         const eventSource = event.nativeEvent || event;
@@ -59,7 +48,7 @@ export default function MainTT ({thumbnail, name, date , duration,id}) {
         const desiredX = clientX + offsetRef.current;
         translateX.value = desiredX
 
-        //console.log(desiredX)
+      
     };
 
     const hadleEnd = () => {
