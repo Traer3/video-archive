@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { View, Image,Pressable,Text } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import bratty from "../../meme/arona.gif"
@@ -10,7 +10,6 @@ import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withRepeat, w
 export default function MainTT ({thumbnail, name, date , duration,id}) {
     const [buttonTest, setButtonTest] = useState(0);
     
-    //const windowWidth = Dimensions.get('window').width
     const translateX = useSharedValue(0);
     const offsetRef = useRef(0);
 
@@ -60,11 +59,10 @@ export default function MainTT ({thumbnail, name, date , duration,id}) {
         const desiredX = clientX + offsetRef.current;
         translateX.value = desiredX
 
-        console.log(desiredX)
+        //console.log(desiredX)
     };
 
     const hadleEnd = () => {
-        console.log("FuckOFF");
 
         if(translateX.value < 50){
             translateX.value = withSpring(0);

@@ -13,9 +13,6 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     const [buttonTest, setButtonTest] = useState(0)
 
 
-    //const [isDragging, setIsDragging] = useState(false);
-    //const [offset, setOffset] = useState({x:0})
-    //const [position, setPosition] = useState({x:0});
 
     const [pressStartTime, setPressStartTime] = useState(null);
     const [timeHeld, setTimeHeld] = useState(0);
@@ -72,9 +69,8 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
         
         translateX.value = clampedX
 
-        console.log("Moi cordi: ", desiredX)
+        //console.log("Moi cordi: ", desiredX)
 
-        //setPosition({ x: clampedX});
     };
 
     const hadleEnd = () =>{
