@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image} from "react-native";
+import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image, Pressable} from "react-native";
 import { VideoView, useVideoPlayer, } from "expo-video";
 
 import YTVidForm from "./YTVidForm";
@@ -18,7 +18,10 @@ export default function YTAssembler () {
     const [page, setPage] = useState(0);
     const [hasNext, setHasNext] = useState(true);
     const [loading, setLoading] = useState(false);
+
     const [scrollAnimation, setScrollAnimation] = useState(true) 
+    const [pressStartTime, setPressStartTime] = useState(null);
+    const [timeHeld, setTimeHeld] = useState(0);
     
     useEffect(()=>{
         let mounted = true;
@@ -144,6 +147,50 @@ export default function YTAssembler () {
         
    }
 
+   const getCurrentTimestamp = (event) => {
+           if(event && event.timeStamp){
+               return event.timeStamp;
+           }
+           return Date.now();
+       };
+   
+       const hadlePressIn = (event,itemUrl) =>{
+           const startTime = getCurrentTimestamp(event);
+           setPressStartTime(startTime);
+
+           const endTime = getCurrentTimestamp(event);
+           const calculatedDuration = Math.round(endTime - startTime);
+
+           console.log("CalDur", calculatedDuration)
+           if(calculatedDuration < 150 ){
+                //console.log("Selected Vid", itemUrl)
+                setSelectedVideo(itemUrl)
+           }
+           setTimeHeld(0);
+       };
+   
+       const handlePressOut = (event,itemUrl) => {
+           if(pressStartTime === null) return;
+           
+           const endTime = getCurrentTimestamp(event);
+           const calculatedDuration = Math.round(endTime - pressStartTime);
+   
+           
+           if(calculatedDuration > 150){
+                console.log("Kto duration ?",calculatedDuration)
+                setScrollAnimation(false)
+           }else{
+              
+               setScrollAnimation(true)
+               setPressStartTime(null)
+           }
+           //setSelectedVideo(itemUrl)
+           setTimeHeld(calculatedDuration);
+           setPressStartTime(null);
+   
+           console.log(calculatedDuration)
+       }
+
 
     const renderItem = ({item}) => {
         if(!item.id) return null;
@@ -158,7 +205,10 @@ export default function YTAssembler () {
         }
         
         return(
-            <TouchableOpacity onPress={()=> setSelectedVideo(item.url)}>
+            <TouchableOpacity 
+                onPressIn={(event)=> hadlePressIn(event,item.url)}
+                onPressOut={(event)=> handlePressOut(event,item.url)}
+            >
                 <ModifiedYTVidForm 
                     thumbnail={item.thumbnail} 
                     name={item.name} 
@@ -168,6 +218,7 @@ export default function YTAssembler () {
                     id={item.id}
                     scrollAnimation={scrollAnimation}
                     setScrollAnimation={setScrollAnimation}
+                    setPressStartTime={setPressStartTime}
                 />
                 
             </TouchableOpacity>
@@ -203,12 +254,12 @@ export default function YTAssembler () {
                     }}
                 />
             )}
+
             <FlatList
                 style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
                 data={videos}
                 scrollEnabled={scrollAnimation}
-                //scrollEnabled={false}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 onEndReached={loadMore}

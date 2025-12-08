@@ -8,18 +8,10 @@ import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withRepeat, w
 //import placeholder from "../../../assets/AronaServer.jpg"
 
 
-export default function ModifiedYTVidForm({thumbnail, name, date , duration,isItUnique,id,scrollAnimation,setScrollAnimation}) {
+export default function ModifiedYTVidForm({thumbnail, name, date , duration,isItUnique,id,scrollAnimation,setScrollAnimation, setPressStartTime}) {
 
 
     const [buttonTest, setButtonTest] = useState(0)
-
-
-
-    const [pressStartTime, setPressStartTime] = useState(null);
-    const [timeHeld, setTimeHeld] = useState(0);
-
-
-
 
     const translateX = useSharedValue(0);
     const offsetRef = useRef(0);
@@ -58,6 +50,15 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
                 translateX.value = withSpring(0);
             }else{
                 touchPoint = eventSource;
+                translateX.value = withSpring(100,{
+                    stiffness: 900,
+                    damping:120,
+                    mass:4,
+                    overshootClamping:false,
+                    energyThreshold:6e-9,
+                    velocity:0,
+                    reduceMotion: ReduceMotion.System
+                })
             }
     
             const clientX = touchPoint.pageX || touchPoint.clientX;
@@ -70,6 +71,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     
         const hadleEnd = () => {
             setScrollAnimation(true)
+            setPressStartTime(null)
             translateX.value = withSpring(0);
             if(translateX.value < 30){
                 translateX.value = withSpring(0);
@@ -93,51 +95,13 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     }
 
 
-    const getCurrentTimestamp = (event) => {
-        if(event && event.timeStamp){
-            return event.timeStamp;
-        }
-        return Date.now();
-    };
-
-    const hadlePressIn = (event) =>{
-        //console.log("Item id",id)
-        const startTime = getCurrentTimestamp(event);
-        setPressStartTime(startTime);
-        setTimeHeld(0);
-    };
-
-    const handlePressOut = (event) => {
-        if(pressStartTime === null || pressStartTime < 150 ) return;
-        
-        const endTime = getCurrentTimestamp(event);
-        const calculatedDuration = Math.round(endTime - pressStartTime);
-
-        
-        if(calculatedDuration > 200){
-            
-            specialFunction()
-            
-        }else{
-            setScrollAnimation(true)
-            translateX.value = withSpring(0);
-        }
-
-        setTimeHeld(calculatedDuration);
-        setPressStartTime(null);
-
-        console.log(calculatedDuration)
-    }
-
     const deleteVideo = (id) => {
         translateX.value = withSpring(0);
         console.log(`Video deleted ${id}`)
     }
 
     return(
-        <Pressable 
-                onPressIn={hadlePressIn}
-                onPressOut={handlePressOut}
+        <View 
                 style={{
                     justifyContent:'center'
                 }}
@@ -235,7 +199,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
                 
                 
             </Animated.View >   
-        </Pressable>     
+        </View>     
 
     );
 };
