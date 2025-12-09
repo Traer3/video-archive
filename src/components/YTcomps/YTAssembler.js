@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image, Pressable} from "react-native";
+import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image, Pressable, Dimensions} from "react-native";
 import { VideoView, useVideoPlayer, } from "expo-video";
 
 import YTVidForm from "./YTVidForm";
 import { DurationFetcher } from "./DurationFetcher";
 import YTLoading from "./YTLoading";
 import ModifiedYTVidForm from "./ModifiedYTVidForm";
+import { useSharedValue } from "react-native-reanimated";
 
 const DB_URL = 'http://192.168.0.8:3001';
 const VIDEO_URL = 'http://192.168.0.8:3004'
@@ -22,7 +23,15 @@ export default function YTAssembler () {
     const [scrollAnimation, setScrollAnimation] = useState(true) 
     const [pressStartTime, setPressStartTime] = useState(null);
     const [timeHeld, setTimeHeld] = useState(0);
-    
+
+    const translateX = useSharedValue(0);
+    const offsetRefX = useRef(0);
+    const translateY = useSharedValue(0);
+    const offsetRefY = useRef(0);
+
+    const windowWidth = Dimensions.get('window').width;
+    const windowHeight = Dimensions.get('window').height;
+        
     useEffect(()=>{
         let mounted = true;
         (async ()=>{
@@ -56,7 +65,7 @@ export default function YTAssembler () {
 
 
     const fetchAllVideos = useCallback(async (pageNum = 1) => {
-        console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
+       // console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
         if(loading || !hasNext ) return;
         setLoading(true);
             try{
@@ -154,42 +163,73 @@ export default function YTAssembler () {
            return Date.now();
        };
    
-       const hadlePressIn = (event,itemUrl) =>{
-           const startTime = getCurrentTimestamp(event);
-           setPressStartTime(startTime);
-
-           const endTime = getCurrentTimestamp(event);
-           const calculatedDuration = Math.round(endTime - startTime);
-
-           console.log("CalDur", calculatedDuration)
-           if(calculatedDuration < 150 ){
-                //console.log("Selected Vid", itemUrl)
-                setSelectedVideo(itemUrl)
-           }
-           setTimeHeld(0);
-       };
+    const hadlePressIn = (event) =>{
+        /*
+        const startTime = getCurrentTimestamp(event);
+        setPressStartTime(startTime);
+        setTimeHeld(0);
+        */
+        
+    };
    
-       const handlePressOut = (event,itemUrl) => {
-           if(pressStartTime === null) return;
+    const handlePressOut = (event,itemUrl) => {
+        /*
+        if(pressStartTime === null) return;
+        console.log("Press Start Time: ",pressStartTime)
            
-           const endTime = getCurrentTimestamp(event);
-           const calculatedDuration = Math.round(endTime - pressStartTime);
-   
+        const endTime = getCurrentTimestamp(event);
+        const calculatedDuration = Math.round(endTime - pressStartTime);
+        console.log("calculatedDuration: ", calculatedDuration)
            
-           if(calculatedDuration > 150){
-                console.log("Kto duration ?",calculatedDuration)
-                setScrollAnimation(false)
-           }else{
+        if(calculatedDuration > 150){
+                
+            setScrollAnimation(false)
+        }else{
               
-               setScrollAnimation(true)
-               setPressStartTime(null)
-           }
-           //setSelectedVideo(itemUrl)
-           setTimeHeld(calculatedDuration);
-           setPressStartTime(null);
+            setScrollAnimation(true)
+            setPressStartTime(null)
+        }
+        //setSelectedVideo(itemUrl)
+        setTimeHeld(calculatedDuration);
+        setPressStartTime(null);
    
-           console.log(calculatedDuration)
-       }
+        console.log("handlePressOut duration",calculatedDuration)
+        */
+
+
+    }
+
+    const hadleStart = (event) => {
+        const eventSource = event.nativeEvent || event;
+        let touchPoint;
+
+        if(eventSource.touches && eventSource.touches.length > 0){
+            touchPoint = eventSource.touches[0];
+        }else{
+            touchPoint = eventSource;
+        }
+
+        const clientX = touchPoint.pageX || touchPoint.clientX;
+        offsetRefX.current = clientX - translateX.value;
+        console.log("clientX",clientX)
+
+        const clientY = touchPoint.pageY || touchPoint.clientY;
+        offsetRefY.current = clientY - translateY.value;
+        console.log("clientY",clientY)
+    }
+
+    const hadleMove = (event) => {
+        const eventSource = event.nativeEvent || event;
+        let touchPoint;
+
+        if(eventSource.touches && eventSource.touches.length > 0){
+            touchPoint = eventSource.touches[0];
+        }else{
+            touchPoint = eventSource;
+        }
+
+
+    }
 
 
     const renderItem = ({item}) => {
@@ -203,11 +243,13 @@ export default function YTAssembler () {
                 <>{placeholder}</>
             );
         }
-        
+         
         return(
-            <TouchableOpacity 
-                onPressIn={(event)=> hadlePressIn(event,item.url)}
-                onPressOut={(event)=> handlePressOut(event,item.url)}
+            <Pressable 
+                //onPressIn={hadlePressIn}
+                //onPressOut={(event)=> handlePressOut(event,item.url)}
+                onTouchStart={hadleStart}
+                
             >
                 <ModifiedYTVidForm 
                     thumbnail={item.thumbnail} 
@@ -221,7 +263,7 @@ export default function YTAssembler () {
                     setPressStartTime={setPressStartTime}
                 />
                 
-            </TouchableOpacity>
+            </Pressable>
         )
     }
 

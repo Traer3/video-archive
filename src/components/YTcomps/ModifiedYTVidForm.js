@@ -25,7 +25,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     
     
         const hadleStart = (event)=>{
-            setScrollAnimation(false);
+            //setScrollAnimation(false);
             const eventSource = event.nativeEvent || event;
             let touchPoint;
     
@@ -41,7 +41,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
         }
     
         const hadleMove = (event)=>{
-            setScrollAnimation(false);
+            //setScrollAnimation(false);
             const eventSource = event.nativeEvent || event;
             let touchPoint;
     
@@ -70,7 +70,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
         };
     
         const hadleEnd = () => {
-            setScrollAnimation(true)
+            //setScrollAnimation(true)
             setPressStartTime(null)
             translateX.value = withSpring(0);
             if(translateX.value < 30){

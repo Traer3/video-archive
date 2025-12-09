@@ -4,70 +4,37 @@ import {useRef, useState } from "react";
 import bratty from "../../meme/arona.gif"
 import shareIcon from "../../../assets/share.png"
 import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withRepeat, withSpring } from "react-native-reanimated";
+import { Swipeable } from "react-native-gesture-handler";
 
 
 
-export default function MainTT ({thumbnail, name, date , duration,id}) {
+export default function MainTT () {
     const [buttonTest, setButtonTest] = useState(0);
     
-    const translateX = useSharedValue(0);
-    const offsetRef = useRef(0);
+    const [data, setData] = useState([
+        {id: "1", title: "Cunt1"},
+        {id: "1", title: "Cunt2"},
+        {id: "1", title: "Cunt3"},
+        {id: "1", title: "Cunt4"},
+    ]);
 
-    const animatedStyles = useAnimatedStyle(()=>({
-        transform: [{translateX: translateX.value}],
-    }));
-
-
-    const hadleStart = (event)=>{
-        const eventSource = event.nativeEvent || event;
-        let touchPoint;
-
-        if(eventSource.touches && eventSource.touches.length > 0){
-            touchPoint = eventSource.touches[0];
-        }else{
-            touchPoint = eventSource;
-        }
-
-        const clientX = touchPoint.pageX || touchPoint.clientX;
-        const initialClientX = -clientX;
-
-        offsetRef.current = initialClientX - translateX.value;
-    }
-
-    const hadleMove = (event)=>{
-        const eventSource = event.nativeEvent || event;
-        let touchPoint;
-
-        if(eventSource.touches && eventSource.touches.length > 0){
-            touchPoint = eventSource.touches[0];
-        }else{
-            touchPoint = eventSource;
-        }
-
-        const clientX = touchPoint.pageX || touchPoint.clientX;
-        const desiredX = clientX + offsetRef.current;
-        translateX.value = desiredX
-
-      
+    const deleteItem = (id) => {
+        setData((prev)=> prev.filter((item)=>  item.id !== id));
     };
 
-    const hadleEnd = () => {
-
-        if(translateX.value < 50){
-            translateX.value = withSpring(0);
-        }else{
-            translateX.value = withSpring(120,{
-                stiffness: 900,
-                damping:120,
-                mass:4,
-                overshootClamping:false,
-                energyThreshold:6e-9,
-                velocity:0,
-                reduceMotion: ReduceMotion.System
-            })
-        }
-    }
-
+    const RightActions = () =>{
+        return(
+            <View style={styles.deleteBox}>
+                <Text style={styles.deleteText}>Delete</Text>
+            </View>
+        );
+    };
+    
+    const renderItem = ({items}) => (
+        <Swipeable>
+            
+        </Swipeable>
+    )
 
         return(
             <View style={styles.main}>
@@ -87,50 +54,7 @@ export default function MainTT ({thumbnail, name, date , duration,id}) {
                     zIndex:1,
                 }}>
 
-                    <Animated.View 
-                        style={[styles.baseForm, animatedStyles]}
-                        onTouchStart={hadleStart}
-                        onTouchMove={hadleMove}
-                        onTouchEnd={hadleEnd}
-                        >
-                            <Image
-                                style={styles.imageStyle}
-                                source={thumbnail ? {uri: thumbnail} : bratty}
-                                resizeMode="contain"
-                            />
-                                    
-                            <View 
-                                style={{
-                                    flex:1,
-                                    marginLeft:3
-                                }}>
-                                    <Text style={{width:'220',}} numberOfLines={1} ellipsizeMode="tail">
-                                        {name}
-                                    </Text>
-                                    <Text>
-                                        {date}
-                                    </Text>
-                                    <Text>
-                                        {duration}
-                                    </Text>
-                            </View>
-                            <Pressable
-                                style={{
-                                    marginRight:5,
-                                    marginTop:50
-                                }}
-                                onPress={()=>{
-                                    setButtonTest(prev => prev + 1)
-                                    console.log(buttonTest)
-                                }}
-                            >
-                                <Image
-                                    source={shareIcon}
-                                    style={{width:20, height:20}}
-                                    resizeMode="contain"
-                                />
-                            </Pressable>
-                    </Animated.View >
+                    
                 </View>
             </View>
         );
