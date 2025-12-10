@@ -31,6 +31,15 @@ export default function YTAssembler () {
 
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
+
+    const [initiationCount, setInitiationCount] = useState(0);
+    const [Xstate,setXstate] = useState(0);
+    const [Ystate,setYstate] = useState(0);
+    const [newXstate,setNewXstate] = useState(0);
+    const [newYstate,setNewYstate] = useState(0);
+
+
+
         
     useEffect(()=>{
         let mounted = true;
@@ -211,11 +220,13 @@ export default function YTAssembler () {
 
         const clientX = touchPoint.pageX || touchPoint.clientX;
         offsetRefX.current = clientX - translateX.value;
-        console.log("clientX",clientX)
+        //console.log("clientX",clientX)
 
         const clientY = touchPoint.pageY || touchPoint.clientY;
         offsetRefY.current = clientY - translateY.value;
-        console.log("clientY",clientY)
+        //console.log("clientY",clientY)
+
+        movementCheck(clientX,clientY)
     }
 
     const hadleMove = (event) => {
@@ -229,6 +240,38 @@ export default function YTAssembler () {
         }
 
 
+    }
+
+   
+    const movementCheck = (x,y) =>{
+       
+        setInitiationCount(prevCount => {
+            const nexCount = prevCount + 1;
+
+            if(nexCount === 1){
+                setXstate(x);
+                setYstate(y);
+                return nexCount;
+            }
+
+            if(nexCount === 2){
+                setNewXstate(x);
+                setNewYstate(y);
+
+                if((Xstate <= newXstate) > (Ystate > newYstate)){
+                    console.log("X state is looked");
+    
+                }else{
+                    console.log("Y state looked")
+                }
+                
+                return nexCount;
+            }
+            if(nexCount === 3){
+                return 0;
+            }
+            return prevCount;
+        });
     }
 
 
