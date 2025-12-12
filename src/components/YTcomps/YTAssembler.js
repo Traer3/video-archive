@@ -38,6 +38,10 @@ export default function YTAssembler () {
     const [newXstate,setNewXstate] = useState(0);
     const [newYstate,setNewYstate] = useState(0);
 
+    const [firstItemPositionID, setFirstItemPositionID] = useState(null);
+    const [firstItemPosition, setFirstItemPosition] = useState({x:0,y:0});
+
+
 
 
         
@@ -226,7 +230,8 @@ export default function YTAssembler () {
         offsetRefY.current = clientY - translateY.value;
         //console.log("clientY",clientY)
 
-        movementCheck(clientX,clientY)
+        //movementCheck(clientX,clientY)
+        firstRenderItemPosition(dbVideos);
     }
 
     const hadleMove = (event) => {
@@ -243,26 +248,29 @@ export default function YTAssembler () {
     }
 
    
-    const movementCheck = (x,y) =>{
+    const movementCheck = (y) =>{
        
         setInitiationCount(prevCount => {
             const nexCount = prevCount + 1;
 
             if(nexCount === 1){
-                setXstate(x);
                 setYstate(y);
                 return nexCount;
             }
 
+            
             if(nexCount === 2){
-                setNewXstate(x);
                 setNewYstate(y);
-
-                if((Xstate <= newXstate) > (Ystate > newYstate)){
-                    console.log("X state is looked");
+                
+                if(Ystate > newYstate){
+                    console.log("Ystate state: ",Ystate)
+                    console.log("newYstate state: ",newYstate)
+                    console.log("Y gooing up");
     
                 }else{
-                    console.log("Y state looked")
+                    console.log("Ystate state: ",Ystate)
+                    console.log("newYstate state: ",newYstate)
+                    console.log("Y gooing down")
                 }
                 
                 return nexCount;
@@ -274,6 +282,14 @@ export default function YTAssembler () {
         });
     }
 
+
+
+    const firstRenderItemPosition = (dbVideos)=>{
+        const firstVidId = dbVideos[0].id
+        console.log(firstVidId)
+        setFirstItemPositionID(firstVidId)
+        console.log(firstItemPosition);
+    }
 
     const renderItem = ({item}) => {
         if(!item.id) return null;
@@ -304,6 +320,9 @@ export default function YTAssembler () {
                     scrollAnimation={scrollAnimation}
                     setScrollAnimation={setScrollAnimation}
                     setPressStartTime={setPressStartTime}
+
+                    setFirstItemPosition={setFirstItemPosition}
+                    firstItemPositionID={firstItemPositionID}
                 />
                 
             </Pressable>

@@ -2,19 +2,32 @@ import { View, StyleSheet, Text, Image, Pressable, ImageBackground } from "react
 import creature from '../../meme/hoshino.png'
 import bratty from '../../meme/arona.gif'
 import shareIcon from '../../../assets/share.png'
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withRepeat, withSpring } from "react-native-reanimated";
 
 //import placeholder from "../../../assets/AronaServer.jpg"
 
 
-export default function ModifiedYTVidForm({thumbnail, name, date , duration,isItUnique,id,scrollAnimation,setScrollAnimation, setPressStartTime}) {
+export default function ModifiedYTVidForm({
+        thumbnail,
+        name, 
+        date , 
+        duration,
+        isItUnique,
+        id,
+        scrollAnimation,
+        setScrollAnimation, 
+        setPressStartTime,
+        setFirstItemPosition,
+        firstItemPositionID,}) {
 
 
     const [buttonTest, setButtonTest] = useState(0)
 
     const translateX = useSharedValue(0);
-    const offsetRef = useRef(0);
+    const offsetRefX = useRef(0);
+    const translateY = useSharedValue(0);
+    const offsetRefY = useRef(0);
 
     const MIN_X_LIMIT = 0;
     const MAX_X_LIMIT = 101;
@@ -22,6 +35,15 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
     const animatedStyles = useAnimatedStyle(()=>({
         transform: [{translateX: translateX.value}],
     }));
+
+    useEffect(()=>{
+        if(id === firstItemPositionID){
+            setFirstItemPosition({
+                x: offsetRefX,
+                y: offsetRefY
+            })
+        }
+    },[setFirstItemPosition])
     
     
         const hadleStart = (event)=>{
@@ -36,8 +58,10 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
             }
     
             const clientX = touchPoint.pageX || touchPoint.clientX;
-            
-            offsetRef.current = clientX - translateX.value;
+            offsetRefX.current = clientX - translateX.value;
+
+            const clientY = touchPoint.pageY || touchPoint.clientY;
+            offsetRefY.current = clientY - translateY.value;
         }
     
         const hadleMove = (event)=>{
@@ -62,7 +86,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date , duration,isIt
             }
     
             const clientX = touchPoint.pageX || touchPoint.clientX;
-            const desiredX = clientX - offsetRef.current;
+            const desiredX = clientX - offsetRefX.current;
     
        
             translateX.value = Math.max(MIN_X_LIMIT, Math.min(desiredX, MAX_X_LIMIT));
