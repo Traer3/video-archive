@@ -35,15 +35,6 @@ export default function ModifiedYTVidForm({
     const animatedStyles = useAnimatedStyle(()=>({
         transform: [{translateX: translateX.value}],
     }));
-
-    useEffect(()=>{
-        if(id === firstItemPositionID){
-            setFirstItemPosition({
-                x: offsetRefX,
-                y: offsetRefY
-            })
-        }
-    },[setFirstItemPosition])
     
     
         const hadleStart = (event)=>{
@@ -95,7 +86,6 @@ export default function ModifiedYTVidForm({
     
         const hadleEnd = () => {
             //setScrollAnimation(true)
-            setPressStartTime(null)
             translateX.value = withSpring(0);
             if(translateX.value < 30){
                 translateX.value = withSpring(0);
@@ -111,12 +101,6 @@ export default function ModifiedYTVidForm({
                 })
             }
         }
-
-
-    const specialFunction = () =>{
-        console.log("Я активировался! ")
-        setScrollAnimation(false)
-    }
 
 
     const deleteVideo = (id) => {

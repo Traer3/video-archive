@@ -231,7 +231,7 @@ export default function YTAssembler () {
         //console.log("clientY",clientY)
 
         //movementCheck(clientX,clientY)
-        firstRenderItemPosition(dbVideos);
+        //firstRenderItemPosition(dbVideos);
     }
 
     const hadleMove = (event) => {
@@ -244,12 +244,18 @@ export default function YTAssembler () {
             touchPoint = eventSource;
         }
 
+        const clientX = touchPoint.pageX || touchPoint.clientX;
+        offsetRefX.current = clientX - translateX.value;
+
+        const clientY = touchPoint.pageY || touchPoint.clientY;
+        offsetRefY.current = clientY - translateY.value;
+
+        movementCheck(clientY);
 
     }
 
    
     const movementCheck = (y) =>{
-       
         setInitiationCount(prevCount => {
             const nexCount = prevCount + 1;
 
@@ -288,7 +294,7 @@ export default function YTAssembler () {
         const firstVidId = dbVideos[0].id
         console.log(firstVidId)
         setFirstItemPositionID(firstVidId)
-        console.log(firstItemPosition);
+        //console.log(firstItemPosition);
     }
 
     const renderItem = ({item}) => {
@@ -308,6 +314,7 @@ export default function YTAssembler () {
                 //onPressIn={hadlePressIn}
                 //onPressOut={(event)=> handlePressOut(event,item.url)}
                 onTouchStart={hadleStart}
+                onTouchMove={hadleMove}
                 
             >
                 <ModifiedYTVidForm 
@@ -317,12 +324,13 @@ export default function YTAssembler () {
                     duration={item.duration} 
                     isItUnique={item.isitunique} 
                     id={item.id}
-                    scrollAnimation={scrollAnimation}
-                    setScrollAnimation={setScrollAnimation}
-                    setPressStartTime={setPressStartTime}
 
-                    setFirstItemPosition={setFirstItemPosition}
-                    firstItemPositionID={firstItemPositionID}
+                    //scrollAnimation={scrollAnimation}
+                    //setScrollAnimation={setScrollAnimation}
+                    //setPressStartTime={setPressStartTime}
+
+                    //setFirstItemPosition={setFirstItemPosition}
+                    //firstItemPositionID={firstItemPositionID}
                 />
                 
             </Pressable>
