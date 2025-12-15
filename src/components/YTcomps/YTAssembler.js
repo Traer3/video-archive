@@ -41,7 +41,7 @@ export default function YTAssembler () {
     const [firstItemPositionID, setFirstItemPositionID] = useState(null);
     const [firstItemPosition, setFirstItemPosition] = useState({x:0,y:0});
 
-
+    const prevYRef = useRef(null);
 
 
         
@@ -256,6 +256,24 @@ export default function YTAssembler () {
 
    
     const movementCheck = (y) =>{
+
+        if(prevYRef.current === null){
+            prevYRef.current = y;
+            return;
+        }
+
+        if(y < prevYRef.current){
+            console.log("Y going up")
+        } else{
+            console.log("Y gooing down");
+        }
+
+        console.log("prevY:",prevYRef.current);
+        console.log("currentY:",y)
+
+        prevYRef.current = y
+
+        /*
         setInitiationCount(prevCount => {
             const nexCount = prevCount + 1;
 
@@ -286,6 +304,7 @@ export default function YTAssembler () {
             }
             return prevCount;
         });
+        */
     }
 
 
@@ -313,8 +332,8 @@ export default function YTAssembler () {
             <Pressable 
                 //onPressIn={hadlePressIn}
                 //onPressOut={(event)=> handlePressOut(event,item.url)}
-                onTouchStart={hadleStart}
-                onTouchMove={hadleMove}
+                //onTouchStart={hadleStart}
+                //onTouchMove={hadleMove}
                 
             >
                 <ModifiedYTVidForm 
@@ -367,7 +386,16 @@ export default function YTAssembler () {
                 />
             )}
 
-            <FlatList
+
+            <Pressable 
+                //onPressIn={hadlePressIn}
+                //onPressOut={(event)=> handlePressOut(event,item.url)}
+                //onTouchStart={hadleStart}
+                onTouchMove={hadleMove}
+                style={{flex:1}}
+                
+            >
+                <FlatList
                 style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
                 data={videos}
@@ -381,6 +409,8 @@ export default function YTAssembler () {
                 windowSize={10}
                 ListFooterComponent={loading ? <Text style={{textAlign:'center'}}>loading...</Text> : null}
             />
+            </Pressable>
+            
             
             <Modal visible={!!selectedVideo} transparent={true} animationType="slide" onRequestClose={()=> setSelectedVideo(null)}>
                 <View style={styles.modalBackground}>
