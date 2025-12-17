@@ -21,23 +21,12 @@ export default function YTAssembler () {
     const [loading, setLoading] = useState(false);
 
     const [scrollAnimation, setScrollAnimation] = useState(true) 
-    //const [pressStartTime, setPressStartTime] = useState(null);
     const pressStartTime = useRef(null);
-    const [timeHeld, setTimeHeld] = useState(0);
 
     const translateX = useSharedValue(0);
     const offsetRefX = useRef(0);
     const translateY = useSharedValue(0);
     const offsetRefY = useRef(0);
-
-    const windowWidth = Dimensions.get('window').width;
-    const windowHeight = Dimensions.get('window').height;
-
-    const [initiationCount, setInitiationCount] = useState(0);
-    const [Xstate,setXstate] = useState(0);
-    const [Ystate,setYstate] = useState(0);
-    const [newXstate,setNewXstate] = useState(0);
-    const [newYstate,setNewYstate] = useState(0);
 
     const [firstItemPositionID, setFirstItemPositionID] = useState(null);
     const firstItemPosition = useRef(null);
@@ -199,8 +188,8 @@ export default function YTAssembler () {
         }
     }
 
-    const hadleStart = (event,itemUrl) => {
-        setSelectedVideo(itemUrl)
+    const hadleStart = (event) => {
+
         const eventSource = event.nativeEvent || event;
         let touchPoint;
 
