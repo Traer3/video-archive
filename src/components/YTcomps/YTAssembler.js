@@ -21,7 +21,8 @@ export default function YTAssembler () {
     const [loading, setLoading] = useState(false);
 
     const [scrollAnimation, setScrollAnimation] = useState(true) 
-    const [pressStartTime, setPressStartTime] = useState(null);
+    //const [pressStartTime, setPressStartTime] = useState(null);
+    const pressStartTime = useRef(null);
     const [timeHeld, setTimeHeld] = useState(0);
 
     const translateX = useSharedValue(0);
@@ -177,42 +178,29 @@ export default function YTAssembler () {
        };
    
     const hadlePressIn = (event) =>{
-        /*
         const startTime = getCurrentTimestamp(event);
-        setPressStartTime(startTime);
-        setTimeHeld(0);
-        */
+        pressStartTime.current = startTime;
         
     };
    
     const handlePressOut = (event,itemUrl) => {
-        /*
-        if(pressStartTime === null) return;
-        console.log("Press Start Time: ",pressStartTime)
+        if(pressStartTime.current === null) return;
+        console.log("Press Start Time: ",pressStartTime.current)
            
         const endTime = getCurrentTimestamp(event);
-        const calculatedDuration = Math.round(endTime - pressStartTime);
+        const calculatedDuration = Math.round(endTime - pressStartTime.current);
         console.log("calculatedDuration: ", calculatedDuration)
-           
-        if(calculatedDuration > 150){
-                
-            setScrollAnimation(false)
+        
+        if(calculatedDuration > 70){
+            setSelectedVideo(itemUrl)
+            pressStartTime.current = null;
         }else{
-              
-            setScrollAnimation(true)
-            setPressStartTime(null)
+            pressStartTime.current = null;
         }
-        //setSelectedVideo(itemUrl)
-        setTimeHeld(calculatedDuration);
-        setPressStartTime(null);
-   
-        console.log("handlePressOut duration",calculatedDuration)
-        */
-
-
     }
 
-    const hadleStart = (event) => {
+    const hadleStart = (event,itemUrl) => {
+        setSelectedVideo(itemUrl)
         const eventSource = event.nativeEvent || event;
         let touchPoint;
 
@@ -296,7 +284,7 @@ export default function YTAssembler () {
         if(!item.id) return null;
 
         if(!item.duration || !item.thumbnail) {
-            const placeholder = Array.from({length: 1}, (_,i)=>(
+            const placeholder = Array.from({length: 7}, (_,i)=>(
                 <YTLoading key={i} delay={i * 150}/>
             ))
             return(
@@ -306,9 +294,9 @@ export default function YTAssembler () {
          
         return(
             <Pressable 
-                //onPressIn={hadlePressIn}
-                //onPressOut={(event)=> handlePressOut(event,item.url)}
-                onTouchStart={hadleStart}
+                onPressIn={hadlePressIn}
+                onPressOut={(event)=> handlePressOut(event,item.url)}
+                //onTouchStart={hadleStart}
                 //onTouchMove={hadleMove}
                 
             >

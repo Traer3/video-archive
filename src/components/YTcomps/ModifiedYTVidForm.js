@@ -56,7 +56,7 @@ export default function ModifiedYTVidForm({
             const clientY = touchPoint.pageY || touchPoint.clientY;
             offsetRefY.current = clientY - translateY.value;
 
-            console.log("Vid id", id)
+            //console.log("Vid id", id)
             if(id === firstItemPositionID){
                 
                 firstItemPosition.current = clientY - translateY.value;
