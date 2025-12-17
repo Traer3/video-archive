@@ -18,7 +18,7 @@ export default function ModifiedYTVidForm({
         scrollAnimation,
         setScrollAnimation, 
         setPressStartTime,
-        setFirstItemPosition,
+        firstItemPosition,
         firstItemPositionID,}) {
 
 
@@ -35,6 +35,8 @@ export default function ModifiedYTVidForm({
     const animatedStyles = useAnimatedStyle(()=>({
         transform: [{translateX: translateX.value}],
     }));
+
+ 
     
     
         const hadleStart = (event)=>{
@@ -53,6 +55,13 @@ export default function ModifiedYTVidForm({
 
             const clientY = touchPoint.pageY || touchPoint.clientY;
             offsetRefY.current = clientY - translateY.value;
+
+            console.log("Vid id", id)
+            if(id === firstItemPositionID){
+                
+                firstItemPosition.current = clientY - translateY.value;
+                console.log("From YTForm",firstItemPosition.current)
+            }
         }
     
         const hadleMove = (event)=>{
@@ -78,7 +87,12 @@ export default function ModifiedYTVidForm({
     
             const clientX = touchPoint.pageX || touchPoint.clientX;
             const desiredX = clientX - offsetRefX.current;
-    
+            
+            const clientY = touchPoint.pageY || touchPoint.clientY;
+            offsetRefY.current = clientY - translateY.value;
+
+            
+            
        
             translateX.value = Math.max(MIN_X_LIMIT, Math.min(desiredX, MAX_X_LIMIT));
     

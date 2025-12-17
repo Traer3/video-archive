@@ -39,7 +39,7 @@ export default function YTAssembler () {
     const [newYstate,setNewYstate] = useState(0);
 
     const [firstItemPositionID, setFirstItemPositionID] = useState(null);
-    const [firstItemPosition, setFirstItemPosition] = useState({x:0,y:0});
+    const firstItemPosition = useRef(null);
 
     const prevYRef = useRef(null);
 
@@ -159,7 +159,7 @@ export default function YTAssembler () {
             }
            
             const data = await res.json();
-            savedIds.add(vidId);
+            savedIds.current.add(vidId);
             console.log(`⏱ Duration saved for video ${vidId} : ${vidDuration}`)
             console.log("✅Updated video: ", data.updatedVideo);
                        
@@ -231,7 +231,7 @@ export default function YTAssembler () {
         //console.log("clientY",clientY)
 
         //movementCheck(clientX,clientY)
-        //firstRenderItemPosition(dbVideos);
+        firstRenderItemPosition(dbVideos);
     }
 
     const hadleMove = (event) => {
@@ -250,13 +250,14 @@ export default function YTAssembler () {
         const clientY = touchPoint.pageY || touchPoint.clientY;
         offsetRefY.current = clientY - translateY.value;
 
-        movementCheck(clientY);
+        //movementCheck(clientY);
 
     }
 
    
     const movementCheck = (y) =>{
 
+       
         if(prevYRef.current === null){
             prevYRef.current = y;
             return;
@@ -273,46 +274,21 @@ export default function YTAssembler () {
 
         prevYRef.current = y
 
-        /*
-        setInitiationCount(prevCount => {
-            const nexCount = prevCount + 1;
+       
 
-            if(nexCount === 1){
-                setYstate(y);
-                return nexCount;
-            }
-
-            
-            if(nexCount === 2){
-                setNewYstate(y);
-                
-                if(Ystate > newYstate){
-                    console.log("Ystate state: ",Ystate)
-                    console.log("newYstate state: ",newYstate)
-                    console.log("Y gooing up");
-    
-                }else{
-                    console.log("Ystate state: ",Ystate)
-                    console.log("newYstate state: ",newYstate)
-                    console.log("Y gooing down")
-                }
-                
-                return nexCount;
-            }
-            if(nexCount === 3){
-                return 0;
-            }
-            return prevCount;
-        });
-        */
     }
 
 
+    
 
     const firstRenderItemPosition = (dbVideos)=>{
-        const firstVidId = dbVideos[0].id
-        console.log(firstVidId)
-        setFirstItemPositionID(firstVidId)
+        if(firstItemPositionID === null){
+            let indexId = dbVideos.length - 1;
+            const firstVidId = dbVideos[indexId].id
+            console.log(firstVidId)
+            setFirstItemPositionID(firstVidId)
+        }
+        
         //console.log(firstItemPosition);
     }
 
@@ -320,7 +296,7 @@ export default function YTAssembler () {
         if(!item.id) return null;
 
         if(!item.duration || !item.thumbnail) {
-            const placeholder = Array.from({length: 7}, (_,i)=>(
+            const placeholder = Array.from({length: 1}, (_,i)=>(
                 <YTLoading key={i} delay={i * 150}/>
             ))
             return(
@@ -332,7 +308,7 @@ export default function YTAssembler () {
             <Pressable 
                 //onPressIn={hadlePressIn}
                 //onPressOut={(event)=> handlePressOut(event,item.url)}
-                //onTouchStart={hadleStart}
+                onTouchStart={hadleStart}
                 //onTouchMove={hadleMove}
                 
             >
@@ -348,8 +324,8 @@ export default function YTAssembler () {
                     //setScrollAnimation={setScrollAnimation}
                     //setPressStartTime={setPressStartTime}
 
-                    //setFirstItemPosition={setFirstItemPosition}
-                    //firstItemPositionID={firstItemPositionID}
+                    firstItemPosition={firstItemPosition}
+                    firstItemPositionID={firstItemPositionID}
                 />
                 
             </Pressable>
@@ -386,16 +362,7 @@ export default function YTAssembler () {
                 />
             )}
 
-
-            <Pressable 
-                //onPressIn={hadlePressIn}
-                //onPressOut={(event)=> handlePressOut(event,item.url)}
-                //onTouchStart={hadleStart}
-                onTouchMove={hadleMove}
-                style={{flex:1}}
-                
-            >
-                <FlatList
+            <FlatList
                 style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
                 data={videos}
@@ -409,8 +376,6 @@ export default function YTAssembler () {
                 windowSize={10}
                 ListFooterComponent={loading ? <Text style={{textAlign:'center'}}>loading...</Text> : null}
             />
-            </Pressable>
-            
             
             <Modal visible={!!selectedVideo} transparent={true} animationType="slide" onRequestClose={()=> setSelectedVideo(null)}>
                 <View style={styles.modalBackground}>
