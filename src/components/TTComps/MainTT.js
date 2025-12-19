@@ -29,12 +29,9 @@ export default function MainTT () {
             </View>
         );
     };
-    
-    const renderItem = ({items}) => (
-        <Swipeable>
-            
-        </Swipeable>
-    )
+
+
+
 
         return(
             <View style={styles.main}>
