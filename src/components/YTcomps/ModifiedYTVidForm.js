@@ -15,19 +15,20 @@ export default function ModifiedYTVidForm({
         duration,
         isItUnique,
         id,
-        scrollAnimation,
-        setScrollAnimation, 
-        setPressStartTime,
-        firstItemPosition,
-        firstItemPositionID,}) {
+        setDeletionTrigger,
+        deletionTrigger,
+    }) {
 
-
+    
     const [buttonTest, setButtonTest] = useState(0)
 
     const translateX = useSharedValue(0);
     const offsetRefX = useRef(0);
     const translateY = useSharedValue(0);
     const offsetRefY = useRef(0);
+
+    const [disableDeletion,setDisableDeletion] = useState(false);
+   
 
     const MIN_X_LIMIT = 0;
     const MAX_X_LIMIT = 101;
@@ -36,9 +37,34 @@ export default function ModifiedYTVidForm({
         transform: [{translateX: translateX.value}],
     }));
 
- 
-    
-    
+   
+
+    useEffect(()=>{
+        if(deletionTrigger){
+            translateX.value = withSpring(100,{
+                stiffness: 900,
+                damping:120,
+                mass:4,
+                overshootClamping:false,
+                energyThreshold:6e-9,
+                velocity:0,
+                reduceMotion: ReduceMotion.System
+            })
+
+            setDisableDeletion(true);
+        }else{
+            translateX.value = withSpring(0);
+            setDisableDeletion(false);
+        }
+        
+    },[deletionTrigger]);
+
+    const deleteVideo = (id) => {
+        translateX.value = withSpring(0);
+        console.log(`Video deleted ${id}`)
+    };
+
+
         const hadleStart = (event)=>{
             //setScrollAnimation(false);
             const eventSource = event.nativeEvent || event;
@@ -117,17 +143,27 @@ export default function ModifiedYTVidForm({
         }
 
 
-    const deleteVideo = (id) => {
-        translateX.value = withSpring(0);
-        console.log(`Video deleted ${id}`)
-    }
+   
 
     return(
         <View 
-                style={{
-                    justifyContent:'center'
-                }}
-                >
+            style={{
+                justifyContent:'center'
+            }}>
+            {disableDeletion && 
+                    <Pressable 
+                    //полная хуйня , но меня ебет фиксить , новая мобила , новый размер ) 
+                    style={{
+                        position:'absolute',
+                        height:"100%",
+                        width:"230%",
+                        zIndex:10,
+                        marginLeft:110
+                    }}
+                    onPress={()=>{setDeletionTrigger(false)}}
+                    >
+                    </Pressable>
+                }
             <View
                 style={[
                     styles.baseForm,{
@@ -136,6 +172,8 @@ export default function ModifiedYTVidForm({
                         width:"30%",
                         backgroundColor:'red',
                         height:76,
+                        //borderColor:'green',
+                        //borderWidth:2,
                         
                     },
                 ]}
@@ -165,6 +203,8 @@ export default function ModifiedYTVidForm({
                 </Text>
                </Pressable>
             </View>
+           
+            
         
             <Animated.View 
                 style={[
@@ -175,10 +215,11 @@ export default function ModifiedYTVidForm({
                     },
                     animatedStyles,
                 ]}
-                onTouchStart={hadleStart}
-                onTouchMove={hadleMove}
-                onTouchEnd={hadleEnd}
+                //onTouchStart={hadleStart}
+                //onTouchMove={hadleMove}
+                //onTouchEnd={hadleEnd}
             >
+                
                 <Image
                     style={styles.imageStyle}
                     source={thumbnail ? {uri: thumbnail} : bratty}
