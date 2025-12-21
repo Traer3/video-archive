@@ -17,6 +17,7 @@ export default function ModifiedYTVidForm({
         id,
         setDeletionTrigger,
         deletionTrigger,
+
     }) {
 
     
@@ -53,10 +54,11 @@ export default function ModifiedYTVidForm({
 
             setDisableDeletion(true);
         }else{
-            translateX.value = withSpring(0);
             setDisableDeletion(false);
+            translateX.value = withSpring(0);
+            
         }
-        
+
     },[deletionTrigger]);
 
     const deleteVideo = (id) => {
@@ -66,7 +68,7 @@ export default function ModifiedYTVidForm({
 
 
         const hadleStart = (event)=>{
-            //setScrollAnimation(false);
+            translateX.value = 0;
             const eventSource = event.nativeEvent || event;
             let touchPoint;
     
@@ -81,17 +83,9 @@ export default function ModifiedYTVidForm({
 
             const clientY = touchPoint.pageY || touchPoint.clientY;
             offsetRefY.current = clientY - translateY.value;
-
-            //console.log("Vid id", id)
-            if(id === firstItemPositionID){
-                
-                firstItemPosition.current = clientY - translateY.value;
-                console.log("From YTForm",firstItemPosition.current)
-            }
         }
     
         const hadleMove = (event)=>{
-            //setScrollAnimation(false);
             const eventSource = event.nativeEvent || event;
             let touchPoint;
     
@@ -121,13 +115,8 @@ export default function ModifiedYTVidForm({
             
        
             translateX.value = Math.max(MIN_X_LIMIT, Math.min(desiredX, MAX_X_LIMIT));
-    
-        };
-    
-        const hadleEnd = () => {
-            //setScrollAnimation(true)
-            translateX.value = withSpring(0);
-            if(translateX.value < 30){
+            
+            if(translateX.value < 40){
                 translateX.value = withSpring(0);
             }else{
                 translateX.value = withSpring(100,{
@@ -140,6 +129,26 @@ export default function ModifiedYTVidForm({
                     reduceMotion: ReduceMotion.System
                 })
             }
+        };
+    
+        const hadleEnd = () => {
+            translateX.value = withSpring(0);
+            console.log("hadleEnd",translateX.value)
+            
+            if(translateX.value < 40){
+                translateX.value = withSpring(0);
+            }else{
+                translateX.value = withSpring(100,{
+                    stiffness: 900,
+                    damping:120,
+                    mass:4,
+                    overshootClamping:false,
+                    energyThreshold:6e-9,
+                    velocity:0,
+                    reduceMotion: ReduceMotion.System
+                })
+            }
+            
         }
 
 
@@ -215,9 +224,9 @@ export default function ModifiedYTVidForm({
                     },
                     animatedStyles,
                 ]}
-                //onTouchStart={hadleStart}
-                //onTouchMove={hadleMove}
-                //onTouchEnd={hadleEnd}
+                onTouchStart={hadleStart}
+                onTouchMove={hadleMove}
+                onTouchEnd={hadleEnd}
             >
                 
                 <Image

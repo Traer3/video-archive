@@ -21,7 +21,8 @@ export default function YTAssembler () {
     const [hasNext, setHasNext] = useState(true);
     const [loading, setLoading] = useState(false);
 
-    const [scrollAnimation, setScrollAnimation] = useState(true);
+
+    
     const pressStartTime = useRef(null);
 
     
@@ -35,8 +36,8 @@ export default function YTAssembler () {
 
     const prevYRef = useRef(null);
 
-    const releseTime = useRef(null);
-    const buttonHeld = useRef(null);
+    //const releseTime = useRef(null);
+    //const buttonHeld = useRef(null);
 
     const [deletionTrigger, setDeletionTrigger] = useState(0);
 
@@ -46,7 +47,9 @@ export default function YTAssembler () {
     const startY = useRef(null);
     const direction = useRef(null);
     const THRESHOLD = 4
-    
+
+    const [scrollAnimation, setScrollAnimation] = useState(true);
+
 
         
     useEffect(()=>{
@@ -185,17 +188,24 @@ export default function YTAssembler () {
    }
    
     const hadlePressIn = (event,itemUrl) =>{
-        //это для использования касаний 
-        pressStartTime.current = Date.now();
+    //Это тоже часть второго варика 
+    setScrollAnimation(prevAnim => prevAnim = false);
+    //это для использования касаний 
+    pressStartTime.current = Date.now();
 
     //Это уже второй варик проверки
     const e = event.nativeEvent;
     const touch = e.touches?.[0] ?? e;
 
+    
+
     startX.current = touch.pageX;
     startY.current = touch.pageY;
     direction.current = null;
-    console.log("Start", startX.current, startY.current);
+
+
+    
+    //console.log("Start", startX.current, startY.current);
 
     /*
       //ВАРИАНТ 1  //это для работы по положение x y 
@@ -235,16 +245,20 @@ export default function YTAssembler () {
 
             if(Math.abs(directionX) > Math.abs(directionY)){
                 direction.current = "x";
-
-                setScrollAnimation(false);
-                
-                console.log("Movment by X");
+                setScrollAnimation(prevAnim => prevAnim = false)
+                pressStartTime.current = null
+                //console.log("Movment by X");
             }else{
                 direction.current = "y";
-                console.log("Movment by Y");
+                setScrollAnimation(prevAnim => prevAnim = true)
+                pressStartTime.current = null
+                
+                //console.log("Movment by Y");
                 
             }
         }
+
+
     };
 
 
@@ -254,7 +268,10 @@ export default function YTAssembler () {
         startX.current = null;
         startY.current = null;
         direction.current = null;
-        setScrollAnimation(true);
+        //тут 2
+        setScrollAnimation(prevAnim => prevAnim = true)
+
+       
 
         /* это для варика 1 
         offsetRefX.current = null;
@@ -263,21 +280,19 @@ export default function YTAssembler () {
 
         //ниже хуйня для работы с касаниями ОТДЕЛЬАНЯ ХУЙНЯ
         if(pressStartTime.current){
-            releseTime.current = Date.now();
-            buttonHeld.current = releseTime.current - pressStartTime.current;
-            //console.log("buttonHeld", buttonHeld.current,'ms'); //касание 130-145ms // нажатие срабатывает от 159 - 180 ms 
+            const releseTime = Date.now();
+            const buttonHeld = releseTime - pressStartTime.current;
+            console.log("buttonHeld", buttonHeld,'ms'); //касание 130-145ms // нажатие срабатывает от 159 - 180 ms 
             
             //почти хорошо , но касания 
-            if(buttonHeld.current > 140 && buttonHeld.current < 400){
-                //setSelectedVideo(itemUrl)
+            if(buttonHeld > 139 && buttonHeld < 400){
+                setSelectedVideo(itemUrl)
             }
 
-            //ебануть условие для проверки сработала ли функция после hadleOnLoongPress, если сработал , включить скролинг , если нет , включить скролинг 
-           
             //если нихуя не поменяеться , то ебашь releseTime и buttonHeld в простые константы
             pressStartTime.current = null;
-            releseTime.current = null;
-            buttonHeld.current = null
+            //releseTime.current = null;
+            //buttonHeld.current = null
         }
     }
 
@@ -396,8 +411,7 @@ export default function YTAssembler () {
                 onPressIn={(event)=> hadlePressIn(event,item.url)}
                 onTouchMove={hadleMove}
                 onPressOut={(event)=> handlePressOut(event,item.url)}
-                onLongPress={hadleOnLoongPress}
-                //delayLongPress={100}
+                //onLongPress={hadleOnLoongPress}
 
                 
             >
