@@ -239,7 +239,6 @@ export default function ModifiedYTVidForm({
                     styles.baseForm,{
                         borderColor: isItUnique ? 'red': 'rgb(43,75,123)', 
                         //borderColor: 'green', 
-                        //right:`${position.x}`,
                     },
                     animatedStyles,
                 ]}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image, Pressable, Dimensions} from "react-native";
+import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Pressable} from "react-native";
 import { VideoView, useVideoPlayer, } from "expo-video";
 import * as  Haptics from 'expo-haptics';
 import { DurationFetcher } from "./DurationFetcher";
@@ -155,7 +155,6 @@ export default function YTAssembler () {
    }
    
     const hadlePressIn = (event) =>{
-    //это для использования касаний 
     pressStartTime.current = Date.now();
 
     setScrollAnimation(prevAnim => prevAnim = false);
@@ -204,7 +203,7 @@ export default function YTAssembler () {
         if(pressStartTime.current){
             const releseTime = Date.now();
             const buttonHeld = releseTime - pressStartTime.current;
-            console.log("buttonHeld", buttonHeld,'ms'); //касание 130-145ms // нажатие срабатывает от 159 - 180 ms 
+            console.log("buttonHeld", buttonHeld,'ms');
             
             if(buttonHeld > 139 && buttonHeld < 400){
                 setSelectedVideo(itemUrl)

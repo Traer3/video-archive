@@ -7,12 +7,10 @@ import { useState } from "react"
 //import placeholder from "../../../assets/AronaServer.jpg"
 
 export default function YTVidForm({thumbnail, name, date , duration,isItUnique,id}) {
-
     
     //console.log(isItUnique)
     const [buttonTest, setButtonTest] = useState(0)
-    //console.log("Selected Vid id: ", id)
-   // console.log(thumbnail)
+
     return(
         <View 
             style={[
