@@ -2,12 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Image, Pressable, Dimensions} from "react-native";
 import { VideoView, useVideoPlayer, } from "expo-video";
 import * as  Haptics from 'expo-haptics';
-
-import YTVidForm from "./YTVidForm";
 import { DurationFetcher } from "./DurationFetcher";
 import YTLoading from "./YTLoading";
-import ModifiedYTVidForm from "./ModifiedYTVidForm";
-import { useSharedValue } from "react-native-reanimated";
+import ModifiedYTVidForm from "./ModifiedYTVidForm";;
 
 const DB_URL = 'http://192.168.0.8:3001';
 const VIDEO_URL = 'http://192.168.0.8:3004'
@@ -21,27 +18,9 @@ export default function YTAssembler () {
     const [hasNext, setHasNext] = useState(true);
     const [loading, setLoading] = useState(false);
 
-
-    
     const pressStartTime = useRef(null);
 
-    
-    const translateX = useSharedValue(0);
-    const offsetRefX = useRef(0);
-    const translateY = useSharedValue(0);
-    const offsetRefY = useRef(0);
-
-    const [firstItemPositionID, setFirstItemPositionID] = useState(null);
-    const firstItemPosition = useRef(null);
-
-    const prevYRef = useRef(null);
-
-    //const releseTime = useRef(null);
-    //const buttonHeld = useRef(null);
-
     const [deletionTrigger, setDeletionTrigger] = useState(0);
-
-    const [viewLayout, setViewLayout] = useState({})
 
     const startX = useRef(null);
     const startY = useRef(null);
@@ -49,7 +28,6 @@ export default function YTAssembler () {
     const THRESHOLD = 4
 
     const [scrollAnimation, setScrollAnimation] = useState(true);
-
 
         
     useEffect(()=>{
@@ -175,60 +153,19 @@ export default function YTAssembler () {
         }
         
    }
-
-   const checkPont = (x,y)=>{
-    const {top, left, right, bottom} = viewLayout;
-    console.log("top",top);
-    console.log("left",left);
-    console.log("right",right);
-    console.log("bottom",bottom);
-    console.log("x",x);
-    console.log("y",y);
-    return (x > left && x < right && y > top && y < bottom);
-   }
    
-    const hadlePressIn = (event,itemUrl) =>{
-    //Это тоже часть второго варика 
-    setScrollAnimation(prevAnim => prevAnim = false);
+    const hadlePressIn = (event) =>{
     //это для использования касаний 
     pressStartTime.current = Date.now();
 
-    //Это уже второй варик проверки
+    setScrollAnimation(prevAnim => prevAnim = false);
     const e = event.nativeEvent;
     const touch = e.touches?.[0] ?? e;
 
-    
-
     startX.current = touch.pageX;
     startY.current = touch.pageY;
-    direction.current = null;
+    direction.current = null;     
 
-
-    
-    //console.log("Start", startX.current, startY.current);
-
-    /*
-      //ВАРИАНТ 1  //это для работы по положение x y 
-        const eventSource = event.nativeEvent || event;
-        let touchPoint;
-
-        if(eventSource.touches && eventSource.touches.length > 0){
-            touchPoint = eventSource.touches[0];
-        }else{
-            touchPoint = eventSource;
-        }
-
-        const clientX = touchPoint.pageX || touchPoint.clientX;
-        offsetRefX.current = clientX - translateX.value;
-        console.log("clientX",clientX)
-
-        const clientY = touchPoint.pageY || touchPoint.clientY;
-        offsetRefY.current = clientY - translateY.value;
-        console.log("clientY",clientY)
-
-        //console.log("checkPont",checkPont(offsetRefX.current,offsetRefY.current))
-    */
-        
     };
 
     const hadleMove = (event)=>{
@@ -252,146 +189,35 @@ export default function YTAssembler () {
                 direction.current = "y";
                 setScrollAnimation(prevAnim => prevAnim = true)
                 pressStartTime.current = null
-                
-                //console.log("Movment by Y");
-                
+                //console.log("Movment by Y");               
             }
         }
-
-
     };
 
-
-   
-    const handlePressOut = (event,itemUrl) => {
-
+    const handlePressOut = (itemUrl) => {
         startX.current = null;
         startY.current = null;
         direction.current = null;
-        //тут 2
+
         setScrollAnimation(prevAnim => prevAnim = true)
 
-       
-
-        /* это для варика 1 
-        offsetRefX.current = null;
-        offsetRefY.current = null
-        */
-
-        //ниже хуйня для работы с касаниями ОТДЕЛЬАНЯ ХУЙНЯ
         if(pressStartTime.current){
             const releseTime = Date.now();
             const buttonHeld = releseTime - pressStartTime.current;
             console.log("buttonHeld", buttonHeld,'ms'); //касание 130-145ms // нажатие срабатывает от 159 - 180 ms 
             
-            //почти хорошо , но касания 
             if(buttonHeld > 139 && buttonHeld < 400){
                 setSelectedVideo(itemUrl)
             }
-
-            //если нихуя не поменяеться , то ебашь releseTime и buttonHeld в простые константы
             pressStartTime.current = null;
-            //releseTime.current = null;
-            //buttonHeld.current = null
         }
-    }
+    };
 
     const hadleOnLoongPress = () =>{
-        /* анимацию стопить не буду , при зажатии буду показывать окно удаление видосов 
-        console.log("we looked scrolling scrollAnimation = false")
-        scrollAnimation.current = false;
-
-        */
-        // ебануть вибрацию по активации 
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft)
-        
-        // затем показать вариант удаление сразу нескольких видосов 
         setDeletionTrigger(true)
     }
 
-    const hadleStart = (event) => {
-        
-
-        /* двигать эту хуйню буду в ModifiedYTForm
-        const eventSource = event.nativeEvent || event;
-        let touchPoint;
-
-        if(eventSource.touches && eventSource.touches.length > 0){
-            touchPoint = eventSource.touches[0];
-        }else{
-            touchPoint = eventSource;
-        }
-
-        const clientX = touchPoint.pageX || touchPoint.clientX;
-        offsetRefX.current = clientX - translateX.value;
-        //console.log("clientX",clientX)
-
-        const clientY = touchPoint.pageY || touchPoint.clientY;
-        offsetRefY.current = clientY - translateY.value;
-        //console.log("clientY",clientY)
-
-        //movementCheck(clientX,clientY)
-        //firstRenderItemPosition(dbVideos);
-
-        */
-    }
-
-    /*
-    const hadleMove = (event) => {
-        const eventSource = event.nativeEvent || event;
-        let touchPoint;
-
-        if(eventSource.touches && eventSource.touches.length > 0){
-            touchPoint = eventSource.touches[0];
-        }else{
-            touchPoint = eventSource;
-        }
-
-        const clientX = touchPoint.pageX || touchPoint.clientX;
-        offsetRefX.current = clientX - translateX.value;
-
-        const clientY = touchPoint.pageY || touchPoint.clientY;
-        offsetRefY.current = clientY - translateY.value;
-
-        //movementCheck(clientY);
-
-    }
-    */
-   
-    const movementCheck = (y) =>{
-
-       
-        if(prevYRef.current === null){
-            prevYRef.current = y;
-            return;
-        }
-
-        if(y < prevYRef.current){
-            console.log("Y going up")
-        } else{
-            console.log("Y gooing down");
-        }
-
-        console.log("prevY:",prevYRef.current);
-        console.log("currentY:",y)
-
-        prevYRef.current = y
-
-       
-
-    }
-
-
-    const firstRenderItemPosition = (dbVideos)=>{
-        if(firstItemPositionID === null){
-            let indexId = dbVideos.length - 1;
-            const firstVidId = dbVideos[indexId].id
-            console.log(firstVidId)
-            setFirstItemPositionID(firstVidId)
-        }
-        
-        //console.log(firstItemPosition);
-    }
 
     const renderItem = ({item}) => {
         if(!item.id) return null;
@@ -407,11 +233,10 @@ export default function YTAssembler () {
          
         return(
             <Pressable 
-                //onTouchStart={hadleStart}
-                onPressIn={(event)=> hadlePressIn(event,item.url)}
+                onPressIn={hadlePressIn}
                 onTouchMove={hadleMove}
                 onPressOut={(event)=> handlePressOut(event,item.url)}
-                //onLongPress={hadleOnLoongPress}
+                onLongPress={hadleOnLoongPress}
 
                 
             >
@@ -423,8 +248,6 @@ export default function YTAssembler () {
                     isItUnique={item.isitunique} 
                     id={item.id}
 
-                    firstItemPosition={firstItemPosition}
-                    firstItemPositionID={firstItemPositionID}
                     setDeletionTrigger={setDeletionTrigger}
                     deletionTrigger={deletionTrigger}
                 />
@@ -446,19 +269,7 @@ export default function YTAssembler () {
 
 
     return(
-        <View 
-            style={{flex:1, }}
-            onLayout={(event)=>{
-                const {x, y, height , width} = event.nativeEvent.layout;
-                const viewLayoutProp = {
-                    top: y,
-                    bottom: y + height,
-                    right: x + width,
-                    left: x,
-                }
-                setViewLayout(viewLayoutProp)
-            }}
-            >
+        <View style={{flex:1, }}>
             {videos.find(v => !v.duration) && (
                 <DurationFetcher
                     key={videos.find(v => !v.duration).id}

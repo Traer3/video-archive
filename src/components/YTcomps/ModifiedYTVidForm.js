@@ -52,7 +52,6 @@ export default function ModifiedYTVidForm({
                 reduceMotion: ReduceMotion.System
             })
 
-            setDisableDeletion(true);
         }else{
             setDisableDeletion(false);
             translateX.value = withSpring(0);
@@ -61,9 +60,29 @@ export default function ModifiedYTVidForm({
 
     },[deletionTrigger]);
 
-    const deleteVideo = (id) => {
+    const deleteVideo = async (id) => {
+        if(!id) return;
+        const idsForDeletion = [id]
         translateX.value = withSpring(0);
-        console.log(`Video deleted ${id}`)
+        console.log("VideoDeleted", id);
+        /*
+        try{
+            
+            const res = await fetch("http://192.168.0.8:3004/deleteVideo",{
+                method:'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    videos:idsForDeletion,
+                }),
+            });
+            if(!res.ok){
+                throw new Error(`Error deleting video id: ${id} , ${res.status}`);
+            }
+            console.log(`Video deleted ${id}`)
+        }catch(err){
+            console.log("Error deleting vide id:",id);
+        }
+        */
     };
 
 
