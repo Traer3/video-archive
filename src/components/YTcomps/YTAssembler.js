@@ -157,7 +157,7 @@ export default function YTAssembler () {
     const hadlePressIn = (event) =>{
     pressStartTime.current = Date.now();
 
-    setScrollAnimation(prevAnim => prevAnim = false);
+    setScrollAnimation(false);
     const e = event.nativeEvent;
     const touch = e.touches?.[0] ?? e;
 
@@ -181,12 +181,12 @@ export default function YTAssembler () {
 
             if(Math.abs(directionX) > Math.abs(directionY)){
                 direction.current = "x";
-                setScrollAnimation(prevAnim => prevAnim = false)
+                setScrollAnimation(false)
                 pressStartTime.current = null
                 //console.log("Movment by X");
             }else{
                 direction.current = "y";
-                setScrollAnimation(prevAnim => prevAnim = true)
+                setScrollAnimation(true)
                 pressStartTime.current = null
                 //console.log("Movment by Y");               
             }
@@ -198,7 +198,7 @@ export default function YTAssembler () {
         startY.current = null;
         direction.current = null;
 
-        setScrollAnimation(prevAnim => prevAnim = true)
+        setScrollAnimation(true)
 
         if(pressStartTime.current){
             const releseTime = Date.now();
@@ -232,9 +232,9 @@ export default function YTAssembler () {
          
         return(
             <Pressable 
-                onPressIn={hadlePressIn}
+                onPressIn={(event)=> hadlePressIn(event,item.url)}
                 onTouchMove={hadleMove}
-                onPressOut={(event)=> handlePressOut(event,item.url)}
+                onPressOut={()=> handlePressOut(item.url)}
                 onLongPress={hadleOnLoongPress}
 
                 
@@ -255,8 +255,6 @@ export default function YTAssembler () {
         )
     }
 
-
-
     const [selectedVideo, setSelectedVideo] = useState(null);
     const player = useVideoPlayer(
         selectedVideo,
@@ -266,9 +264,8 @@ export default function YTAssembler () {
         }
     );
 
-
     return(
-        <View style={{flex:1, }}>
+        <View style={{flex:1}}>
             {videos.find(v => !v.duration) && (
                 <DurationFetcher
                     key={videos.find(v => !v.duration).id}

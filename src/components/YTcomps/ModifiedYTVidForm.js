@@ -1,27 +1,9 @@
-import { View, StyleSheet, Text, Image, Pressable, ImageBackground } from "react-native"
-import creature from '../../meme/hoshino.png'
-import bratty from '../../meme/arona.gif'
-import shareIcon from '../../../assets/share.png'
+import { View, StyleSheet, Text, Pressable} from "react-native"
 import { useEffect, useRef, useState } from "react"
-import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withRepeat, withSpring } from "react-native-reanimated";
+import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import YTVidForm from "./YTVidForm"
 
-//import placeholder from "../../../assets/AronaServer.jpg"
-
-
-export default function ModifiedYTVidForm({
-        thumbnail,
-        name, 
-        date , 
-        duration,
-        isItUnique,
-        id,
-        setDeletionTrigger,
-        deletionTrigger,
-
-    }) {
-
-    
-    const [buttonTest, setButtonTest] = useState(0)
+export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,isItUnique,setDeletionTrigger,deletionTrigger,}){
 
     const translateX = useSharedValue(0);
     const offsetRefX = useRef(0);
@@ -30,32 +12,30 @@ export default function ModifiedYTVidForm({
 
     const [disableDeletion,setDisableDeletion] = useState(false);
    
-
     const MIN_X_LIMIT = 0;
     const MAX_X_LIMIT = 101;
-    
+
     const animatedStyles = useAnimatedStyle(()=>({
         transform: [{translateX: translateX.value}],
     }));
-
-   
+    const translateXValue = withSpring(100,{
+        stiffness: 900,
+        damping:120,
+        mass:4,
+        overshootClamping:false,
+        energyThreshold:6e-9,
+        velocity:0,
+        reduceMotion: ReduceMotion.System
+    });
 
     useEffect(()=>{
         if(deletionTrigger){
-            translateX.value = withSpring(100,{
-                stiffness: 900,
-                damping:120,
-                mass:4,
-                overshootClamping:false,
-                energyThreshold:6e-9,
-                velocity:0,
-                reduceMotion: ReduceMotion.System
-            })
+            setDisableDeletion(true)
+            translateX.value = translateXValue;
 
         }else{
             setDisableDeletion(false);
             translateX.value = withSpring(0);
-            
         }
 
     },[deletionTrigger]);
@@ -67,7 +47,6 @@ export default function ModifiedYTVidForm({
         console.log("VideoDeleted", id);
         /*
         try{
-            
             const res = await fetch("http://192.168.0.8:3004/deleteVideo",{
                 method:'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -113,15 +92,7 @@ export default function ModifiedYTVidForm({
                 translateX.value = withSpring(0);
             }else{
                 touchPoint = eventSource;
-                translateX.value = withSpring(100,{
-                    stiffness: 900,
-                    damping:120,
-                    mass:4,
-                    overshootClamping:false,
-                    energyThreshold:6e-9,
-                    velocity:0,
-                    reduceMotion: ReduceMotion.System
-                })
+                translateX.value = translateXValue;
             }
     
             const clientX = touchPoint.pageX || touchPoint.clientX;
@@ -130,23 +101,12 @@ export default function ModifiedYTVidForm({
             const clientY = touchPoint.pageY || touchPoint.clientY;
             offsetRefY.current = clientY - translateY.value;
 
-            
-            
-       
             translateX.value = Math.max(MIN_X_LIMIT, Math.min(desiredX, MAX_X_LIMIT));
             
             if(translateX.value < 40){
                 translateX.value = withSpring(0);
             }else{
-                translateX.value = withSpring(100,{
-                    stiffness: 900,
-                    damping:120,
-                    mass:4,
-                    overshootClamping:false,
-                    energyThreshold:6e-9,
-                    velocity:0,
-                    reduceMotion: ReduceMotion.System
-                })
+                translateX.value = translateXValue;
             }
         };
     
@@ -157,88 +117,41 @@ export default function ModifiedYTVidForm({
             if(translateX.value < 40){
                 translateX.value = withSpring(0);
             }else{
-                translateX.value = withSpring(100,{
-                    stiffness: 900,
-                    damping:120,
-                    mass:4,
-                    overshootClamping:false,
-                    energyThreshold:6e-9,
-                    velocity:0,
-                    reduceMotion: ReduceMotion.System
-                })
+                translateX.value = translateXValue
             }
             
         }
 
-
-   
-
     return(
-        <View 
-            style={{
-                justifyContent:'center'
-            }}>
+        <View style={{justifyContent:'center' }}>
             {disableDeletion && 
                     <Pressable 
                     //полная хуйня , но меня ебет фиксить , новая мобила , новый размер ) 
-                    style={{
-                        position:'absolute',
-                        height:"100%",
-                        width:"230%",
-                        zIndex:10,
-                        marginLeft:110
-                    }}
-                    onPress={()=>{setDeletionTrigger(false)}}
-                    >
-                    </Pressable>
-                }
-            <View
-                style={[
-                    styles.baseForm,{
-                        position:'absolute',
-                        
-                        width:"30%",
-                        backgroundColor:'red',
-                        height:76,
-                        //borderColor:'green',
-                        //borderWidth:2,
-                        
-                    },
-                ]}
-            >
-               <Pressable 
-                 style={{
-                    //borderColor:'green',
-                    //borderWidth:2,
-                    height:"100%",
-                    width:'100%',
-                 }}
-                 onPress={()=>deleteVideo(id)}
-               >
-                <Text 
                         style={{
+                            position:'absolute',
                             height:"100%",
-                            width:'100%',
-                            
-                            textAlign:'center',
-                            textAlignVertical:'center',
-                            fontWeight:'600',
-                            fontSize:20,
-                            color:'white'
+                            width:"230%",
+                            zIndex:10,
+                            marginLeft:110,
                         }}
-                >
-                    delete
-                </Text>
+                        onPress={()=>{setDeletionTrigger(false)}}
+                    />
+                }
+            <View style={styles.deletionForm}>
+               <Pressable 
+                    style={{ height:"100%",width:'100%',}}
+                    onPress={()=>deleteVideo(id)}
+               >
+                    <Text style={styles.deleteButton}>
+                        delete
+                    </Text>
                </Pressable>
             </View>
            
-            
-        
             <Animated.View 
                 style={[
                     styles.baseForm,{
                         borderColor: isItUnique ? 'red': 'rgb(43,75,123)', 
-                        //borderColor: 'green', 
                     },
                     animatedStyles,
                 ]}
@@ -246,51 +159,15 @@ export default function ModifiedYTVidForm({
                 onTouchMove={hadleMove}
                 onTouchEnd={hadleEnd}
             >
-                
-                <Image
-                    style={styles.imageStyle}
-                    source={thumbnail ? {uri: thumbnail} : bratty}
-                    resizeMode='stretch'
+                <YTVidForm 
+                    thumbnail={thumbnail} 
+                    name={name} 
+                    date={date} 
+                    duration={duration} 
+                    id={id}
                 />
-
-                <View 
-                    style={{
-                    marginLeft:3,
-                }}>
-                    <Text style={{width:'220',}} numberOfLines={1} ellipsizeMode="tail">
-                        {name}
-                    </Text>
-                    <Text>
-                        {date}
-                    </Text>
-                    <Text>
-                        {duration}
-                    </Text>
-
-                    <Pressable
-                        style={{
-                            //borderWidth:1,
-                            //borderColor:'red',
-                            alignItems:"flex-end"
-                        }}
-                        onPress={()=>{
-                            setButtonTest(prev => prev + 1)
-                            console.log(buttonTest)
-                        }}
-                    >
-                        <Image
-                            source={shareIcon}
-                            style={{width:20, height:20}}
-                            resizeMode="contain"
-                        />
-                    </Pressable>
-                </View>
-
-                
-                
             </Animated.View >   
         </View>     
-
     );
 };
 
@@ -299,60 +176,28 @@ const styles = StyleSheet.create({
         flex:1,
         flexDirection:'row',
         backgroundColor:'rgb(73,106,154)',
-        height:'80',
-        borderWidth:2,
+        marginLeft:10
+    },
+    deletionForm:{
+        position:'absolute',
+        width:"30%",
+        backgroundColor:'red',
+        height:76,
+        flex:1,
+        flexDirection:'row',
 
         marginTop:8,
         marginLeft:10,
-        marginRight:10,
-
         
     },
-    imageStyle:{
-        borderWidth:1,
-        borderRadius:2,
-        height:'100%',
-        width:'30%'
+    deleteButton:{
+        height:"100%",
+        width:'100%',
+        textAlign:'center',
+        textAlignVertical:'center',
+        fontWeight:'600',
+        fontSize:20,
+        color:'white'
     }
+    
 })
-
-
-//рабочая хуйня без анимки 
-/*
-<View
-                style={[
-                    styles.baseForm,{
-                        position:'absolute',
-                        borderColor: 'red', 
-                        width:"30%",
-                        backgroundColor:'red'
-                    }
-                ]}
-            >
-               <Pressable 
-                 style={{
-                    borderColor:'green',
-                    borderWidth:2,
-                    height:"100%",
-                    width:'100%',
-                 }}
-                 onPress={()=>deleteVideo(id)}
-               >
-                <Text 
-                        style={{
-                            height:"100%",
-                            width:'100%',
-                            
-                            textAlign:'center',
-                            textAlignVertical:'center',
-                            fontWeight:'600',
-                            fontSize:20,
-                            color:'white'
-                        }}
-                >
-                    delete
-                </Text>
-               </Pressable>
-            </View>
-
-*/
