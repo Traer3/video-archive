@@ -71,7 +71,7 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
         if(pressStartTime.current){
             const releseTime = Date.now();
             const buttonHeld = releseTime - pressStartTime.current;
-            console.log("buttonHeld", buttonHeld,'ms');
+            //console.log("buttonHeld", buttonHeld,'ms');
             
             if(buttonHeld > 139 && buttonHeld < 400){
                 setSelectedVideo(itemUrl)

@@ -112,7 +112,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
     
         const hadleEnd = () => {
             translateX.value = withSpring(0);
-            console.log("hadleEnd",translateX.value)
+            //console.log("hadleEnd",translateX.value)
             
             if(translateX.value < 40){
                 translateX.value = withSpring(0);

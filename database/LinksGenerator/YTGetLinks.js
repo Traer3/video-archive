@@ -83,11 +83,11 @@ async function youTubeVideoData(auth){
         nextPageToken = res.data.nextPageToken;
         console.log(`📥 Loaded: ${allVideos.length} so far...`);
 
-       if(allVideos.length >= 10) break; //ссылки для первых 100 видео 
+       //if(allVideos.length >= 300) break; //ссылки для первых 100 видео 
 
     }while(nextPageToken);
 
-    const textOutput = allVideos.map(v => `${v.name}`).join('\n'); //allVideos.map(v => `${v.name} | ${v.url}`).join('\n')
+    const textOutput = allVideos.map(v => `${v.name} | ${v.url}`).join('\n'); //allVideos.map(v => `${v.name} | ${v.url}`).join('\n')
     fs.writeFileSync('likes.txt', textOutput);
 
     console.log(`✅ Saved ${allVideos.length} videos in likes.txt`)

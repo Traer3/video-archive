@@ -31,6 +31,7 @@ export default function YTVidForm({thumbnail, name, date , duration,isItUnique})
                     <Pressable
                         style={{ alignItems:"flex-end"}}
                         onPress={()=>{
+//кнопка переслать видос , допилить ! 
                             setButtonTest(prev => prev + 1)
                             console.log(buttonTest)
                         }}
