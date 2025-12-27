@@ -3,8 +3,6 @@ const fs = require("fs");
 const path = require("path");
 const {spawn} = require("child_process");
 const app = express();
-//const VIDEO_DIR = "/home/dbvidsserver/VideoArchive/videos";
-//const THUMBNAILS_DIR = "/home/dbvidsserver/VideoArchive/thumbnails";
 const VIDEO_DIR = path.join(__dirname, "videos");
 const THUMBNAILS_DIR = path.join(__dirname, "./thumbnails");
 const AUTHNIFICATION = path.join(__dirname,"LinksGenerator","Authorize.js");
@@ -133,9 +131,9 @@ app.get("/videos",(req, res)=>{
             const hasThumbnail = thumbnails.includes(thumbnailName);
             return{
                 name: file,
-                url: `http://192.168.0.8:3004/${file}`,
+                url: `http://192.168.0.8:3004/${encodeURIComponent(file)}`,
                 thumbnail: hasThumbnail
-                    ?  `http://192.168.0.8:3004/thumbnails/${thumbnailName}`
+                    ?  `http://192.168.0.8:3004/thumbnails/${encodeURIComponent(thumbnailName)}`
                     : null,
             };
         });
