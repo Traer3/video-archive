@@ -186,7 +186,7 @@ async function authorizeByHand() {
         const authUrl = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: SCOPES,
-            
+            prompt: 'consent'
         });
 
         console.log(`Go to this URL ${authUrl}`);

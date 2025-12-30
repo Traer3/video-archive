@@ -83,7 +83,7 @@ async function youTubeVideoData(auth){
         nextPageToken = res.data.nextPageToken;
         console.log(`📥 Loaded: ${allVideos.length} so far...`);
 
-       //if(allVideos.length >= 300) break; //ссылки для первых 100 видео 
+       //if(allVideos.length >= 100) break; //ссылки для первых 100 видео 
 
     }while(nextPageToken);
 
