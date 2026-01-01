@@ -2,10 +2,11 @@ const fs = require('fs');
 const {authorizeByHand} = require ('./LinksGenerator/Authorize');
 const {google} = require('googleapis');
 
+const DB_URL = 'http://192.168.0.8:3001'
 
     const getVideos = async () => {
         try{
-            const responce = await fetch("http://192.168.0.8:3001/videos");
+            const responce = await fetch(`${DB_URL}/videos`);
             const data = await responce.json();
             IsItUnique(data)
         }catch(err){
@@ -14,6 +15,33 @@ const {google} = require('googleapis');
     }
     getVideos();
 
+    const savaUniqueData = async (id,isisunique)=>{
+        if(!id){
+            console.log("Require id");
+            return;
+        }
+        try{
+            const res = await fetch(`${DB_URL}/saveUniqueData`,{
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    vidId: id,
+                    isisunique: isisunique,
+                }),
+            });
+
+            if(!res.ok){
+                throw new Error(`Server error: ${res.status}`);
+            }
+            
+            const data = await res.json();
+            console.log("Updated video: ",data.updatedVideo)
+        }catch(err){
+            console.error(`Error saving uniqueData Id ${id},state: ${isisunique}`)
+        }
+    }
+
+    
     async function IsItUnique(DBvideos) {
         try{
             const YTLikesNames = await authorizeByHand().then(getYTLikesNames).catch(console.error);
@@ -30,12 +58,15 @@ const {google} = require('googleapis');
             
             uniqueVideos.forEach(vid => {
                 console.log(`Vid id: ${vid.id}, name: ${vid.name}, isitunique: true`);
+
+                savaUniqueData(5008,true)
+
             });
             
             return uniqueVideos;
 
         }catch(err){
-            
+            console.error(`Exequning IsItUnique: `, err)
         }
     }
 
