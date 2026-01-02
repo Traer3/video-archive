@@ -1,13 +1,25 @@
-import { View, StyleSheet, Text, Image, Pressable } from "react-native"
+import { View, StyleSheet, Text, Image, Pressable, Share } from "react-native"
 import creature from '../../meme/hoshino.png'
 import bratty from '../../meme/arona.gif'
 import shareIcon from '../../../assets/share.png'
-import { useState } from "react"
 //import placeholder from "../../../assets/AronaServer.jpg"
-export default function YTVidForm({thumbnail, name, date , duration,isItUnique}) {
+import * as Clipboard from 'expo-clipboard';
+import * as  Haptics from 'expo-haptics';
+export default function YTVidForm({thumbnail, name, date , duration,isItUnique,url}) {
 
-    //console.log(isItUnique)
-    const [buttonTest, setButtonTest] = useState(0)
+
+    const copyUrlToClipboard = async () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft)
+        try{
+            await Clipboard.setStringAsync(url)
+            await Share.share({
+                message: url,
+            });
+        }catch(err){
+            console.error("Error forwarding url")
+        }
+        
+    }
     
     return(
         <View 
@@ -17,6 +29,7 @@ export default function YTVidForm({thumbnail, name, date , duration,isItUnique})
                 }
             ]}
         >
+           
             <Image
                 style={styles.imageStyle}
                 source={thumbnail ? {uri: thumbnail} : bratty}
@@ -31,9 +44,8 @@ export default function YTVidForm({thumbnail, name, date , duration,isItUnique})
                     <Pressable
                         style={{ alignItems:"flex-end"}}
                         onPress={()=>{
-//кнопка переслать видос , допилить ! 
-                            setButtonTest(prev => prev + 1)
-                            console.log(buttonTest)
+                            copyUrlToClipboard()
+                            console.log("Vide url: ",url )
                         }}
                     >
                         <Image

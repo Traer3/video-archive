@@ -100,6 +100,7 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
                     duration={item.duration} 
                     isItUnique={item.isitunique} 
                     id={item.id}
+                    url={item.url}
     
                     setDeletionTrigger={setDeletionTrigger}
                     deletionTrigger={deletionTrigger}

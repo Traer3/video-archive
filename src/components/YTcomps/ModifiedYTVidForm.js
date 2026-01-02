@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import YTVidForm from "./YTVidForm"
 
-export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,isItUnique,setDeletionTrigger,deletionTrigger,}){
+export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,isItUnique,setDeletionTrigger,deletionTrigger,url}){
 
     const translateX = useSharedValue(0);
     const offsetRefX = useRef(0);
@@ -150,9 +150,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
            
             <Animated.View 
                 style={[
-                    styles.baseForm,{
-                        borderColor: isItUnique ? 'red': 'rgb(43,75,123)', 
-                    },
+                    styles.baseForm,
                     animatedStyles,
                 ]}
                 onTouchStart={hadleStart}
@@ -165,6 +163,8 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
                     date={date} 
                     duration={duration} 
                     id={id}
+                    isItUnique={isItUnique}
+                    url={url}
                 />
             </Animated.View >   
         </View>     
@@ -174,8 +174,6 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
 const styles = StyleSheet.create({
     baseForm:{
         flex:1,
-        flexDirection:'row',
-        backgroundColor:'rgb(73,106,154)',
         marginLeft:10
     },
     deletionForm:{

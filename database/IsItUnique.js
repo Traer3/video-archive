@@ -58,8 +58,8 @@ const DB_URL = 'http://192.168.0.8:3001'
             
             uniqueVideos.forEach(vid => {
                 console.log(`Vid id: ${vid.id}, name: ${vid.name}, isitunique: true`);
-
-                savaUniqueData(5008,true)
+                //ПОДСТАВИТЬ ЗНАЧЕНИЯ vid.id И НОВЫЙ СТАТУС true
+                //savaUniqueData(5008,true)
 
             });
             
