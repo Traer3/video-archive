@@ -3,6 +3,7 @@ import { Pressable } from "react-native";
 import * as  Haptics from 'expo-haptics';
 import ModifiedYTVidForm from "./ModifiedYTVidForm";
 import YTLoading from "./YTLoading";
+import useSoundEffect from './useSoundEffect';
 
 export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,setDeletionTrigger,deletionTrigger}){
     if(!item.id) return null;
@@ -22,6 +23,7 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
     const direction = useRef(null);
     const THRESHOLD = 4
 
+    const playSound = useSoundEffect();
 
     const hadlePressIn = (event) =>{
         pressStartTime.current = Date.now();
@@ -61,7 +63,7 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
         }
     };
 
-    const handlePressOut = (itemUrl) => {
+    const handlePressOut = async (itemUrl) => {
         startX.current = null;
         startY.current = null;
         direction.current = null;
@@ -74,7 +76,9 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
             //console.log("buttonHeld", buttonHeld,'ms');
             
             if(buttonHeld > 139 && buttonHeld < 400){
-                setSelectedVideo(itemUrl)
+               await playSound()
+               setSelectedVideo(itemUrl)
+                
             }
             pressStartTime.current = null;
         }
@@ -85,6 +89,7 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
         setDeletionTrigger(true)
     }
     
+
     
     return(
         <Pressable 

@@ -5,6 +5,7 @@ import shareIcon from '../../../assets/share.png'
 //import placeholder from "../../../assets/AronaServer.jpg"
 import * as Clipboard from 'expo-clipboard';
 import * as  Haptics from 'expo-haptics';
+
 export default function YTVidForm({thumbnail, name, date , duration,isItUnique,url}) {
 
 
@@ -42,7 +43,7 @@ export default function YTVidForm({thumbnail, name, date , duration,isItUnique,u
                     <Text>{date}</Text>
                     <Text> {duration}</Text>
                     <Pressable
-                        style={{ alignItems:"flex-end"}}
+                        style={{right:-195,width:"10%"}}
                         onPress={()=>{
                             copyUrlToClipboard()
                             console.log("Vide url: ",url )
