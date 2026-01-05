@@ -1,54 +1,46 @@
 import { useEffect, useRef, useState } from "react";
-import { Audio } from "expo-av";
+import {useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 
-export default function useSoundEffect({volume = 0.3, rate = 8, correctPitch = true} = {}) {
-    const soundRef = useRef(null);
+// '../../../assets/0103.mp3'
 
-    // '../../../assets/0103.mp3'
-    useEffect(()=>{
-       let isMounted = true;
+export default function useSoundEffect() {
+    const player = useAudioPlayer(
+        require('../../../assets/0103.mp3')
+    );
+    const status = useAudioPlayerStatus(player);
+    //console.log("Duration:", status.duration)
 
-       Audio.Sound.createAsync(
-            require('../../../assets/0103.mp3')
-       ).then(async ({sound}) =>{
-        if(!isMounted) return;
+    const isPlayingRef = useRef(false);
 
-        await sound.setVolumeAsync(volume);
-        await sound.setRateAsync(rate, correctPitch);
-        soundRef.current = sound
-       });
-
-       return () => {
-        isMounted = false;
-        if(soundRef.current){
-            soundRef.current.unloadAsync();
+    const playSound = async () => {
+        if(!player || isPlayingRef.current){
+            return Promise.resolve();
         }
-       };
-    },[volume]);
 
-
-    let isPlaying = false;
-    const playSound =  () => {
-        if(isPlaying) return Promise.resolve();
-
-        isPlaying = true;
-
-        return new Promise(async (resolve)=>{
-            if(!soundRef.current){
-                resolve();
+        try{
+            if(!status.isLoaded){
+                //console.log("Soud is loading");
                 return;
             }
-            
-            soundRef.current.setOnPlaybackStatusUpdate(status => {
-                if(status.didJustFinish){
-                    isPlaying = false;
-                    soundRef.current.setOnPlaybackStatusUpdate(null);
-                    resolve();
-                }
-            });
 
-            await soundRef.current.replayAsync();
-        });
+            isPlayingRef.current = true;
+            player.play();
+
+            const duration = status.duration ?? 1000;
+
+            await new Promise((resolve)=>{
+                setTimeout(()=>{
+                    isPlayingRef.current = false;
+                    //console.log("Sound ended");
+                    player.seekTo(0);
+                    resolve();
+                },duration);
+            });
+        }catch(err){
+            console.error("Error while playing sound", err);
+            isPlayingRef.current = false;
+        }
     };
-    return playSound; 
+
+   return playSound;
 }
