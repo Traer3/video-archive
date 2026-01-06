@@ -76,6 +76,7 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
             //console.log("buttonHeld", buttonHeld,'ms');
             
             if(buttonHeld > 139 && buttonHeld < 400){
+               
                await playSound()
                setSelectedVideo(itemUrl)
                

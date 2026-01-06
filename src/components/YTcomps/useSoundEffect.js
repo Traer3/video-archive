@@ -4,42 +4,34 @@ import {useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 // '../../../assets/0103.mp3'
 
 export default function useSoundEffect() {
-    const player = useAudioPlayer(
-        require('../../../assets/0103.mp3')
-    );
-    const status = useAudioPlayerStatus(player);
-    //console.log("Duration:", status.duration)
-
+    
+    const player = useAudioPlayer(require('../../../assets/0103.mp3'));
     const isPlayingRef = useRef(false);
 
-    const playSound = async () => {
+    const playSound =  () => {
         if(!player || isPlayingRef.current){
             return Promise.resolve();
         }
 
-        try{
-            if(!status.isLoaded){
-                //console.log("Soud is loading");
-                return;
-            }
+        return new Promise((resolve)=>{
+            try{
+                isPlayingRef.current = true;
+                player.seekTo(0);
+                player.play();
 
-            isPlayingRef.current = true;
-            player.play();
-
-            const duration = status.duration ?? 1000;
-
-            await new Promise((resolve)=>{
+                const duration = player.duration ?? 1000;
+                console.log("Duration",duration)
                 setTimeout(()=>{
                     isPlayingRef.current = false;
-                    //console.log("Sound ended");
                     player.seekTo(0);
                     resolve();
                 },duration);
-            });
-        }catch(err){
-            console.error("Error while playing sound", err);
-            isPlayingRef.current = false;
-        }
+            }catch(err){
+                console.error("Error while playing sound", err);
+                isPlayingRef.current = false;
+                resolve();
+            }
+        });
     };
 
    return playSound;
