@@ -155,6 +155,7 @@ export default function YTAssembler () {
         (player) => {
             player.loop = false
             player.play();
+            player.audioMixingMode='mixWithOthers'
         }
     );
 
@@ -200,10 +201,14 @@ export default function YTAssembler () {
                         {selectedVideo && (
                             <VideoView
                                 style={styles.video}
+                                
                                 player={player}
+                                
                                 fullscreenOptions={{
                                     enable: true,
+                                    
                                 }}
+                                
                                 nativeControls
                             />
                         )}

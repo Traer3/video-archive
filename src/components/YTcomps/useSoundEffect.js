@@ -8,6 +8,7 @@ export default function useSoundEffect() {
     const player = useAudioPlayer(require('../../../assets/0103.mp3'));
     const isPlayingRef = useRef(false);
 
+
     const playSound =  () => {
         if(!player || isPlayingRef.current){
             return Promise.resolve();
@@ -17,15 +18,18 @@ export default function useSoundEffect() {
             try{
                 isPlayingRef.current = true;
                 player.seekTo(0);
+                player.volume = 0.5
                 player.play();
+                //console.log("Status: ", player.currentStatus)
 
                 const duration = player.duration ?? 1000;
                 console.log("Duration",duration)
+                
                 setTimeout(()=>{
                     isPlayingRef.current = false;
-                    player.seekTo(0);
                     resolve();
-                },duration);
+                },duration)
+                
             }catch(err){
                 console.error("Error while playing sound", err);
                 isPlayingRef.current = false;
