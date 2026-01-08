@@ -20,6 +20,7 @@ export default function useSoundEffect() {
                 player.seekTo(0);
                 player.volume = 0.5
                 player.play();
+                
                 //console.log("Status: ", player.currentStatus)
 
                 const duration = player.duration ?? 1000;
