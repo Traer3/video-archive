@@ -1,56 +1,24 @@
-import {Text, View } from 'react-native';
+import { View } from 'react-native';
 import styles from './src/styles/BaseStyle'
 import Background from './src/styles/Background';
 import CustomButton from './src/components/CustomButton';
 import SidePanel from './src/components/SidePanel';
 import SwipeArea from './src/components/YTcomps/SwipeArea';
-import { useEffect, useState } from 'react';
+import {useState} from 'react';
 import Menu from './src/components/menuComps/Menu';
 import MainTT from './src/components/TTComps/MainTT';
-import useSoundEffect from './src/components/YTcomps/useSoundEffect';
-import { Audio } from 'expo-av';
 import SoundEffect from './src/components/YTcomps/SoundEffect';
-import { useAudioPlayer,useAudioPlayerStatus } from 'expo-audio';
-
 
 export default function App() {
-
-  /*
-  useEffect(()=>{
-    const confAudion = async () => {
-      try{
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS:true,
-          allowsRecordingIOS: false,
-          staysActiveInBackground: false,
-          interruptionModeAndroid: 1,
-          interruptionModeIOS: 1,
-          shouldDuckAndroid: true,
-        })
-        console.log("Audio configuration successful")
-      }catch(err){
-        console.error("Error while configuration audio ")
-      }
-    };
-
-    confAudion();
-  },[])
-  */
-
-  useEffect(()=>{
-    try{
-
-    }catch(err){
-      
-      
-    }
-  })
-
   const [showYT, setShowYT] = useState(false);
   const [showTT, setShowTT] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
-  const playSound = SoundEffect();
+  const soundPlayer = SoundEffect();
+  const playSound = async () =>{
+    if(!soundPlayer) return;
+    soundPlayer.play();
+  }
 
   return (
     <View style={{flex:1,}}>
