@@ -4,40 +4,41 @@ import {useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 // '../../../assets/0103.mp3'
 
 export default function useSoundEffect() {
-    
+
     const player = useAudioPlayer(require('../../../assets/0103.mp3'));
+    const status = useAudioPlayerStatus(player);
     const isPlayingRef = useRef(false);
 
+    if(player){
+       // console.log("PlayerCreated")
+    }
+    
+    const playSound = async () => {
+        if(!player || isPlayingRef.current || !status.isLoaded) return;
 
-    const playSound =  () => {
-        if(!player || isPlayingRef.current){
-            return Promise.resolve();
-        }
+        isPlayingRef.current = true;
+        console.log("PlayerColdStart")
+        player.seekTo(0);
+        player.volume = 0.5
+        player.play();
 
         return new Promise((resolve)=>{
-            try{
-                isPlayingRef.current = true;
-                player.seekTo(0);
-                player.volume = 0.5
-                player.play();
-                
-                //console.log("Status: ", player.currentStatus)
-
-                const duration = player.duration ?? 1000;
-                console.log("Duration",duration)
-                
-                setTimeout(()=>{
+            const check = setInterval(()=>{
+                if(!status.playing){
+                    clearInterval(check);
                     isPlayingRef.current = false;
                     resolve();
-                },duration)
-                
-            }catch(err){
-                console.error("Error while playing sound", err);
-                isPlayingRef.current = false;
-                resolve();
-            }
+                }
+            },50);
         });
     };
+
+    useEffect(()=>{
+        return()=>{
+            console.log("Plaer release")
+            player?.release();
+        }
+    },[])
 
    return playSound;
 }

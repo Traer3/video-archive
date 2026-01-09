@@ -9,10 +9,13 @@ import Menu from './src/components/menuComps/Menu';
 import MainTT from './src/components/TTComps/MainTT';
 import useSoundEffect from './src/components/YTcomps/useSoundEffect';
 import { Audio } from 'expo-av';
+import SoundEffect from './src/components/YTcomps/SoundEffect';
+import { useAudioPlayer,useAudioPlayerStatus } from 'expo-audio';
 
 
 export default function App() {
 
+  /*
   useEffect(()=>{
     const confAudion = async () => {
       try{
@@ -32,13 +35,22 @@ export default function App() {
 
     confAudion();
   },[])
+  */
+
+  useEffect(()=>{
+    try{
+
+    }catch(err){
+      
+      
+    }
+  })
 
   const [showYT, setShowYT] = useState(false);
   const [showTT, setShowTT] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
-  const playSound = useSoundEffect();
-
+  const playSound = SoundEffect();
 
   return (
     <View style={{flex:1,}}>

@@ -15,7 +15,7 @@ export default function CustomButton({buttonName,buttonSetState, buttonState,ico
     // rgb(178,191,217) цвет текста 
     const specialFunction = async () =>{
         buttonSetState(!buttonState)
-        await executeFunction();
+       await executeFunction();
     }
     return(
         <Pressable
