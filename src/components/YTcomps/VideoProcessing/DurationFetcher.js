@@ -1,7 +1,6 @@
 import { useVideoPlayer } from "expo-video";
 import { useEffect } from "react";
 
-
 export function DurationFetcher({url, onDurationReady}){
 
     const VideoUrl = String(url)
@@ -28,7 +27,7 @@ export function DurationFetcher({url, onDurationReady}){
         },300);
 
         return ()  => clearInterval(check);
-    
+
     },[player]);
 
     return null;

@@ -1,8 +1,7 @@
 import { View, StyleSheet, Text, Image, Pressable, Share } from "react-native"
-import creature from '../../meme/hoshino.png'
-import bratty from '../../meme/arona.gif'
-import shareIcon from '../../../assets/share.png'
-//import placeholder from "../../../assets/AronaServer.jpg"
+import bratty from '../../../meme/arona.gif'
+import shareIcon from '../../../../assets/share.png'
+//import placeholder from "../../../../assets/AronaServer.jpg"
 import * as Clipboard from 'expo-clipboard';
 import * as  Haptics from 'expo-haptics';
 

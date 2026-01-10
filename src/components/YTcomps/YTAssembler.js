@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal, Pressable} from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal} from "react-native";
 import { VideoView, useVideoPlayer, } from "expo-video";
-import { DurationFetcher } from "./DurationFetcher";
-import RenderItem from "./RenderItem";;
+import { DurationFetcher } from "./VideoProcessing/DurationFetcher";
+import RenderItem from "./VideoProcessing/RenderItem";
+import { useSaveVideo } from "./VideoProcessing/SaveVideoData";
 
 const DB_URL = 'http://192.168.0.8:3001';
 const VIDEO_URL = 'http://192.168.0.8:3004'
@@ -32,6 +33,8 @@ export default function YTAssembler () {
                     isitunique: v.isitunique,
                 }));
                 setDbVideos(formatted);
+
+                //console.log('DB formated: ',formatted)
                 //console.log('DB videos loaded:',formatted.length);
             }catch(err){
                 console.log("Error loading DB videos:", err);
@@ -39,16 +42,46 @@ export default function YTAssembler () {
         })();
         return () => {mounted = false;};
     },[]);
-
     
+
+    /*
+    const PromiseDB =  new Promise(async (resolve, reject)=>{
+        console.log("Promise Created!")
+        try{
+            const res = await fetch(`${DB_URL}/videos`);
+            const arr = await res.json();
+            const formatted = arr.map(v => ({
+                id: v.id,
+                name: v.name,
+                tumbnail: v.thumbnail,
+                duration: v.duration,
+                isitunique: v.isitunique,
+            }))
+            resolve(formatted);
+        }catch(err){
+
+        }
+    });
+    */
+   
     useEffect(()=>{
-        if(dbVideos.length === 0 ) return;
+        if(dbVideos.length === 0) return;
         fetchAllVideos(1)
     },[dbVideos,page]);
+    
+
 
     const fetchAllVideos = useCallback(async (pageNum = 1) => {
        // console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
         if(loading || !hasNext ) return;
+
+        /*
+        PromiseDB.then(result => {
+            setDbVideos(result)
+            console.log("Promise result");
+        })
+        */
+
         setLoading(true);
             try{
                 const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=7`);
@@ -97,44 +130,7 @@ export default function YTAssembler () {
 
     const keyExtractor = item => (item.id ? item.id.toString() : item.url);
 
-    const savedIds = useRef(new Set());
-    const saveVideoData = async (vidId,vidDuration) =>{
-            if(!vidId  || vidId === 0) return
-            try{
-
-                if(!vidDuration){
-                    console.log("⚠️ Video duration is null or undefined")
-                    return;
-                }
-
-                if(savedIds.current.has(vidId)){
-                    console.log(`⏭ Video ${vidId} already saved, skipping...`);
-                    return;
-                }
-
-                const res = await fetch(`${DB_URL}/saveVidDuration`,{
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        vidId: vidId,
-                        vidDurationData: vidDuration,
-                    }),
-                });
-
-                if(!res.ok){
-                    throw new Error(`Server error:  ${res.status}`);
-                }
-        
-                const data = await res.json();
-                savedIds.current.add(vidId);
-                console.log(`⏱ Duration saved for video ${vidId} : ${vidDuration}`)
-                console.log("✅Updated video: ", data.updatedVideo);
-                        
-            }catch(err){
-                console.error('❌ Error saving video: ', err);
-            }
-            
-    }
+    const {saveVideoData} = useSaveVideo();
    
     const renderItem = ({item}) => {
         return(

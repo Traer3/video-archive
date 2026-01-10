@@ -84,8 +84,6 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
         setDeletionTrigger(true)
     }
     
-
-    
     return(
         <Pressable 
             onPressIn={(event)=> hadlePressIn(event,item.url)}

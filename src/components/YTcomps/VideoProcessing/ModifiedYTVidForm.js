@@ -64,7 +64,6 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
         */
     };
 
-
         const hadleStart = (event)=>{
             translateX.value = 0;
             const eventSource = event.nativeEvent || event;

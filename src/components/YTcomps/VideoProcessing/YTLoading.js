@@ -1,5 +1,5 @@
-import react, { useEffect, useRef } from "react";
-import { View, Animated , StyleSheet} from "react-native";
+import { useEffect, useRef } from "react";
+import { Animated , StyleSheet} from "react-native";
 
 export default function YTLoading ({delay = 0}){
     const fadeAnim = useRef(new Animated.Value(0.5)).current;
