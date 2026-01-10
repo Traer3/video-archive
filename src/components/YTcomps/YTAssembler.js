@@ -14,7 +14,6 @@ export default function YTAssembler () {
     const [hasNext, setHasNext] = useState(true);
     const [loading, setLoading] = useState(false);
 
-    
     const [deletionTrigger, setDeletionTrigger] = useState(0);
     const [scrollAnimation, setScrollAnimation] = useState(true);
 

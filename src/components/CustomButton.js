@@ -9,13 +9,12 @@ const icons = {
     MenuIcon : menuIcon,
 }
 
-export default function CustomButton({buttonName,buttonSetState, buttonState,iconsName,executeFunction}){
+export default function CustomButton({buttonName,buttonSetState, buttonState,iconsName}){
     //rgb(73,106,154) цвет кнокпи 
     // rgb(43,75,123) цвет рамки 
     // rgb(178,191,217) цвет текста 
     const specialFunction = async () =>{
         buttonSetState(!buttonState)
-       await executeFunction();
     }
     return(
         <Pressable

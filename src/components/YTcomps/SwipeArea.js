@@ -1,12 +1,12 @@
-import { View, StyleSheet, Text, Dimensions, Pressable, ScrollView,  } from "react-native"
+import { View, StyleSheet, Pressable,} from "react-native"
 import YTAssembler from "./YTAssembler";
 
-export default  function SwipeArea({areaState}) {
+export default function SwipeArea({areaState}) {
 
-    const onAreaPress = () =>{
+    const onAreaPress = async () =>{
         areaState(false)
-    }
-
+       
+    }    
     return(
         <View style={{borderWidth:0.1}} >
           <Pressable style={styles.outerArea} onPress={onAreaPress}/>
@@ -32,9 +32,6 @@ const styles = StyleSheet.create({
         position:'absolute',
         width:'100%',
         height:'100%',
-        backgroundColor:'rgba(0,0,0,0.5)',
-        
+        backgroundColor:'rgba(0,0,0,0.5)',   
     }
-    
-
 })

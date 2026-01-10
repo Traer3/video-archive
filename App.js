@@ -14,11 +14,6 @@ export default function App() {
   const [showTT, setShowTT] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
-  const soundPlayer = SoundEffect();
-  const playSound = async () =>{
-    if(!soundPlayer) return;
-    soundPlayer.play();
-  }
 
   return (
     <View style={{flex:1,}}>
@@ -27,7 +22,8 @@ export default function App() {
      
       <View style={styles.baseTheme}>
         <>
-          {showYT && <SwipeArea areaState={setShowYT}/>}
+          {showYT && <SoundEffect/>}
+          {showYT &&  <SwipeArea areaState={setShowYT}/>}
         </>
         <>
           {showMenu && <Menu areaState={setShowMenu}/>}
@@ -39,7 +35,8 @@ export default function App() {
             
             <CustomButton iconsName="TTLogo" buttonSetState={setShowTT} buttonState={showTT}/>
             <CustomButton iconsName="MenuIcon" buttonSetState={setShowMenu} buttonState={showMenu}/>
-            <CustomButton iconsName="YTLogo" buttonSetState={setShowYT} buttonState={showYT} executeFunction={playSound}/>
+            <CustomButton iconsName="YTLogo" buttonSetState={setShowYT} buttonState={showYT} />
+            
         </SidePanel>
 
         
