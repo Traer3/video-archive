@@ -1,62 +1,26 @@
-import { useState } from "react";
 import { View, StyleSheet } from "react-native"
-import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
-import { scheduleOnRN } from "react-native-worklets";
-// scheduleOnRN(() => setRefreshKey(prev => prev + 1))();
-
 export default function SidePanel({children}){
-
-    const [isOpen, setIsOpen] = useState(false);
-    const translateX = useSharedValue(-85);
-    const panGesture = Gesture.Pan()
-        .onUpdate((event)=>{
-            translateX.value = -85 + event.translationX;
-        })
-
-        .onEnd((event)=>{
-            if(event.translationX > 100){
-                translateX.value = withSpring(0);
-                
-                //runOnJS(setIsOpen)(true);
-                //runOnJS(alert)("Ты повернул вправо!")
-                
-            }else if(event.translationX < 100){
-                translateX.value = withSpring(-85)
-                //runOnJS(alert)("Ты повернул влево!")
-                
-                runOnJS(setIsOpen)(false);
-            } else {
-                translateX.value = withSpring(isOpen ? 0 : -85);
-            }
-            //translateX.value = withSpring(0, { damping: 10,stiffness: 100});
-        });
-    
-    
-    const animatedStyle = useAnimatedStyle(()=>({
-       //uncomment this one to make them slide =)  //transform:[{translateX: translateX.value}],
-        // transform:[{translateX: `${translateX.value}%`}],
-    }));
-
+   
     return(
-            <View style={styles.wrapper}>
-                    <View 
-                        style={styles.conteiner}>
-                            <View style={styles.panel}>
-                                {children}
-                            </View>
+        <View style={styles.wrapper}>
+            <Text style={{}}>zindex 0</Text>
+            <View 
+                style={styles.conteiner}>
+                    <View style={styles.panel}>
+                        {children}
                     </View>
             </View>
-    )
-}
+        </View>
+    );
+};
 
 const styles = StyleSheet.create({
 
     wrapper:{
         flex:1,
         zIndex:0,
-        //borderColor:'red',
-        //borderWidth:2
+        borderColor:'red',
+        borderWidth:2
     },
 
     panel:{

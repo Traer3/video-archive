@@ -8,7 +8,11 @@ export default function SwipeArea({areaState}) {
        
     }    
     return(
-        <View style={{borderWidth:0.1}} >
+        <View style={{
+            //borderWidth:0.1,
+            borderWidth:1,
+            borderColor:'red',
+            }} >
           <Pressable style={styles.outerArea} onPress={onAreaPress}/>
             <View style={styles.conteiner}>
                 <YTAssembler />          
@@ -21,9 +25,11 @@ const styles = StyleSheet.create({
     conteiner: {
         flexGrow:1,
         width:'84%',
+        //width:'100%',
         height:'100%',
         backgroundColor:'rgb(71, 103, 151)',
         margin:'8%',
+        //marginBottom:'8%',
         overflow:'visible',
         
     },
