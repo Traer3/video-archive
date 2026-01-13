@@ -1,11 +1,10 @@
-import { View, StyleSheet } from "react-native"
+import { View, StyleSheet, Text } from "react-native"
 export default function SidePanel({children}){
    
     return(
         <View style={styles.wrapper}>
-            <Text style={{}}>zindex 0</Text>
             <View 
-                style={styles.conteiner}>
+                style={styles.conteiner}> 
                     <View style={styles.panel}>
                         {children}
                     </View>
@@ -18,17 +17,47 @@ const styles = StyleSheet.create({
 
     wrapper:{
         flex:1,
-        zIndex:0,
-        borderColor:'red',
-        borderWidth:2
+        paddingTop:200,
+        flexDirection:'column-reverse',
+        zIndex:2,
+        //borderColor:'red',
+        //borderWidth:2,
     },
 
     panel:{
         flex:1,
-        position:'absolute',
         borderRadius:2,
         borderWidth:1,
         borderColor:'rgb(43,75,123)',
+        backgroundColor:'rgb(73,106,154)',
+        flexDirection:'row',
+        alignItems:'center',
+        justifyContent:"space-between",
+        padding:10,
+        
+        //borderWidth:2,
+        //borderColor:'green',
+    },
+    conteiner:{
+        flex:0.1,
+        flexDirection:'column-reverse',
+
+        //borderColor:'yellow',
+        //borderWidth:2,
+    }
+})
+
+/*
+panel:{
+        flex:1,
+        position:'absolute',
+        borderRadius:2,
+        //borderWidth:1,
+        //borderColor:'rgb(43,75,123)',
+
+        borderWidth:2,
+        borderColor:'green',
+
         backgroundColor:'rgb(73,106,154)',
         width:'100%',
         height:'8%',
@@ -41,10 +70,4 @@ const styles = StyleSheet.create({
         justifyContent:"space-between"
         
     },
-    conteiner:{
-        flex:1,
-
-       // borderColor:'yellow',
-        //borderWidth:2
-    }
-})
+*/

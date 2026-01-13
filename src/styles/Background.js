@@ -12,6 +12,7 @@ export default function Background () {
                     height:'100%',
                     width:'100%',
                     zIndex:-1,
+
                 }}
                 source={BGImage}
                 resizeMode='stretch'

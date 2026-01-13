@@ -16,7 +16,10 @@ export default function App() {
 
 
   return (
-    <View style={{flex:1,}}>
+    <View style={{flex:1,
+      //borderWidth:2,
+      //borderColor:'brown',
+      }}>
       
       <Background/>
      
@@ -31,6 +34,7 @@ export default function App() {
         <>
           {showTT && <MainTT/>}
         </>
+        
         <SidePanel>
             
             <CustomButton iconsName="TTLogo" buttonSetState={setShowTT} buttonState={showTT}/>
