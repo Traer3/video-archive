@@ -1,10 +1,14 @@
 import { useEffect } from "react";
 import { View, StyleSheet, Text, Pressable, Dimensions } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, ReduceMotion } from "react-native-reanimated";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, ReduceMotion, useAnimatedReaction } from "react-native-reanimated";
+import { runOnJS, scheduleOnRN } from "react-native-worklets";
 
 
 export default function SwipeWindow ({setTriggerButton}) {
+    const SWIPE_THRESHOLD = -60;
     const {height, width} = Dimensions.get('window');
+    const isFinished = useSharedValue(false);
     const translateX = useSharedValue(0);
     const transleteHeight = useSharedValue(height);
     const transleteWidth = useSharedValue(width);
@@ -29,7 +33,7 @@ export default function SwipeWindow ({setTriggerButton}) {
             reduceMotion: ReduceMotion.System
     });
 
-    const translateXValueReverse = withSpring(0,{
+    const translateXValueReverse = withSpring(-1,{
         stiffness: 3000,
         damping:200,
         mass:4,
@@ -50,53 +54,75 @@ export default function SwipeWindow ({setTriggerButton}) {
         if(setTriggerButton){
             translateX.value = translateXValue
         }
+
     },[setTriggerButton])
+
+   function togOff() {
+        setTimeout(()=>{
+            setTriggerButton(false);
+        },300)
+   }
+
+    useAnimatedReaction(
+        () => isFinished.value,
+        (current, previous) =>{
+            if(current && current !== previous){
+                scheduleOnRN(togOff)
+            }
+        }
+    );
+
+    const panGesture = Gesture.Pan()
+        .shouldCancelWhenOutside(false)
+        .onEnd((event)=>{
+            if(event.translationX < SWIPE_THRESHOLD || event.velocityX < -500){
+                
+                translateX.value = translateXValueReverse
+                transleteHeight.value = transformHeight
+                transleteWidth.value = transformWidth
+                
+                isFinished.value = true;
+            }
+        })
     
-    
-    const onPrssFunction = () =>{
-        console.log("Pressed")
-        translateX.value = translateXValueReverse
-        transleteHeight.value = transformHeight
-        transleteWidth.value = transformWidth
-            setTimeout(()=>{
-                setTriggerButton(false)
-            },500)
-        
-    }
     return(
-        <Animated.View style={[
-            styles.conteiner,
-            animatedStyles
-            ]}>
-            <Animated.View style={[
-                styles.main,
-                animatedSize
-            ]}>
-                <Pressable 
-                    style={{
-                        position:'absolute',
-                        zIndex:10,
-                        height:'30%',
-                        width:'30%',
-                        borderColor:'red',
-                        borderWidth:2,
-                        backgroundColor:'red',
-                    }}
-                    onPress={onPrssFunction}
-                />
-            </Animated.View>
-        </Animated.View>
+        <GestureHandlerRootView style={styles.root}>
+            <GestureDetector gesture={panGesture}>
+                <Animated.View style={[styles.conteiner,animatedStyles]}>
+                    <Animated.View style={[styles.main,animatedSize]}>
+                        <Pressable 
+                            style={{
+                                position:'absolute',
+                                zIndex:10,
+                                height:'30%',
+                                width:'30%',
+                                borderColor:'red',
+                                borderWidth:2,
+                                backgroundColor:'red',
+                            }}
+                            //onPress={()=> setTriggerButton(false)}
+                        />
+                    </Animated.View>
+                </Animated.View>
+            </GestureDetector>
+        </GestureHandlerRootView>
     );
 };
 
 const styles = StyleSheet.create({
+    root:{
+        position:'absolute',
+        height:"100%",
+        width:"100%",
+        zIndex:3,
+    },
     conteiner:{
         position:'absolute',
         height:"100%",
         alignItems:'center',
         justifyContent:'center',
         right:'-100%',
-        zIndex:3
+        zIndex:3,
     },
     main:{
         //borderColor:'green',

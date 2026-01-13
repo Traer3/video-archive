@@ -16,6 +16,7 @@ export default function App() {
   const [showMenu, setShowMenu] = useState(false);
 
 
+
   return (
     <View style={{flex:1,
       //borderWidth:2,
@@ -40,7 +41,7 @@ export default function App() {
           {showTT && <MainTT/>}
         </>
         <>
-          {showYT && <SwipeWindow setTriggerButton={setShowYT}/>}
+          {showYT && <SwipeWindow setTriggerButton={setShowYT} />}
         </>
         <SidePanel>
             
