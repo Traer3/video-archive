@@ -8,6 +8,7 @@ import {useState} from 'react';
 import Menu from './src/components/menuComps/Menu';
 import MainTT from './src/components/TTComps/MainTT';
 import SoundEffect from './src/components/YTcomps/SoundEffect';
+import SwipeWindow from './src/components/SwipeWindow';
 
 export default function App() {
   const [showYT, setShowYT] = useState(false);
@@ -25,8 +26,12 @@ export default function App() {
      
       <View style={styles.baseTheme}>
         <>
-          {showYT && <SoundEffect/>}
-          {showYT &&  <SwipeArea areaState={setShowYT}/>}
+          {
+            //showYT && <SoundEffect/>
+          }
+          {
+          //showYT &&  <SwipeArea areaState={setShowYT}/>
+          }
         </>
         <>
           {showMenu && <Menu areaState={setShowMenu}/>}
@@ -34,7 +39,9 @@ export default function App() {
         <>
           {showTT && <MainTT/>}
         </>
-        
+        <>
+          {showYT && <SwipeWindow setTriggerButton={setShowYT}/>}
+        </>
         <SidePanel>
             
             <CustomButton iconsName="TTLogo" buttonSetState={setShowTT} buttonState={showTT}/>
