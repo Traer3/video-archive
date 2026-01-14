@@ -173,7 +173,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
 const styles = StyleSheet.create({
     baseForm:{
         flex:1,
-        marginLeft:10
+        //marginLeft:10
     },
     deletionForm:{
         position:'absolute',
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
 
         marginTop:8,
-        marginLeft:10,
+        //marginLeft:10,
         
     },
     deleteButton:{

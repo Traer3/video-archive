@@ -42,7 +42,7 @@ export default function YTVidForm({thumbnail, name, date , duration,isItUnique,u
                     <Text>{date}</Text>
                     <Text> {duration}</Text>
                     <Pressable
-                        style={{right:-195,width:"10%"}}
+                        style={{right:-190,width:"10%"}}
                         onPress={()=>{
                             copyUrlToClipboard()
                             console.log("Vide url: ",url )
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
         height:'80',
         borderWidth:2,
         marginTop:8,
-        marginRight:10,
+        //marginRight:10,
     },
     imageStyle:{
         borderWidth:1,

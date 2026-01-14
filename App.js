@@ -15,45 +15,27 @@ export default function App() {
   const [showTT, setShowTT] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
-
-
   return (
-    <View style={{flex:1,
-      //borderWidth:2,
-      //borderColor:'brown',
-      }}>
-      
+    <View style={{flex:1}}>
       <Background/>
-     
       <View style={styles.baseTheme}>
-        <>
-          {
-            //showYT && <SoundEffect/>
-          }
-          {
-          //showYT &&  <SwipeArea areaState={setShowYT}/>
-          }
-        </>
-        <>
-          {showMenu && <Menu areaState={setShowMenu}/>}
-        </>
-        <>
-          {showTT && <MainTT/>}
-        </>
-        <>
-          {showYT && <SwipeWindow setTriggerButton={setShowYT} />}
-        </>
+        <>{showMenu && <Menu areaState={setShowMenu}/>}</>
+        <>{showTT && <MainTT/>}</>
+        
+        <>{showYT && (
+          <>
+            <SoundEffect/>
+            <SwipeWindow setTriggerButton={setShowYT} >
+              <SwipeArea />
+            </SwipeWindow>
+          </>
+        )}</>
+
         <SidePanel>
-            
             <CustomButton iconsName="TTLogo" buttonSetState={setShowTT} buttonState={showTT}/>
             <CustomButton iconsName="MenuIcon" buttonSetState={setShowMenu} buttonState={showMenu}/>
             <CustomButton iconsName="YTLogo" buttonSetState={setShowYT} buttonState={showYT} />
-            
         </SidePanel>
-
-        
-        
-        
       </View>
       
       

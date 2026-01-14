@@ -1,19 +1,15 @@
 import { View, StyleSheet, Pressable,} from "react-native"
 import YTAssembler from "./YTAssembler";
 
-export default function SwipeArea({areaState}) {
-
-    const onAreaPress = async () =>{
-        areaState(false)
-       
-    }    
+export default function SwipeArea() {   
     return(
         <View style={{
             //borderWidth:0.1,
-            borderWidth:1,
-            borderColor:'red',
+            //borderWidth:3,
+            //borderColor:'green',
+            justifyContent:'center',
+            alignItems:'center',
             }} >
-          <Pressable style={styles.outerArea} onPress={onAreaPress}/>
             <View style={styles.conteiner}>
                 <YTAssembler />          
             </View>
@@ -24,14 +20,21 @@ export default function SwipeArea({areaState}) {
 const styles = StyleSheet.create({
     conteiner: {
         flexGrow:1,
-        width:'84%',
+        width:'79%',
         //width:'100%',
         height:'100%',
         backgroundColor:'rgb(71, 103, 151)',
-        margin:'8%',
+        //margin:'8%',
         //marginBottom:'8%',
         overflow:'visible',
-        
+        padding:2,
+
+        borderRadius:2,
+        borderWidth:2,
+        borderColor:'rgb(43,75,123)',
+
+        //borderWidth:3,
+        //borderColor:'yellow',
     },
     
     outerArea:{

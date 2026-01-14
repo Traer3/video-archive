@@ -1,11 +1,14 @@
-import { useEffect, useRef } from "react";
-import { View, StyleSheet, Pressable, Dimensions } from "react-native";
+import { useEffect } from "react";
+import { View, StyleSheet, Text, Pressable, Dimensions } from "react-native";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, ReduceMotion, useAnimatedReaction } from "react-native-reanimated";
-
+import { scheduleOnRN } from "react-native-worklets";
 
 
 export default function SwipeWindow ({setTriggerButton,children}) {
+    const SWIPE_THRESHOLD = -60;
     const {height, width} = Dimensions.get('window');
+    const isFinished = useSharedValue(false);
     const translateX = useSharedValue(0);
     const transleteHeight = useSharedValue(height);
     const transleteWidth = useSharedValue(width);
@@ -60,7 +63,6 @@ export default function SwipeWindow ({setTriggerButton,children}) {
         },300)
    }
 
-   /*
     useAnimatedReaction(
         () => isFinished.value,
         (current, previous) =>{
@@ -82,81 +84,30 @@ export default function SwipeWindow ({setTriggerButton,children}) {
                 isFinished.value = true;
             }
         })
-    */
-    const pressStartTime = useRef(null);
-    const startX = useRef(null);
-    const startY = useRef(null);
-    const direction = useRef(null);
-    const THRESHOLD = 4
-
-    const hadlePressIn = (event) =>{
-        pressStartTime.current = Date.now();
-
-        const e = event.nativeEvent;
-        const touch = e.touches?.[0] ?? e;
-        startX.current = touch.pageX;
-        startY.current = touch.pageY;
-        direction.current = null;
-    }
     
-    const hadleMove = (event) => {
-        if(startX.current === null || startY.current === null) return;
-
-        const e = event.nativeEvent;
-        const touch = e.touches?.[0] ?? e;
-
-        const directionX = touch.pageX - startX.current;
-        const directionY = touch.pageY - startY.current;
-
-        if(!direction.current){
-            if(Math.abs(directionX) < THRESHOLD && Math.abs(directionY) < THRESHOLD) return;
-            
-            if(Math.abs(directionX) > Math.abs(directionY)){
-                direction.current = "x";
-                //console.log("Swiper right")
-                translateX.value = translateXValueReverse
-                transleteHeight.value = transformHeight
-                transleteWidth.value = transformWidth
-
-                togOff();
-
-            }else{
-                direction.current = "y";
-                //console.log("User swiper vertical");
-            }
-        }
-    }
-
-    const handlePressOut = async () =>{
-        startX.current = null;
-        startY.current = null;
-        direction.current = null;
-    }
-
     return(
-        <Pressable style={styles.root}
-            onPressIn={(event)=> hadlePressIn(event)}
-            onTouchMove={hadleMove}
-            onPressOut={()=>handlePressOut}
-        >
-            <Animated.View style={[styles.conteiner,animatedStyles]}>
-                <Animated.View style={[styles.main,animatedSize]}>
-                    <View 
-                        style={{
-                            position:'absolute',
-                            zIndex:10,
-                            height:'100%',
-                            width:'100%',
-                            //borderColor:'red',
-                             borderWidth:2,
-                            //backgroundColor:'red',
-                            //backgroundColor:'rgba(0,0,0,0.5)',
-                        }}>
-                        {children}
-                    </View>
+        <GestureHandlerRootView style={styles.root}>
+            <GestureDetector gesture={panGesture}>
+                <Animated.View style={[styles.conteiner,animatedStyles]}>
+                    <Animated.View style={[styles.main,animatedSize]}>
+                        <View 
+                            style={{
+                                position:'absolute',
+                                zIndex:10,
+                                height:'100%',
+                                width:'100%',
+                                borderColor:'red',
+                                borderWidth:2,
+                                //backgroundColor:'red',
+                            }}
+                            
+                        >
+                            {children}
+                        </View>
+                    </Animated.View>
                 </Animated.View>
-            </Animated.View>   
-        </Pressable>       
+            </GestureDetector>
+        </GestureHandlerRootView>
     );
 };
 
@@ -177,9 +128,10 @@ const styles = StyleSheet.create({
     },
     main:{
         //borderColor:'green',
-        //borderWidth:2,
+        borderWidth:2,
         borderRadius:2,
         borderWidth:1,
-        backgroundColor:'rgba(0,0,0,0.5)',
+        borderColor:'rgb(43,75,123)',
+        backgroundColor:'rgb(73,106,154)',
     }
 })
