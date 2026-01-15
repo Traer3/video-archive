@@ -15,6 +15,8 @@ export default function YTAssembler () {
     const [hasNext, setHasNext] = useState(true);
     const [loading, setLoading] = useState(false);
 
+    const [offline, setOffline] = useState(false);
+
     const [deletionTrigger, setDeletionTrigger] = useState(0);
     const [scrollAnimation, setScrollAnimation] = useState(true);
 
@@ -114,6 +116,10 @@ export default function YTAssembler () {
 
             }catch(err){
                 console.log("Error merging videos : ", err)
+                setLoading(false);
+                setHasNext(false);
+                setOffline(true);
+
             }finally{
                 setLoading(false);
             }
@@ -171,6 +177,20 @@ export default function YTAssembler () {
                     }}
                 />
             )}
+            {offline && 
+                <View style={{
+                    position:'absolute',
+                    width:'100%',
+                    height:'100%',
+                    justifyContent:'center',
+                    alignItems:'center',
+                }}>
+                    <Text style={{textAlign:'center'}}>
+                        Sorry no video for {'\n'}
+                        internetless
+                    </Text>
+                </View>
+            }
             <FlatList
                 style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
