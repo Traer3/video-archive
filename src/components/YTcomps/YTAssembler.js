@@ -4,6 +4,7 @@ import { VideoView, useVideoPlayer, } from "expo-video";
 import { DurationFetcher } from "./VideoProcessing/DurationFetcher";
 import RenderItem from "./VideoProcessing/RenderItem";
 import { useSaveVideo } from "./VideoProcessing/SaveVideoData";
+import ServerLoading from "../ServerLoading";
 
 const DB_URL = 'http://192.168.0.8:3001';
 const VIDEO_URL = 'http://192.168.0.8:3004'
@@ -106,6 +107,11 @@ export default function YTAssembler () {
                     };
                 });
 
+                //Делаем 3 списка по 7 
+                //1. preLoad который
+                //2. ready который уже загружен и ждет тригера от FlatList 
+                //3. videos на показ тригер сработал и показал видосы 
+
                 setVideos(prev => {
                     const existingIds = new Set(prev.map(p => p.id));
                     const unique = newFormPage.filter(v => !existingIds.has(v.id));
@@ -178,18 +184,7 @@ export default function YTAssembler () {
                 />
             )}
             {offline && 
-                <View style={{
-                    position:'absolute',
-                    width:'100%',
-                    height:'100%',
-                    justifyContent:'center',
-                    alignItems:'center',
-                }}>
-                    <Text style={{textAlign:'center'}}>
-                        Sorry no video for {'\n'}
-                        internetless
-                    </Text>
-                </View>
+                <ServerLoading/>
             }
             <FlatList
                 style={{flex:1}}
@@ -203,7 +198,7 @@ export default function YTAssembler () {
                 removeClippedSubviews={false}
                 initialNumToRender={10}
                 windowSize={10}
-                ListFooterComponent={loading ? <Text style={{textAlign:'center'}}>loading...</Text> : null}
+                ListFooterComponent={loading ? <Text style={{textAlign:'center',marginTop:"50%",fontWeight:'600',fontSize:20}}>loading...</Text> : null}
             />
             
             <Modal visible={!!selectedVideo} transparent={true} animationType="slide" onRequestClose={()=> setSelectedVideo(null)}>
