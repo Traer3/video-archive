@@ -3,11 +3,12 @@ const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 //npm install fluent-ffmpeg
 
-const VIDEOS_DIR =  path.join(__dirname, "videos");
-const OUTPUT_DIR = path.join(__dirname, "./thumbnails");
 
-if(!fs.existsSync(OUTPUT_DIR)){
-    fs.mkdirSync(OUTPUT_DIR);
+const VIDEOS_DIR =  path.join(__dirname, "videos");
+const THUMBNAILS_DIR = path.join(__dirname, "thumbnails");
+
+if(!fs.existsSync(THUMBNAILS_DIR)){
+    fs.mkdirSync(THUMBNAILS_DIR);
 }
 async function generateThumbnail(videoPath, outputPath){
     return new Promise((resolve, reject)=>{
@@ -18,7 +19,7 @@ async function generateThumbnail(videoPath, outputPath){
                 count: 1,
                 timemarks: ['00:00:02.000'],
                 filename: path.basename(outputPath),
-                folder: OUTPUT_DIR,
+                folder: THUMBNAILS_DIR,
                 size: '320x240',
             });
     });
@@ -26,16 +27,21 @@ async function generateThumbnail(videoPath, outputPath){
 
 async function processAllVideos() {
     const files = fs.readdirSync(VIDEOS_DIR).filter(f => f.endsWith('.mp4'));
+    const thumbnails = fs.readdirSync(THUMBNAILS_DIR)
 
     for(const file of files){
         const videoPath = path.join(VIDEOS_DIR, file);
-        const outputPath = path.join(OUTPUT_DIR, `${path.parse(file).name}.jpg`);
+        const outputPath = path.join(THUMBNAILS_DIR, `${path.parse(file).name}.jpg`);
+        const name = `${path.parse(file).name}.jpg`
         
-
+        if(thumbnails.includes(name)){
+            continue;
+        }
+        
         try{
-            console.log(`🎬 Generating thumbnail for: ${file}`);
-            await generateThumbnail(videoPath, outputPath);
-            console.log(`✅ Thumbnail generated : ${outputPath}`);
+           console.log(`🎬 Generating thumbnail for: ${file}`);
+           await generateThumbnail(videoPath, outputPath);
+           console.log(`✅ Thumbnail generated : ${outputPath}`);
         }catch(err){
             console.error(`❌ error ${file}:`, err.message);
         }
