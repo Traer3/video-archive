@@ -1,7 +1,39 @@
 import { View, StyleSheet, Pressable,} from "react-native"
 import YTAssembler from "./YTAssembler";
+import { useEffect, useState } from "react";
 
-export default function SwipeArea() {   
+
+const DB_URL = 'http://192.168.0.8:3001';
+export default function SwipeArea() {
+    const [dbVideos,setDbVideos] = useState([]);   
+    const [showVideos, setShowVideos] = useState(false);
+    useEffect(()=>{
+        const getDBData = async () => {
+            try{
+                const res = await fetch(`${DB_URL}/videos`);
+                const arr = await res.json();
+                const formatted = arr.map(v => ({
+                    id: v.id,
+                    name: v.name,
+                    tumbnail: v.thumbnail,
+                    duration: v.duration,
+                    isitunique: v.isitunique,
+                }));
+                setDbVideos(formatted);
+    
+                console.log('DB videos loaded:',formatted.length);
+            }catch(err){
+                console.log("Error loading DB videos:", err);
+            }finally{
+                setShowVideos(true)
+            }
+        };
+        getDBData();
+ 
+    },[])
+
+ 
+
     return(
         <View style={{
             //borderWidth:0.1,
@@ -11,7 +43,7 @@ export default function SwipeArea() {
             alignItems:'center',
             }} >
             <View style={styles.conteiner}>
-                <YTAssembler />          
+                {showVideos && <YTAssembler dbVideos={dbVideos}/>}          
             </View>
         </View>
     );

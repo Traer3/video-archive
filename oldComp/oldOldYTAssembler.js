@@ -6,9 +6,11 @@ import RenderItem from "./VideoProcessing/RenderItem";
 import { useSaveVideo } from "./VideoProcessing/SaveVideoData";
 import ServerLoading from "../ServerLoading";
 
+const DB_URL = 'http://192.168.0.8:3001';
 const VIDEO_URL = 'http://192.168.0.8:3004'
 
-export default function YTAssembler ({dbVideos}) {
+export default function YTAssembler () {
+    const [dbVideos,setDbVideos] = useState([]);
     const [videos, setVideos] = useState([]);
     const [page, setPage] = useState(0);
     const [hasNext, setHasNext] = useState(true);
@@ -19,54 +21,119 @@ export default function YTAssembler ({dbVideos}) {
     const [deletionTrigger, setDeletionTrigger] = useState(0);
     const [scrollAnimation, setScrollAnimation] = useState(true);
 
+    useEffect(()=>{
+        let mounted = true;
+        (async ()=>{
+            try{
+                const res = await fetch(`${DB_URL}/videos`);
+                const arr = await res.json();
+                if(!mounted) return;
+                const formatted = arr.map(v => ({
+                    id: v.id,
+                    name: v.name,
+                    tumbnail: v.thumbnail,
+                    duration: v.duration,
+                    isitunique: v.isitunique,
+                }));
+                setDbVideos(formatted);
+
+                //console.log('DB formated: ',formatted)
+                //console.log('DB videos loaded:',formatted.length);
+            }catch(err){
+                console.log("Error loading DB videos:", err);
+            }
+        })();
+        return () => {mounted = false;};
+    },[]);
     
-    const fetchAllVideos = async (pageNum = 1) => {
-       // console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
 
-       try{
-        const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=10`);
-        const urlData = await urlResponse.json()
-
-        setHasNext(urlData.hasNext);
-
-        const normolizeName = (name) => name.replace(/\.mp4$/i, '');
-        const newFormPage = urlData.videos.map(u => {
-            const urlName = normolizeName(u.name);
-
-            const dbVid = dbVideos.find(db => db.name === urlName);
-
-            return{
-                id: dbVid ? dbVid.id : null,
-                name: u.name,
-                url: u.url,
-                thumbnail: u.thumbnail,
-                duration: dbVid ? dbVid.duration : null,
-                isitunique: dbVid ? dbVid.isitunique : false,
-            };
-        });
-
-        setVideos(prev => {
-            const existingIds = new Set(prev.map(p => p.id));
-            const unique = newFormPage.filter(v => !existingIds.has(v.id));
-            return[...prev, ...unique];
-        });
-
-        console.log('Loaded page ', pageNum, 'items:', newFormPage.length);
-        
-
+    /*
+    const PromiseDB =  new Promise(async (resolve, reject)=>{
+        console.log("Promise Created!")
+        try{
+            const res = await fetch(`${DB_URL}/videos`);
+            const arr = await res.json();
+            const formatted = arr.map(v => ({
+                id: v.id,
+                name: v.name,
+                tumbnail: v.thumbnail,
+                duration: v.duration,
+                isitunique: v.isitunique,
+            }))
+            resolve(formatted);
         }catch(err){
-            console.log("Error merging videos : ", err)
-            setLoading(false);
-            setHasNext(false);
-            setOffline(true);
 
         }
-    }
+    });
+    */
+   
+    useEffect(()=>{
+        if(dbVideos.length === 0) return;
+        fetchAllVideos(1)
+    },[dbVideos,page]);
+    
+
+
+    const fetchAllVideos = useCallback(async (pageNum = 1) => {
+       // console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
+        if(loading || !hasNext ) return;
+
+        /*
+        PromiseDB.then(result => {
+            setDbVideos(result)
+            console.log("Promise result");
+        })
+        */
+
+        setLoading(true);
+            try{
+                const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=7`);
+                const urlData = await urlResponse.json()
+
+                setHasNext(urlData.hasNext);
+
+                const normolizeName = (name) => name.replace(/\.mp4$/i, '');
+                const newFormPage = urlData.videos.map(u => {
+                    const urlName = normolizeName(u.name);
+                    const dbVid = dbVideos.find(db => db.name === urlName);
+
+                    return{
+                        id: dbVid ? dbVid.id : null,
+                        name: u.name,
+                        url: u.url,
+                        thumbnail: u.thumbnail,
+                        duration: dbVid ? dbVid.duration : null,
+                        isitunique: dbVid ? dbVid.isitunique : false,
+                    };
+                });
+
+                //Делаем 3 списка по 7 
+                //1. preLoad который
+                //2. ready который уже загружен и ждет тригера от FlatList 
+                //3. videos на показ тригер сработал и показал видосы 
+
+                setVideos(prev => {
+                    const existingIds = new Set(prev.map(p => p.id));
+                    const unique = newFormPage.filter(v => !existingIds.has(v.id));
+                    return[...prev, ...unique];
+                });
+
+                console.log('Loaded page ', pageNum, 'items:', newFormPage.length);
+
+            }catch(err){
+                console.log("Error merging videos : ", err)
+                setLoading(false);
+                setHasNext(false);
+                setOffline(true);
+
+            }finally{
+                setLoading(false);
+            }
+        },[loading,hasNext,dbVideos]);
 
     const loadMore = () => {
-        console.log("LoadMore trigered!")
         const nextPage = page + 1;
-        if(hasNext){
+        if(hasNext && !loading){
             fetchAllVideos(nextPage).then(()=>{
                  setPage(nextPage) 
             })
@@ -120,15 +187,13 @@ export default function YTAssembler ({dbVideos}) {
                 <ServerLoading/>
             }
             <FlatList
-                style={{flex:1,}}
+                style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
                 data={videos}
                 scrollEnabled={scrollAnimation}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
-
-                onEndReached={loadMore}////////////////////////////////////////////////
-
+                onEndReached={loadMore}
                 onEndReachedThreshold={0.5}
                 removeClippedSubviews={false}
                 initialNumToRender={10}
