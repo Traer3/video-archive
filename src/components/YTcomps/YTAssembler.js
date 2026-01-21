@@ -19,6 +19,9 @@ export default function YTAssembler ({dbVideos}) {
     const [deletionTrigger, setDeletionTrigger] = useState(0);
     const [scrollAnimation, setScrollAnimation] = useState(true);
 
+
+    const [preloaded, setPreloaded] = useState(null);
+    const [loaded, setLoaded] = useState(null);
     
     const fetchAllVideos = async (pageNum = 1) => {
        // console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
@@ -45,11 +48,20 @@ export default function YTAssembler ({dbVideos}) {
             };
         });
 
+        //return newFormPage будет возвращать 10 видосов 
+
+        //setPreloaded() а в эти функции будем закидывать видосы 
+        //setLoaded()
+        ////setVideoForShow()
+
+
         setVideos(prev => {
             const existingIds = new Set(prev.map(p => p.id));
             const unique = newFormPage.filter(v => !existingIds.has(v.id));
             return[...prev, ...unique];
         });
+
+
 
         console.log('Loaded page ', pageNum, 'items:', newFormPage.length);
         
@@ -70,6 +82,10 @@ export default function YTAssembler ({dbVideos}) {
             fetchAllVideos(nextPage).then(()=>{
                  setPage(nextPage) 
             })
+            
+            //setPreloaded(page = 3)
+            //setLoaded(pag = 2)
+            //setVideoForShow(page = 1)
         }
     };
 
