@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal} from "react-native";
 import { VideoView, useVideoPlayer, } from "expo-video";
 import { DurationFetcher } from "./VideoProcessing/DurationFetcher";
@@ -10,27 +10,23 @@ const VIDEO_URL = 'http://192.168.0.8:3004'
 
 export default function YTAssembler ({dbVideos}) {
     const [videos, setVideos] = useState([]);
-    const [page, setPage] = useState(0);
-    const [hasNext, setHasNext] = useState(true);
-    const [loading, setLoading] = useState(false);
 
+    const page = useRef(0);
+    const hasNext = useRef(true)
+
+    const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(false);
 
     const [deletionTrigger, setDeletionTrigger] = useState(0);
     const [scrollAnimation, setScrollAnimation] = useState(true);
-
-
-    const [preloaded, setPreloaded] = useState(null);
-    const [loaded, setLoaded] = useState(null);
     
     const fetchAllVideos = async (pageNum = 1) => {
        // console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
-
        try{
         const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=10`);
         const urlData = await urlResponse.json()
 
-        setHasNext(urlData.hasNext);
+        hasNext.current = urlData.hasNext
 
         const normolizeName = (name) => name.replace(/\.mp4$/i, '');
         const newFormPage = urlData.videos.map(u => {
@@ -47,47 +43,41 @@ export default function YTAssembler ({dbVideos}) {
                 isitunique: dbVid ? dbVid.isitunique : false,
             };
         });
-
-        //return newFormPage будет возвращать 10 видосов 
-
-        //setPreloaded() а в эти функции будем закидывать видосы 
-        //setLoaded()
-        ////setVideoForShow()
-
-
-        setVideos(prev => {
-            const existingIds = new Set(prev.map(p => p.id));
-            const unique = newFormPage.filter(v => !existingIds.has(v.id));
-            return[...prev, ...unique];
-        });
-
-
-
         console.log('Loaded page ', pageNum, 'items:', newFormPage.length);
-        
+        return newFormPage 
 
         }catch(err){
             console.log("Error merging videos : ", err)
             setLoading(false);
-            setHasNext(false);
             setOffline(true);
-
         }
     }
 
-    const loadMore = () => {
-        console.log("LoadMore trigered!")
-        const nextPage = page + 1;
-        if(hasNext){
-            fetchAllVideos(nextPage).then(()=>{
-                 setPage(nextPage) 
-            })
-            
-            //setPreloaded(page = 3)
-            //setLoaded(pag = 2)
-            //setVideoForShow(page = 1)
+    const loadMore = async () => {
+        const nextPage = page.current + 1;
+        
+        if(hasNext.current && nextPage <= 5){
+            const newFormPage = await fetchAllVideos(nextPage)
+            page.current = nextPage;
+            loadMore()
+
+            updateVideo(newFormPage)
+        }else{
+            console.log("SlowerPase")
+            const newFormPage = await fetchAllVideos(nextPage)
+            page.current = nextPage;
+            updateVideo(newFormPage)
         }
     };
+
+    const updateVideo = (vids) =>{
+        setVideos(prev => {
+            const existingIds = new Set(prev.map(p => p.id));
+            const unique = vids.filter(v => !existingIds.has(v.id));
+            return[...prev, ...unique];
+        });
+    }
+  
 
     const keyExtractor = item => (item.id ? item.id.toString() : item.url);
 
@@ -142,9 +132,7 @@ export default function YTAssembler ({dbVideos}) {
                 scrollEnabled={scrollAnimation}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
-
-                onEndReached={loadMore}////////////////////////////////////////////////
-
+                onEndReached={loadMore}
                 onEndReachedThreshold={0.5}
                 removeClippedSubviews={false}
                 initialNumToRender={10}
