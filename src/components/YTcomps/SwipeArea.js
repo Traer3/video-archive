@@ -2,8 +2,8 @@ import { View, StyleSheet, Pressable,} from "react-native"
 import YTAssembler from "./YTAssembler";
 import { useEffect, useState } from "react";
 
-
 const DB_URL = 'http://192.168.0.8:3001';
+
 export default function SwipeArea() {
     const [dbVideos,setDbVideos] = useState([]);   
     const [showVideos, setShowVideos] = useState(false);
@@ -32,13 +32,8 @@ export default function SwipeArea() {
  
     },[])
 
- 
-
     return(
         <View style={{
-            //borderWidth:0.1,
-            //borderWidth:3,
-            //borderColor:'green',
             justifyContent:'center',
             alignItems:'center',
             }} >
@@ -53,18 +48,13 @@ const styles = StyleSheet.create({
     conteiner: {
         flexGrow:1,
         width:'79%',
-        //width:'100%',
         height:'100%',
         backgroundColor:'rgb(71, 103, 151)',
-        //margin:'8%',
-        //marginBottom:'8%',
         overflow:'visible',
         padding:2,
-
         borderRadius:2,
         borderWidth:2,
         borderColor:'rgb(43,75,123)',
-
         //borderWidth:3,
         //borderColor:'yellow',
     },

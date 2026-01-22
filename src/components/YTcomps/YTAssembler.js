@@ -78,7 +78,6 @@ export default function YTAssembler ({dbVideos}) {
         });
     }
   
-
     const keyExtractor = item => (item.id ? item.id.toString() : item.url);
 
     const {saveVideoData} = useSaveVideo();
@@ -150,14 +149,11 @@ export default function YTAssembler ({dbVideos}) {
                         {selectedVideo && (
                             <VideoView
                                 style={styles.video}
-                                
                                 player={player}
-                                
                                 fullscreenOptions={{
                                     enable: true,
                                     
                                 }}
-                                
                                 nativeControls
                             />
                         )}
