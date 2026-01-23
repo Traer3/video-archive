@@ -9,18 +9,24 @@ const icons = {
     MenuIcon : menuIcon,
 }
 
-export default function CustomButton({buttonName,buttonSetState, buttonState,iconsName}){
+export default function CustomButton({buttonName,buttonSetState, buttonState,iconsName,onLongState, setOnLongState}){
     //rgb(73,106,154) цвет кнокпи 
     // rgb(43,75,123) цвет рамки 
     // rgb(178,191,217) цвет текста 
-    const specialFunction = async () =>{
+    const specialFunction = () =>{
         buttonSetState(!buttonState);
         
+    }
+    const onLongPress = ()=>{
+        setOnLongState(!onLongState);
     }
     return(
         <Pressable
             onPress={()=>{
                specialFunction()
+            }}
+            onLongPress={()=>{
+                onLongPress()
             }}
             style={{
                 borderRadius:2,

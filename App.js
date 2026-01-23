@@ -9,17 +9,20 @@ import Menu from './src/components/menuComps/Menu';
 import MainTT from './src/components/TTComps/MainTT';
 import SoundEffect from './src/components/YTcomps/SoundEffect';
 import SwipeWindow from './src/components/SwipeWindow';
+import InfoPanel from './src/components/menuComps/InfoPanel';
 
 export default function App() {
   const [showYT, setShowYT] = useState(false);
   const [showTT, setShowTT] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   return (
     <View style={{flex:1}}>
       <Background/>
       <View style={styles.baseTheme}>
         <>{showMenu && <Menu areaState={setShowMenu}/>}</>
+        <>{showInfo && <InfoPanel/>}</>
         <>{showTT && <MainTT/>}</>
         
         <>{showYT && (
@@ -33,7 +36,7 @@ export default function App() {
 
         <SidePanel>
             <CustomButton iconsName="TTLogo" buttonSetState={setShowTT} buttonState={showTT}/>
-            <CustomButton iconsName="MenuIcon" buttonSetState={setShowMenu} buttonState={showMenu}/>
+            <CustomButton iconsName="MenuIcon" buttonSetState={setShowMenu} buttonState={showMenu} onLongState={showInfo} setOnLongState={setShowInfo}/>
             <CustomButton iconsName="YTLogo" buttonSetState={setShowYT} buttonState={showYT} />
         </SidePanel>
       </View>
