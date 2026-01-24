@@ -1,10 +1,11 @@
 import { View, StyleSheet,  } from "react-native";
+import InfoForm from "./InfoForm";
 
 export default function InfoPanel () {
     return(
         <View style={styles.outerArea}>
             <View style={styles.conteiner}>
-
+                <InfoForm/>
             </View>
         </View>
     );
@@ -12,7 +13,7 @@ export default function InfoPanel () {
 
 const styles = StyleSheet.create({
     conteiner: {
-
+        
         width:'90%',
         height:'90%',
         backgroundColor:'rgb(71, 103, 151)',
@@ -21,6 +22,9 @@ const styles = StyleSheet.create({
         borderRadius:2,
         borderWidth:2,
         borderColor:'rgb(43,75,123)',
+
+        
+        alignItems:'center',
         //borderWidth:3,
         //borderColor:'yellow',
     },
