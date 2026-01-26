@@ -6,6 +6,8 @@ export default function InfoPanel () {
         <View style={styles.outerArea}>
             <View style={styles.conteiner}>
                 <InfoForm/>
+                <InfoForm/>
+                <InfoForm/>
             </View>
         </View>
     );
@@ -17,14 +19,14 @@ const styles = StyleSheet.create({
         width:'90%',
         height:'90%',
         backgroundColor:'rgb(71, 103, 151)',
-        overflow:'visible',
+       
 
         borderRadius:2,
         borderWidth:2,
         borderColor:'rgb(43,75,123)',
 
         
-        alignItems:'center',
+        
         //borderWidth:3,
         //borderColor:'yellow',
     },
