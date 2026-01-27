@@ -29,6 +29,8 @@ const styles = StyleSheet.create({
         
         //borderWidth:3,
         //borderColor:'yellow',
+        alignItems:'center',
+        flexDirection:'column',
     },
     
     outerArea:{
