@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-export default function InfoForm() {
+export default function InfoForm({serverName}) {
 
     const [serverState, setServerState] = useState(false);
     const [showPanel, setShowPanel] = useState(false);
@@ -38,7 +38,7 @@ export default function InfoForm() {
                                     <Text style={{
                                          marginLeft:'10%',
                                     }}>
-                                        process name
+                                        {serverName}
                                     </Text>
                                 </Pressable>
                             </View>

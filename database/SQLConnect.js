@@ -14,7 +14,10 @@ const pool = new Pool({
     port: 5432,
 });
 
+const serverName = "SQL connection";
+
 app.use(express.json());
+
 
 app.get("/videos", async(req, res) => {
     try{
@@ -136,6 +139,16 @@ app.post('/deleteVideo',async(req,res)=>{
         console.error('Error wihle deleting video:',err.message);
     }
 })
+
+app.get('/info',async(req,res)=>{
+    try{
+        res.json(serverName);
+    }catch(err){
+        console.error(err);
+        res.status(500).json({error: "Cant get info"});
+    }
+})
+
 
 app.listen(3001, ()=>{
     console.log("✅ API initiated")

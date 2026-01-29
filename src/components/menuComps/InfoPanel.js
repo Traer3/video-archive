@@ -1,7 +1,29 @@
 import { View, StyleSheet,  } from "react-native";
 import InfoForm from "./InfoForm";
+import { useEffect, useState } from "react";
+
+const DB_URL = 'http://192.168.0.8:3001';
 
 export default function InfoPanel () {
+    const [SQLInfo, setSQLInfo] = useState(false);
+
+    useEffect(()=>{
+        const getDBData = async () => {
+            try{
+                const res = await fetch(`${DB_URL}/videos`);
+                const arr = await res.json();
+                setSQLInfo(true);
+                console.log('DB videos loaded');
+            }catch(err){
+                setSQLInfo(false);
+                console.log("Error loading DB videos:", err);
+            }
+        };
+        getDBData();
+ 
+    },[])
+
+
     return(
         <View style={styles.outerArea}>
             <View style={styles.conteiner}>
