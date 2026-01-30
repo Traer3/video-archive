@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function InfoForm({serverName}) {
 
-    const [serverState, setServerState] = useState(false);
+    //const [serverState, setServerState] = useState(false);
     const [showPanel, setShowPanel] = useState(false);
 
     return(
@@ -21,7 +21,7 @@ export default function InfoForm({serverName}) {
                 <View style={styles.main}>
                     <View style={styles.conteiner}>
                         <View style={[styles.circle,{
-                            backgroundColor: serverState ? 'green' : 'red'
+                            backgroundColor: serverName ? 'green' : 'red'
                         }]}/>
                             <View style={{
                                     //borderColor:'red',borderWidth:1,
