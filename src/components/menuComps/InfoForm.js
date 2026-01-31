@@ -52,6 +52,21 @@ export default function InfoForm({serverName}) {
                             <Text>
                                 server logs 
                             </Text>
+                            <Text>
+                                server logs 
+                            </Text><Text>
+                                server logs 
+                            </Text><Text>
+                                server logs 
+                            </Text><Text>
+                                server logs 
+                            </Text><Text>
+                                server logs 
+                            </Text><Text>
+                                server logs 
+                            </Text><Text>
+                                server logs 
+                            </Text>
                         </View>
                     </View>
                     }
