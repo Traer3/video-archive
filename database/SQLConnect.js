@@ -14,9 +14,6 @@ const pool = new Pool({
     port: 5432,
 });
 
-const serverName = "SQL connection";
-//будем читать логи из файла логи
-
 app.use(express.json());
 
 
@@ -29,9 +26,11 @@ app.get("/videos", async(req, res) => {
         res.json(result.rows);
     }catch(err){
         console.error(err);
-        res.status(500).json({error: "Server error XD"});
+        res.status(500).json({error: "Table videos error",err});
     }
 });
+
+
 
 app.post('/saveUniqueData',async(req,res)=>{
     try{
@@ -139,17 +138,44 @@ app.post('/deleteVideo',async(req,res)=>{
     }catch(err){
         console.error('Error wihle deleting video:',err.message);
     }
-})
+});
 
-app.get('/info',async(req,res)=>{
+
+app.get("/logs",async(req,res)=>{
     try{
-        res.json(serverName);
+        const result = await pool.query("SELECT * FROM logs");
+        res.json(result.rows);
     }catch(err){
         console.error(err);
-        res.status(500).json({error: "Cant get info"});
+        res.status(500).json({error:"Table logs error",err})
     }
-})
+});
 
+app.post('/addLog',async(req,res)=>{
+    try{
+        const {type, log} = req.body;
+
+        const allowedLogs = [
+            "SQLLogs","ExpressLogs","DownloaderLogs","ImporterLogs","EraserLogs","IsItUniqueLogs","ThumbnailGeneratorLogs"
+        ];
+
+        if(!type || !allowedLogs.includes(type)){
+            return(res.status(400).json({message: "Invalid or Missing type of logs"}));
+        }
+
+        await pool.query(
+            `INSERT INTO logs (log_type, log)
+             VALUES ($1, $2)`,
+             [type, log]
+        );
+        res.status(200).json({
+            message:  '✅ Logged successfully',
+        })
+    }catch(err){
+        console.error("Error while writing log ",err);
+        res.status(500).json({error:"Error table logs ", err })
+    }
+});
 
 app.listen(3001, ()=>{
     console.log("✅ API initiated")

@@ -1,16 +1,12 @@
-import { View, StyleSheet, FlatList, Text } from "react-native";
+import { View, StyleSheet, FlatList, Pressable } from "react-native";
 import InfoForm from "./InfoForm";
 import { useEffect, useState } from "react";
-import ServerLoading from "../ServerLoading";
 
 const DB_URL = 'http://192.168.0.8:3001';
 
-const ExpressLogs = "Express Logs";
-const VideoDownloaderLogs = "Video Downloader Logs";
-const VideoImporterLogs = "Video Importer Logs";
-const VideoEraserLogs = "Video Eraser Logs";
-const IsItUniqueLogs = "Is It Unique Logs";
-const ThumbnailGeneratorLogs = "Thumbnail Generator Logs";
+/*
+"SQLLogs","ExpressLogs","DownloaderLogs","ImporterLogs","EraserLogs","IsItUniqueLogs","ThumbnailGeneratorLogs"
+*/
 export default function InfoPanel () {
     const [SQLInfo, setSQLInfo] = useState(null);
     
@@ -18,35 +14,36 @@ export default function InfoPanel () {
     useEffect(()=>{
         const getDBData = async () => {
             try{
-                const res = await fetch(`${DB_URL}/info`);
+                const res = await fetch(`${DB_URL}/logs`);
                 const arr = await res.json();
                 setSQLInfo(arr);
-                console.log('DB videos loaded');
+                console.log('DB logs loaded');
             }catch(err){
 
-                console.log("Error loading DB videos:", err);
+                console.log("Error loading DB logs:", err);
             }
         };
         getDBData();
  
     },[])
 
-    /*
-                    <InfoForm serverName={SQLInfo}/>
-                    <InfoForm serverName={ExpressLogs}/>
-                    <InfoForm serverName={VideoDownloaderLogs}/>
-                    <InfoForm serverName={VideoImporterLogs}/>
-                    <InfoForm serverName={VideoEraserLogs}/>
-                    <InfoForm serverName={IsItUniqueLogs}/>
-                    <InfoForm serverName={ThumbnailGeneratorLogs}/>
+    const writeLog = async (type,log) =>{
+       const res = await fetch(`${DB_URL}/addLog`,{
+        method: "POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({type, log})
+       });
 
-                    const ExpressLogs = "Express Logs";
-                    const VideoDownloaderLogs = "Video Downloader Logs";
-                    const VideoImporterLogs = "Video Importer Logs";
-                    const VideoEraserLogs = "Video Eraser Logs";
-                    const IsItUniqueLogs = "Is It Unique Logs";
-                    const ThumbnailGeneratorLogs = "Thumbnail Generator Logs";
-    */
+       if(!res.ok){
+        const errorData = await res.json();
+        console.error(`❌ Failed writing log: ${errorData.message}`);
+        return;
+       }
+
+       const data = await res.json();
+       console.log(data);
+    }
+
 
     const data = [
         {id: '1',title: 'SQLInfo',},
