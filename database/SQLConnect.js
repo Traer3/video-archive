@@ -15,6 +15,7 @@ const pool = new Pool({
 });
 
 const serverName = "SQL connection";
+//будем читать логи из файла логи
 
 app.use(express.json());
 
