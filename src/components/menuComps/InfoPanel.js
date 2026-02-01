@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 const DB_URL = 'http://192.168.0.8:3001';
 
-/*
+/* sort this
 "SQLLogs","ExpressLogs","DownloaderLogs","ImporterLogs","EraserLogs","IsItUniqueLogs","ThumbnailGeneratorLogs"
 */
 export default function InfoPanel () {
@@ -43,6 +43,7 @@ export default function InfoPanel () {
        const data = await res.json();
        console.log(data);
     }
+
 
 
     const data = [
