@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-export default function InfoForm({serverName}) {
+export default function InfoForm({serverName, log}) {
 
     //const [serverState, setServerState] = useState(false);
     const [showPanel, setShowPanel] = useState(false);
@@ -50,22 +50,7 @@ export default function InfoForm({serverName}) {
                     <View style={styles.infoMain}>
                         <View style={styles.infoConteiner}>
                             <Text>
-                                server logs 
-                            </Text>
-                            <Text>
-                                server logs 
-                            </Text><Text>
-                                server logs 
-                            </Text><Text>
-                                server logs 
-                            </Text><Text>
-                                server logs 
-                            </Text><Text>
-                                server logs 
-                            </Text><Text>
-                                server logs 
-                            </Text><Text>
-                                server logs 
+                               {log}
                             </Text>
                         </View>
                     </View>

@@ -17,7 +17,7 @@ export default function InfoPanel () {
                 const res = await fetch(`${DB_URL}/logs`);
                 const arr = await res.json();
                 setSQLInfo(arr);
-                console.log('DB logs loaded');
+                //console.log('DB logs loaded');
             }catch(err){
 
                 console.log("Error loading DB logs:", err);
@@ -42,36 +42,46 @@ export default function InfoPanel () {
 
        const data = await res.json();
        console.log(data);
+    };
+
+   
+
+    const LogContainerGenerator = (DBLogs, type, log) =>{
+        const dbLogTypes = DBLogs.map(logType => logType = logType.log_type)
+        const uniqueTypes = [...new Set(dbLogTypes)]
+       // console.log("DB log types", uniqueTypes);
+        
+        return uniqueTypes
+    }
+
+    if(SQLInfo){
+        const uniqueTypes = LogContainerGenerator(SQLInfo)
+        console.log(uniqueTypes)
+        const logContainer = Array.from({length:uniqueTypes.length},(_,i)=>(
+            <InfoForm key={i} serverName={uniqueTypes[i]}/>
+        ))
+        return(
+            <>{logContainer}</>
+        )
     }
 
 
-
-    const data = [
-        {id: '1',title: 'SQLInfo',},
-        {id: '2',title: 'Express Logs'},
-        {id: '3',title: 'Video Downloader Logs',},
-        {id: '4',title: 'Video Importer Logs'},
-        {id: '5',title: 'Video Eraser Logs',},
-        {id: '6',title: 'Is It Unique Logs',},
-        {id: '7',title: 'Thumbnail Generator Logs'},
-    ];
-    
-    const Item = ({ title })=>(
+    const Item = ({ title , log})=>(
         <View style={styles.item}>
-            <InfoForm serverName={title}/>
+            <InfoForm serverName={title} log={log}/>
         </View>
     )
-
+    // <Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{writeLog("ThumbnailGeneratorLogs","ThumbnailLogssssss")}}/>
     return(
         <View style={styles.outerArea}>
+            <Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{LogContainerGenerator(SQLInfo)}}/>
             <FlatList 
                 style={styles.conteiner}
                 //style={{height:"80%",width:'90%',borderColor:'red',borderWidth:1,marginTop:40,zIndex:3}}
-                data={data}
-                renderItem={({item}) => <Item title={item.title} />}
+                data={SQLInfo}
+                renderItem={({item}) => <Item title={item.log_type} log={item.log} />}
                 keyExtractor={item => item.id}
             />
-            
             
         </View>
     );
