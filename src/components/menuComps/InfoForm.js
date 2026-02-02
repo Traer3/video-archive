@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-export default function InfoForm({serverName, log}) {
+export default function InfoForm({logType, log}) {
 
     //const [serverState, setServerState] = useState(false);
     const [showPanel, setShowPanel] = useState(false);
@@ -21,7 +21,7 @@ export default function InfoForm({serverName, log}) {
                 <View style={styles.main}>
                     <View style={styles.conteiner}>
                         <View style={[styles.circle,{
-                            backgroundColor: serverName ? 'green' : 'red'
+                            backgroundColor: logType ? 'green' : 'red'
                         }]}/>
                             <View style={{
                                     //borderColor:'red',borderWidth:1,
@@ -38,7 +38,7 @@ export default function InfoForm({serverName, log}) {
                                     <Text style={{
                                          marginLeft:'10%',
                                     }}>
-                                        {serverName}
+                                        {logType}
                                     </Text>
                                 </Pressable>
                             </View>

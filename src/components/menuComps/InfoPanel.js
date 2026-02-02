@@ -46,6 +46,8 @@ export default function InfoPanel () {
 
    
 
+
+    /*
     const LogContainerGenerator = (DBLogs, type, log) =>{
         const dbLogTypes = DBLogs.map(logType => logType = logType.log_type)
         const uniqueTypes = [...new Set(dbLogTypes)]
@@ -54,32 +56,59 @@ export default function InfoPanel () {
         return uniqueTypes
     }
 
+    
     if(SQLInfo){
         const uniqueTypes = LogContainerGenerator(SQLInfo)
         console.log(uniqueTypes)
         const logContainer = Array.from({length:uniqueTypes.length},(_,i)=>(
-            <InfoForm key={i} serverName={uniqueTypes[i]}/>
+            <InfoForm key={i} logType={uniqueTypes[i]}/>
         ))
         return(
             <>{logContainer}</>
         )
     }
+    */
+
+    const [logs,setLogs] = useState([{
+        name:"",
+        log:"",
+    }])
+
+    const LogMolder = ()=>{
+        const dbLogTypes = SQLInfo.map(logType => logType = logType.log_type)
+        const uniqueTypes = [...new Set(dbLogTypes)]
+        uniqueTypes.forEach(logType=>{
+            setLogs({name:logType})
+            
+        })
+
+       return console.log(logs)
+    }
+   
+    const Item = ({ logType , log})=>{
+        const dbLogTypes = SQLInfo.map(logType => logType = logType.log_type)
+        const uniqueTypes = [...new Set(dbLogTypes)]
+
+        //сделать 
+        const logContainer = Array.from({length:uniqueTypes.length},(_,i)=>(
+            <InfoForm key={i} logType={uniqueTypes[i]} log={log}/>
+        ))
 
 
-    const Item = ({ title , log})=>(
+        return(
         <View style={styles.item}>
-            <InfoForm serverName={title} log={log}/>
+
+            <>{logContainer}</>
         </View>
-    )
+    )}
     // <Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{writeLog("ThumbnailGeneratorLogs","ThumbnailLogssssss")}}/>
     return(
         <View style={styles.outerArea}>
-            <Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{LogContainerGenerator(SQLInfo)}}/>
+             <Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{LogMolder()}}/>
             <FlatList 
                 style={styles.conteiner}
-                //style={{height:"80%",width:'90%',borderColor:'red',borderWidth:1,marginTop:40,zIndex:3}}
                 data={SQLInfo}
-                renderItem={({item}) => <Item title={item.log_type} log={item.log} />}
+                renderItem={({item}) => <Item logType={item.log_type} log={item.log} />}
                 keyExtractor={item => item.id}
             />
             
