@@ -22,7 +22,7 @@ export default function InfoPanel () {
                 let id = 0;
                 const dbLogTypes = await DBLogs.map(logType => logType = logType.log_type)
                 const uniqueTypes = [...new Set(dbLogTypes)]
-                uniqueTypes.map(logType => newForm.push({id:id++, log_type: logType,  log: [""]}))
+                uniqueTypes.map(logType => newForm.push({id:id++, log_type: logType,  log: []}))
                 setLogs(newForm);
 
             }catch(err){
@@ -30,7 +30,6 @@ export default function InfoPanel () {
             }
         };
         getDBData();
- 
     },[]);
 
 
@@ -39,15 +38,18 @@ export default function InfoPanel () {
         if(!dbLogs) return;
 
         for (let i = 0; i < dbLogs.length; i++) {
-            console.log("id: ",dbLogs[i].id," log type: ",dbLogs[i].log_type, " log: ",dbLogs[i].log);
-            
-            
+            for(const logType of logs){
+                if(logType.log_type === dbLogs[i].log_type){
+                    logType.log.push(dbLogs[i].log)
+                }   
+            }
         }
 
+        /*
         for(const logType of logs){
-            //console.log(logType.log_type)
-            
+            console.log("id: ",logType.id," Log Type: ",logType.log_type, "Log: ", logType.log);   
         }
+        */
     }
 
 
@@ -69,7 +71,7 @@ export default function InfoPanel () {
     };
    
     const Item = ({logType , log, id})=>{
-        if(!id) return;
+        if(id === null) return;
         return (
         <View style={styles.item}>
             <InfoForm key={id} logType={logType} log={log}/>
