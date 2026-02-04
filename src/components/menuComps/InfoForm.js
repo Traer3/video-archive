@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 export default function InfoForm({logType, log}) {
 
     //const [serverState, setServerState] = useState(false);
-    const [showPanel, setShowPanel] = useState(false);
+    const [showPanel, setShowPanel] = useState(false);    
 
     return(
         <View style={{

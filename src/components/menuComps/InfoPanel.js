@@ -8,24 +8,48 @@ const DB_URL = 'http://192.168.0.8:3001';
 "SQLLogs","ExpressLogs","DownloaderLogs","ImporterLogs","EraserLogs","IsItUniqueLogs","ThumbnailGeneratorLogs"
 */
 export default function InfoPanel () {
-    const [SQLInfo, setSQLInfo] = useState(null);
-    
+    const [dbLogs, setDBLogs] = useState(null);
+    const [logs,setLogs] = useState(null)
 
     useEffect(()=>{
         const getDBData = async () => {
             try{
                 const res = await fetch(`${DB_URL}/logs`);
-                const arr = await res.json();
-                setSQLInfo(arr);
-                //console.log('DB logs loaded');
-            }catch(err){
+                const DBLogs = await res.json();
+                setDBLogs(DBLogs);
 
+                let newForm = [];
+                let id = 0;
+                const dbLogTypes = await DBLogs.map(logType => logType = logType.log_type)
+                const uniqueTypes = [...new Set(dbLogTypes)]
+                uniqueTypes.map(logType => newForm.push({id:id++, log_type: logType,  log: [""]}))
+                setLogs(newForm);
+
+            }catch(err){
                 console.log("Error loading DB logs:", err);
             }
         };
         getDBData();
  
-    },[])
+    },[]);
+
+
+
+    const logFiller = async () =>{
+        if(!dbLogs) return;
+
+        for (let i = 0; i < dbLogs.length; i++) {
+            console.log("id: ",dbLogs[i].id," log type: ",dbLogs[i].log_type, " log: ",dbLogs[i].log);
+            
+            
+        }
+
+        for(const logType of logs){
+            //console.log(logType.log_type)
+            
+        }
+    }
+
 
     const writeLog = async (type,log) =>{
        const res = await fetch(`${DB_URL}/addLog`,{
@@ -43,74 +67,28 @@ export default function InfoPanel () {
        const data = await res.json();
        console.log(data);
     };
-
    
-
-
-    /*
-    const LogContainerGenerator = (DBLogs, type, log) =>{
-        const dbLogTypes = DBLogs.map(logType => logType = logType.log_type)
-        const uniqueTypes = [...new Set(dbLogTypes)]
-       // console.log("DB log types", uniqueTypes);
-        
-        return uniqueTypes
-    }
-
-    
-    if(SQLInfo){
-        const uniqueTypes = LogContainerGenerator(SQLInfo)
-        console.log(uniqueTypes)
-        const logContainer = Array.from({length:uniqueTypes.length},(_,i)=>(
-            <InfoForm key={i} logType={uniqueTypes[i]}/>
-        ))
-        return(
-            <>{logContainer}</>
-        )
-    }
-    */
-
-    const [logs,setLogs] = useState([{
-        name:"",
-        log:"",
-    }])
-
-    const LogMolder = ()=>{
-        const dbLogTypes = SQLInfo.map(logType => logType = logType.log_type)
-        const uniqueTypes = [...new Set(dbLogTypes)]
-        uniqueTypes.forEach(logType=>{
-            setLogs({name:logType})
-            
-        })
-
-       return console.log(logs)
-    }
-   
-    const Item = ({ logType , log})=>{
-        const dbLogTypes = SQLInfo.map(logType => logType = logType.log_type)
-        const uniqueTypes = [...new Set(dbLogTypes)]
-
-        //сделать 
-        const logContainer = Array.from({length:uniqueTypes.length},(_,i)=>(
-            <InfoForm key={i} logType={uniqueTypes[i]} log={log}/>
-        ))
-
-
-        return(
+    const Item = ({logType , log, id})=>{
+        if(!id) return;
+        return (
         <View style={styles.item}>
-
-            <>{logContainer}</>
+            <InfoForm key={id} logType={logType} log={log}/>
         </View>
     )}
+
     // <Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{writeLog("ThumbnailGeneratorLogs","ThumbnailLogssssss")}}/>
+    //<Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{LogFormer()}}/>
     return(
         <View style={styles.outerArea}>
-             <Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{LogMolder()}}/>
+            <Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{logFiller()}}/>
+            {logs && 
             <FlatList 
                 style={styles.conteiner}
-                data={SQLInfo}
-                renderItem={({item}) => <Item logType={item.log_type} log={item.log} />}
+                data={logs}
+                renderItem={({item}) => <Item id={item.id} logType={item.log_type} log={item.log} />}
                 keyExtractor={item => item.id}
             />
+            }
             
         </View>
     );
