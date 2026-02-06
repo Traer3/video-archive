@@ -6,6 +6,34 @@ export default function InfoForm({logType, log}) {
     //const [serverState, setServerState] = useState(false);
     const [showPanel, setShowPanel] = useState(false);    
 
+    const LogReader = ()=>{
+            if(log === null) return;
+
+           return (log.map(log=>(
+                <View style={{flexDirection:'row'}}>
+                    <Text style={{fontSize:15, marginLeft:10,}}>
+                        {formatDate(log.createdAt)}
+                        
+                    </Text>
+                    <Text style={{fontSize:15, marginLeft:10,fontWeight:600,}}>
+                      {log.message}
+                    </Text>
+                </View>
+            )))
+        }
+    const formatDate = (isoDate) =>{
+        const date = new Date(isoDate);
+        const dateString =  date.toLocaleString('ru-Ru',{
+            day: '2-digit',
+            month: '2-digit',
+            //year:'numeric',
+            hour:'2-digit',
+            minute:'2-digit',
+        });
+        const clearDate = dateString.replace(',',''); //заебала запятая )
+        return clearDate;
+    };
+
     return(
         <View style={{
                 alignItems:'center',
@@ -49,9 +77,7 @@ export default function InfoForm({logType, log}) {
                     {showPanel &&
                     <View style={styles.infoMain}>
                         <View style={styles.infoConteiner}>
-                            <Text>
-                               {log}
-                            </Text>
+                            <LogReader />
                         </View>
                     </View>
                     }
@@ -109,10 +135,10 @@ const styles = StyleSheet.create({
         
         backgroundColor:'rgb(73,106,154)',
         flexDirection:'column',
-        justifyContent:'center',
-        alignItems:'center',
+        justifyContent:'flex-start',
+        
 
-        borderColor:'yellow',
-        borderWidth:1,
+        //borderColor:'yellow',
+        //borderWidth:1,
     }
 })

@@ -18,13 +18,15 @@ export default function InfoPanel () {
                 const DBLogs = await res.json();
                 setDBLogs(DBLogs);
 
-                let newForm = [];
+                let filteredType = [];
                 let id = 0;
                 const dbLogTypes = await DBLogs.map(logType => logType = logType.log_type)
                 const uniqueTypes = [...new Set(dbLogTypes)]
-                uniqueTypes.map(logType => newForm.push({id:id++, log_type: logType,  log: []}))
-                setLogs(newForm);
+                uniqueTypes.map(logType => filteredType.push({id:id++, log_type: logType,  log: []}))
+               
+                await logFiller(DBLogs,filteredType);
 
+                setLogs(filteredType);
             }catch(err){
                 console.log("Error loading DB logs:", err);
             }
@@ -33,36 +35,23 @@ export default function InfoPanel () {
     },[]);
 
 
-
-    const logFiller = async () =>{
-        if(!dbLogs) return;
+    const logFiller = async (dbLogs, filteredType) =>{
+        if(!dbLogs) {return console.log("DB empty") }
+        //console.log("Worked!")
 
         for (let i = 0; i < dbLogs.length; i++) {
-            let desiredLog = logs.find(logType => logType.log_type === dbLogs[i].log_type )
-            if(desiredLog){
-                //console.log("desiredLog: ", desiredLog)
-                //console.log("message: ", dbLogs[i].log)
-                //console.log("createdAt: ", dbLogs[i].created_at)
-                desiredLog.log.push({message:dbLogs[i].log ,createdAt: dbLogs[i].created_at,})
-                //console.log("desiredLog: ", desiredLog)
-                setLogs(desiredLog)
-            }
+            let desiredLog = filteredType.find(logType => logType.log_type === dbLogs[i].log_type);
             
-            /*
-            for(const logType of logs){
-                if(logType.log_type === dbLogs[i].log_type){
-                    logType.log.push(dbLogs[i].log)
-                }   
-            }
-            */
+            if(desiredLog){
+                desiredLog.log.push({message:dbLogs[i].log ,createdAt: dbLogs[i].created_at,})
+                //console.log(desiredLog)
+                setLogs(desiredLog)
+            };
+        };
+    };
+    
 
-        }
 
-        for(const logType of logs){
-            console.log("id: ",logType.id," Log Type: ",logType.log_type, "Log: ", logType.log);   
-        }
-        
-    }
 
 
     const writeLog = async (type,log) =>{
@@ -84,6 +73,7 @@ export default function InfoPanel () {
    
     const Item = ({logType , log, id})=>{
         if(id === null) return;
+        //console.log(log)
         return (
         <View style={styles.item}>
             <InfoForm key={id} logType={logType} log={log}/>
@@ -94,15 +84,13 @@ export default function InfoPanel () {
     //<Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{LogFormer()}}/>
     return(
         <View style={styles.outerArea}>
-            <Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{logFiller()}}/>
-            {logs && 
-            <FlatList 
+            {logs && <FlatList 
                 style={styles.conteiner}
                 data={logs}
-                renderItem={({item}) => <Item id={item.id} logType={item.log_type} log={item.log} />}
+                renderItem={({item}) => <Item id={item.id} logType={item.log_type}  log={item.log}/>}
                 keyExtractor={item => item.id}
-            />
-            }
+            />}
+            
             
         </View>
     );
