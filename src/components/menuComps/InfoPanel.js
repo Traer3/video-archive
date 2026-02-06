@@ -22,7 +22,7 @@ export default function InfoPanel () {
                 let id = 0;
                 const dbLogTypes = await DBLogs.map(logType => logType = logType.log_type)
                 const uniqueTypes = [...new Set(dbLogTypes)]
-                uniqueTypes.map(logType => newForm.push({id:id++, log_type: logType,  log: [{message:null ,createdAt: null,}]}))
+                uniqueTypes.map(logType => newForm.push({id:id++, log_type: logType,  log: []}))
                 setLogs(newForm);
 
             }catch(err){
@@ -51,7 +51,7 @@ export default function InfoPanel () {
             /*
             for(const logType of logs){
                 if(logType.log_type === dbLogs[i].log_type){
-                    console.log("Log type: ",logType.log_type)
+                    logType.log.push(dbLogs[i].log)
                 }   
             }
             */
