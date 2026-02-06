@@ -22,7 +22,7 @@ export default function InfoPanel () {
                 let id = 0;
                 const dbLogTypes = await DBLogs.map(logType => logType = logType.log_type)
                 const uniqueTypes = [...new Set(dbLogTypes)]
-                uniqueTypes.map(logType => newForm.push({id:id++, log_type: logType,  log: []}))
+                uniqueTypes.map(logType => newForm.push({id:id++, log_type: logType,  log: [{message:null ,createdAt: null,}]}))
                 setLogs(newForm);
 
             }catch(err){
@@ -38,18 +38,30 @@ export default function InfoPanel () {
         if(!dbLogs) return;
 
         for (let i = 0; i < dbLogs.length; i++) {
+            let desiredLog = logs.find(logType => logType.log_type === dbLogs[i].log_type )
+            if(desiredLog){
+                //console.log("desiredLog: ", desiredLog)
+                //console.log("message: ", dbLogs[i].log)
+                //console.log("createdAt: ", dbLogs[i].created_at)
+                desiredLog.log.push({message:dbLogs[i].log ,createdAt: dbLogs[i].created_at,})
+                //console.log("desiredLog: ", desiredLog)
+                setLogs(desiredLog)
+            }
+            
+            /*
             for(const logType of logs){
                 if(logType.log_type === dbLogs[i].log_type){
-                    logType.log.push(dbLogs[i].log)
+                    console.log("Log type: ",logType.log_type)
                 }   
             }
+            */
+
         }
 
-        /*
         for(const logType of logs){
             console.log("id: ",logType.id," Log Type: ",logType.log_type, "Log: ", logType.log);   
         }
-        */
+        
     }
 
 
