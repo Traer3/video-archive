@@ -14,7 +14,34 @@ const pool = new Pool({
     port: 5432,
 });
 
-app.use(express.json());
+async function logWriter (type, message) {
+    try{
+        await pool.query(
+            `INSERT INTO logs (log_type, log)
+             VALUES ($1, $2)`,
+             [type, message]
+        );
+        console.log(`Log saved: [${type}] ${message}`)
+    }catch(err){
+        console.error("❌ Database logging failed: ",err.message);
+    }
+ };
+
+ app.use(express.json());
+
+app.use((req, res, next)=>{
+    const oldJson = res.json;
+
+    res.json = function (data){
+        if(req.url !== '/addLog' && req.url !== '/logs'){
+            logWriter("SQLLogs",`Path: ${req.url} | Status: ${res.statusCode}`);
+        }
+        return oldJson.call(this, data);
+    };
+
+    next();
+});
+
 
 
 app.get("/videos", async(req, res) => {
@@ -23,7 +50,7 @@ app.get("/videos", async(req, res) => {
         const result = await pool.query("SELECT * FROM videos");
         //console.log("Результат ")
         //console.log(result)
-        res.json(result.rows);
+       res.json(result.rows);
     }catch(err){
         console.error(err);
         res.status(500).json({error: "Table videos error",err});
@@ -176,6 +203,10 @@ app.post('/addLog',async(req,res)=>{
         res.status(500).json({error:"Error table logs ", err })
     }
 });
+
+
+
+
 
 app.listen(3001, ()=>{
     console.log("✅ API initiated")

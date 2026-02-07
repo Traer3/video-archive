@@ -8,7 +8,47 @@ const THUMBNAILS_DIR = path.join(__dirname, "./thumbnails");
 const AUTHNIFICATION = path.join(__dirname,"LinksGenerator","Authorize.js");
 const VIDEO_ERASER = path.join(__dirname,"VideoEraser.js");
 
-app.use(express.json());
+async function logWriter (type, message) {
+
+    const res = await fetch('http://192.168.0.8:3001/addLog',{
+     method: "POST",
+     headers:{"Content-Type":"application/json"},
+     body: JSON.stringify({type, message})
+    });
+
+    if(!res.ok){
+     const errorData = await res.text();
+     console.error(`❌ Failed writing log: ${errorData.message}`);
+     return;
+    }
+
+    const data = await res.json();
+    console.log(data);
+ };
+
+ app.use(express.json());
+
+const IGNORED_PATHS = ['/videos','/check','/thumbnails'];
+
+app.use((req, res, next)=>{
+    const oldJson = res.json;
+
+    res.json = function (data){
+        const shouldLog = !IGNORED_PATHS.some(path => req.url.startsWith(path));
+        if(shouldLog){
+            const logMsg = `[VideoServer] ${req.method} ${req.url} | Status: ${res.statusCode}`;
+            logWriter("ExpressLogs",logMsg);
+        }
+         
+        
+        return oldJson.call(this, data);
+    };
+
+    next();
+});
+
+
+
 
 app.get("/tokenCheck",async(req,res)=>{
     try{
@@ -57,6 +97,7 @@ app.get("/authorize", async (req,res)=>{
         });
 
         proc.on('error',err=>{
+            //отправить если не успешно
             res.status(500).json({error: err.message});
         });
     }catch(err){
@@ -77,6 +118,7 @@ app.post("/authorize/callback",async(req,res)=>{
     proc.stderr.on('data',data => console.error(data.toString()));
 
     proc.on('close',code => {
+        //отправить если успешно 
         res.json({message: 'Authorization completed', output});
     });
 });

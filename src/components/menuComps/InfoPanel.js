@@ -53,7 +53,6 @@ export default function InfoPanel () {
 
 
 
-
     const writeLog = async (type,log) =>{
        const res = await fetch(`${DB_URL}/addLog`,{
         method: "POST",
@@ -81,7 +80,7 @@ export default function InfoPanel () {
     )}
 
     // <Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{writeLog("ThumbnailGeneratorLogs","ThumbnailLogssssss")}}/>
-    //<Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{LogFormer()}}/>
+    //<Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{logWriter()}}/>
     return(
         <View style={styles.outerArea}>
             {logs && <FlatList 
