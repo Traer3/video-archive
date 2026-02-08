@@ -1,11 +1,29 @@
 const fs = require('fs');
 const path = require('path');
 
-
-
 function generateRequirePath(fileName){
    return "http://192.168.0.8:3004/" + encodeURIComponent(fileName);
 }
+
+
+async function logWriter (type, message) {
+
+    const res = await fetch('http://192.168.0.8:3001/addLog',{
+     method: "POST",
+     headers:{"Content-Type":"application/json"},
+     body: JSON.stringify({type, message})
+    });
+
+    if(!res.ok){
+     const errorData = await res.text();
+     console.error(`❌ Failed writing log: ${errorData}`);
+     return;
+    }
+
+    const data = await res.json();
+    console.log(data);
+ };
+
 
 async function VideoImporter(folderPath){
    try {
@@ -50,6 +68,7 @@ async function VideoImporter(folderPath){
 
                 // не забудь включить 
                 //importVideos({name: finalName,url: requirePath,duration: duration,sizeMB: sizeMB,category: 'YouTube',});
+                await logWriter("ImporterLogs",`✅ Successfully imported: ${finalName}`)
 
                 existingVideos.push({name: finalName , size_mb: sizeMB});
                 console.log(`✅ Added: ${finalName} (${sizeMB} MB)`);
@@ -81,6 +100,7 @@ const importVideos = async (videoData) => {
     if(!res.ok){
         const errorData = await res.json();
         console.error(`❌ Imoirt failed: ${errorData.message}`);
+        await logWriter("ImporterLogs",`❌Imoirt failed: ${errorData.message}`)
         return;
     }
 

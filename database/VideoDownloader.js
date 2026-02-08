@@ -43,12 +43,34 @@ async function VideoDownloader(url,index){
         console.log("📥 Importing downloaded video(s) to DB...");
         await runComand(comand2);
         console.log("✅ Imported successfully");
+
+        await logWriter("DownloaderLogs",`✅ Successfully processed: ${url}`)
     }catch(err){
         console.log(`❌ error while processing ${url} :`,err.message);
+        await logWriter("DownloaderLogs",`❌ Error: ${url} | ${err.message}`)
         fs.appendFileSync(FAILED_FILE, url + "\n");
     }
     
 }
+
+
+async function logWriter (type, message) {
+
+    const res = await fetch('http://192.168.0.8:3001/addLog',{
+     method: "POST",
+     headers:{"Content-Type":"application/json"},
+     body: JSON.stringify({type, message})
+    });
+
+    if(!res.ok){
+     const errorData = await res.text();
+     console.error(`❌ Failed writing log: ${errorData}`);
+     return;
+    }
+
+    const data = await res.json();
+    console.log(data);
+ };
 
 async function main() {
     for (let i = 0; i < links.length; i++){

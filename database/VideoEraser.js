@@ -27,6 +27,24 @@ console.log(`Videos amount ${videoFiles.length}`)
 const thumbnailFiles = fs.readdirSync(THUMBNAILS_DIR);
 console.log(`Thumbnails amount ${thumbnailFiles.length}`)
 
+async function logWriter (type, message) {
+
+    const res = await fetch('http://192.168.0.8:3001/addLog',{
+     method: "POST",
+     headers:{"Content-Type":"application/json"},
+     body: JSON.stringify({type, message})
+    });
+
+    if(!res.ok){
+     const errorData = await res.text();
+     console.error(`❌ Failed writing log: ${errorData}`);
+     return;
+    }
+
+    const data = await res.json();
+    console.log(data);
+ };
+
 async function videoFromDB() {
     try{
         const responce = await fetch("http://192.168.0.8:3001/videos");
@@ -45,8 +63,6 @@ async function videoFromDB() {
 }
 
 
-
-
 async function VideoEraser(videosId) {
     const existingVideos = await videoFromDB();
     console.log("Ids for deletion: ", videosId)
@@ -54,10 +70,11 @@ async function VideoEraser(videosId) {
     for(const id of videosId){
         const isVideoExited = findVideoInDB(existingVideos, id)
         let videoName = isVideoExited.name
-    
+        
         deleteVideoInFolder(videoFiles, videoName)
         deleteThumbnailInFolder(thumbnailFiles, videoName)
         deleteVideoInDB(isVideoExited.id);
+
     }
 };
 
@@ -71,6 +88,7 @@ async function ThumbnailEraser(thumbnailFiles,videosId) {
     
         deleteThumbnailInFolder(thumbnailFiles, videoName)
 
+        await logWriter("EraserLogs",`✅ Thumbnail deleted: ${videoName}`)
     }
 };
 
@@ -82,9 +100,14 @@ async function deleteVideoInDB(videoId) {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({videoId: videoId})
     });
+    if(res.ok){
+        await logWriter("EraserLogs",`✅ Video ${videoId} deleted: `)
+    }
+
     if(!res.ok){
         const errData = await res.json();
         console.error(`Deletion failed: ${errData.message}`);
+        await logWriter("EraserLogs",`Deletion id ${videoId} failed: ${errData.message}`)
         return;
     }
     const data = await res.json();
@@ -116,6 +139,7 @@ async function deleteThumbnailInFolder(thumbnailFiles, videoName) {
 
         }catch(err){
             console.error("Error while executing deleteThumbnailInFolder ", err.message)
+            await logWriter("EraserLogs",`Deletion ${videoName} failed: ${err.message}`)
         }
     } 
 }

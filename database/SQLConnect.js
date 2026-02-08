@@ -42,8 +42,6 @@ app.use((req, res, next)=>{
     next();
 });
 
-
-
 app.get("/videos", async(req, res) => {
     try{
         //console.log("Попытка взять данные ")
