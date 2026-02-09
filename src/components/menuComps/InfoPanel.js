@@ -53,11 +53,11 @@ export default function InfoPanel () {
 
 
 
-    const writeLog = async (type,log) =>{
+    const writeLog = async (type,message) =>{
        const res = await fetch(`${DB_URL}/addLog`,{
         method: "POST",
         headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({type, log})
+        body: JSON.stringify({type, message})
        });
 
        if(!res.ok){

@@ -178,7 +178,7 @@ app.get("/logs",async(req,res)=>{
 
 app.post('/addLog',async(req,res)=>{
     try{
-        const {type, log} = req.body;
+        const {type, message} = req.body;
 
         const allowedLogs = [
             "SQLLogs","ExpressLogs","DownloaderLogs","ImporterLogs","EraserLogs","IsItUniqueLogs","ThumbnailGeneratorLogs"
@@ -191,7 +191,7 @@ app.post('/addLog',async(req,res)=>{
         await pool.query(
             `INSERT INTO logs (log_type, log)
              VALUES ($1, $2)`,
-             [type, log]
+             [type, message]
         );
         res.status(200).json({
             message:  '✅ Logged successfully',
