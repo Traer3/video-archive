@@ -15,6 +15,24 @@ const DB_URL = 'http://192.168.0.8:3001'
     }
     getVideos();
 
+    async function logWriter (type, message) {
+
+        const res = await fetch('http://192.168.0.8:3001/addLog',{
+         method: "POST",
+         headers:{"Content-Type":"application/json"},
+         body: JSON.stringify({type, message})
+        });
+    
+        if(!res.ok){
+         const errorData = await res.text();
+         console.error(`❌ Failed writing log: ${errorData}`);
+         return;
+        }
+    
+        const data = await res.json();
+        console.log(data);
+     };
+
     const savaUniqueData = async (id,isisunique)=>{
         if(!id){
             console.log("Require id");
@@ -30,6 +48,9 @@ const DB_URL = 'http://192.168.0.8:3001'
                 }),
             });
 
+            if(res.ok){
+                await logWriter("IsItUniqueLogs",`✅ Unique video id: ${id}`)
+            }
             if(!res.ok){
                 throw new Error(`Server error: ${res.status}`);
             }
@@ -37,6 +58,7 @@ const DB_URL = 'http://192.168.0.8:3001'
             const data = await res.json();
             console.log("Updated video: ",data.updatedVideo)
         }catch(err){
+            await logWriter("IsItUniqueLogs",`Error saving uniqueData Id ${id},state: ${isisunique}`)
             console.error(`Error saving uniqueData Id ${id},state: ${isisunique}`)
         }
     }
