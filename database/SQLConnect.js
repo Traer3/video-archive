@@ -202,8 +202,26 @@ app.post('/addLog',async(req,res)=>{
     }
 });
 
+app.post('/filterVideo',async(req,res)=>{
+    try{
+        const {id, state} = req.body;
+        if(!id || !state) {
+            return(res.status(400).json({message: "Missing id or invalid status"}));
+        }
 
+        await pool.query(
+           'UPDATE videos SET filtered = $1 WHERE id = $2 RETURNING *',
+            [state, id]      
+        );
 
+        res.status(200).json({
+            message:'✅ Filtered successfully'
+        })
+    }catch(err){
+        console.error("Error while changing state ",err);
+        res.status(500).json({error:"Error changing state ", err})
+    }
+})
 
 
 app.listen(3001, ()=>{

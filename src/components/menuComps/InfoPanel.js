@@ -50,26 +50,6 @@ export default function InfoPanel () {
         };
     };
     
-
-
-
-    const writeLog = async (type,message) =>{
-       const res = await fetch(`${DB_URL}/addLog`,{
-        method: "POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({type, message})
-       });
-
-       if(!res.ok){
-        const errorData = await res.json();
-        console.error(`❌ Failed writing log: ${errorData.message}`);
-        return;
-       }
-
-       const data = await res.json();
-       console.log(data);
-    };
-   
     const Item = ({logType , log, id})=>{
         if(id === null) return;
         //console.log(log)
@@ -79,7 +59,6 @@ export default function InfoPanel () {
         </View>
     )}
 
-    // <Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{writeLog("ThumbnailGeneratorLogs","ThumbnailLogssssss")}}/>
     //<Pressable style={{borderColor:'red',borderWidth:1,width:"20%",height:'20%',zIndex:3}} onPress={()=>{logWriter()}}/>
     return(
         <View style={styles.outerArea}>

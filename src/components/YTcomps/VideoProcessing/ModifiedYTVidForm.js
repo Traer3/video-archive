@@ -40,6 +40,28 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
 
     },[deletionTrigger]);
 
+    const filteredVideo = async (id) =>{
+        if(!id) return;
+        translateX.value = withSpring(0);
+        console.log("VideoFILTERED ", id);
+        try{
+            const res = await fetch("http://192.168.0.8:3001/filterVideo",{
+                method:'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    id:id,
+                    state: true,
+                })
+            });
+            if(!res.ok){
+                throw new Error(`Error changing filtered state for if: ${id}`);
+            }
+            console.log(`Video ${id} Filtered!`)
+        }catch(err){
+            console.log("Error changing state id:",id);
+        }
+    }
+
     const deleteVideo = async (id) => {
         if(!id) return;
         const idsForDeletion = [id]
@@ -139,7 +161,8 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
             <View style={styles.deletionForm}>
                <Pressable 
                     style={{ height:"100%",width:'100%',}}
-                    onPress={()=>deleteVideo(id)}
+                    //onPress={()=>deleteVideo(id)}
+                    onPress={()=>filteredVideo(id)}
                >
                     <Text style={styles.deleteButton}>
                         delete
