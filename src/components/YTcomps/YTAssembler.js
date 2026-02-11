@@ -5,11 +5,14 @@ import { DurationFetcher } from "./VideoProcessing/DurationFetcher";
 import RenderItem from "./VideoProcessing/RenderItem";
 import { useSaveVideo } from "./VideoProcessing/SaveVideoData";
 import ServerLoading from "../ServerLoading";
+import VideoPlayer from "./VideoPlayer";
 
 const VIDEO_URL = 'http://192.168.0.8:3004'
 
 export default function YTAssembler ({dbVideos}) {
     const [videos, setVideos] = useState([]);
+
+    const [selectedVideo, setSelectedVideo] = useState(null);
 
     const page = useRef(0);
     const hasNext = useRef(true)
@@ -94,16 +97,6 @@ export default function YTAssembler ({dbVideos}) {
         )
     }
 
-    const [selectedVideo, setSelectedVideo] = useState(null);
-    const player = useVideoPlayer(
-        selectedVideo,
-        (player) => {
-            player.loop = false
-            player.play();
-            player.audioMixingMode='mixWithOthers'
-        }
-    );
-
     return(
         <View style={{flex:1}}>
             {videos.find(v => !v.duration) && (
@@ -138,28 +131,9 @@ export default function YTAssembler ({dbVideos}) {
                 windowSize={10}
                 ListFooterComponent={loading ? <Text style={{textAlign:'center',marginTop:"50%",fontWeight:'600',fontSize:20}}>loading...</Text> : null}
             />
+
+            <VideoPlayer setSelectedVideo={setSelectedVideo} selectedVideo={selectedVideo}/>
             
-            <Modal visible={!!selectedVideo} transparent={true} animationType="slide" onRequestClose={()=> setSelectedVideo(null)}>
-                <View style={styles.modalBackground}>
-                    <TouchableOpacity
-                        style={styles.closeArea}
-                        onPress={()=> setSelectedVideo(null)}
-                    />
-                    <View style={styles.videoContainer}>
-                        {selectedVideo && (
-                            <VideoView
-                                style={styles.video}
-                                player={player}
-                                fullscreenOptions={{
-                                    enable: true,
-                                    
-                                }}
-                                nativeControls
-                            />
-                        )}
-                    </View>
-                </View>
-            </Modal>
         </View>
     )
 };
@@ -174,21 +148,5 @@ const styles = StyleSheet.create({
     text:{
         fontSize:16,
     },
-    modalBackground:{
-        flex:1,
-        backgroundColor:"rgba(0,0,0,0.5)",
-        justifyContent:'center',
-        alignItems:'center',
-    },
-    closeArea:{
-        ...StyleSheet.absoluteFillObject,
-    },
-    videoContainer:{
-        width:'100%',
-        height:'60%',  
-    },
-    video:{
-        width:'100%',
-        height:'100%',
-    },
+    
 });
