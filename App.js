@@ -35,7 +35,7 @@ export default function App() {
             </SwipeWindow>
           </>
         )}</>
-        <>{showFiltered && <FilteredVideos/>}</>
+        <>{showFiltered && <FilteredVideos setShowFiltered={setShowFiltered}/>}</>
 
         <SidePanel>
             <CustomButton iconsName="TTLogo" buttonSetState={setShowTT} buttonState={showTT}/>
