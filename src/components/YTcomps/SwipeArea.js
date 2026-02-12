@@ -18,8 +18,11 @@ export default function SwipeArea() {
                     tumbnail: v.thumbnail,
                     duration: v.duration,
                     isitunique: v.isitunique,
+                    filtered: v.filtered
                 }));
-                setDbVideos(formatted);
+                const filtered = formatted.filter(vid => vid.filtered === false)
+
+                setDbVideos(filtered);
     
                 console.log('DB videos loaded:',formatted.length);
             }catch(err){

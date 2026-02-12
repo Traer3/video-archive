@@ -13,21 +13,23 @@ export default function FilteredVideos({setShowFiltered}) {
 
     const [selectedVideo, setSelectedVideo] = useState(null);
 
+    const getDBData = async (url,param,param2) =>{
+        const res = await fetch(`${url}${param}${param2}`)
+        const DBRes = await res.json();
+        return DBRes;
+    }
 
     useEffect(()=>{
         async function getAndMergeAllVideos() {
             try{
-                const res = await fetch(`${DB_URL}/videos`);
-                const DBVideos = await res.json();
+                const DBVideos = await getDBData(DB_URL,"/videos","");
                 const filteredVideos = DBVideos.filter(video => video.filtered === true)
 
-                const ExpressRes = await fetch(`${VIDEO_URL}/videos`);
-                const totalRes = await ExpressRes.json();
+                const totalRes = await getDBData(VIDEO_URL,"/videos","");
+                
+                const urlsData = await getDBData(VIDEO_URL,"/videos?page=1&limit=",totalRes.total);
 
-                const totalUrls = await fetch(`${VIDEO_URL}/videos?page=1&limit=${totalRes.total}`)
-                const urlsData = await totalUrls.json();
-
-                const unNormolizeName = (name) => name + ".mp4"
+                const unNormolizeName = (name) => name + ".mp4";
 
                 const newDBForm = filteredVideos.map(vid => {
                     const newName = unNormolizeName(vid.name)
