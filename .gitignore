@@ -16,6 +16,8 @@ assets/videos/*
 /vids/*
 /database/videos/*
 /database/thumbnails/*
+/database/TestVideos/videos1/*
+/database/TestVideos/videos2/*
 
 /database/LinksGenerator/*
 !database/LinksGenerator/YTGetLinks.js

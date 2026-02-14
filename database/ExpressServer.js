@@ -2,11 +2,43 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const {spawn} = require("child_process");
-const app = express();
-const VIDEO_DIR = path.join(__dirname, "videos");
+const app = express(); 
+
+const VIDEO_DIR = path.join(__dirname, "videos"); 
+
 const THUMBNAILS_DIR = path.join(__dirname, "./thumbnails");
 const AUTHNIFICATION = path.join(__dirname,"LinksGenerator","Authorize.js");
-const VIDEO_ERASER = path.join(__dirname,"VideoEraser.js");
+const VIDEO_ERASER = path.join(__dirname,"VideoEraser.js"); 
+
+const VIDEOS_DIR = path.join(__dirname, "TestVideos");
+
+async function FolderReader() {
+    const fsPromises = require("fs").promises
+    const videos = [];
+    try{
+        
+        const subFolders = await fsPromises.readdir(VIDEOS_DIR);
+        for(const folderName of subFolders){
+            const fullPath = path.join(VIDEOS_DIR,folderName);
+            const stats = await fsPromises.stat(fullPath);
+
+            if(stats.isDirectory()){
+                console.log(`--- Reading folder: ${folderName} ---`);
+                const videoFiles = await fsPromises.readdir(fullPath);
+                videoFiles.map(file => {
+                    videos.push({
+                        name: file,
+                        fullPath:path.join(fullPath, file)
+                    });
+                });
+            }
+        }
+        return videos;
+    }catch(err){
+        console.error("Error reading directories: ",err.message);
+        return [];
+    }; 
+}
 
 async function logWriter (type, message) {
 
@@ -46,9 +78,6 @@ app.use((req, res, next)=>{
 
     next();
 });
-
-
-
 
 app.get("/tokenCheck",async(req,res)=>{
     try{
@@ -148,7 +177,94 @@ app.get("/deleteToken",async(req,res)=>{
 })
 
 
-//переделываем 
+app.get("/videos",async (req, res)=>{
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 7;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const allVideos =  await FolderReader();
+
+        if(allVideos.length === 0){
+            return res.status(200).json({videos:[],total:0});
+        }
+
+        const sortedFiles = allVideos
+            .filter(v => v.name.match(/\.(mp4|mov|mkv|webm|avi)$/i))
+            .sort((a,b)=> {
+               const statA = fs.statSync(a.fullPath).mtime;
+               const statB = fs.statSync(b.fullPath).mtime;  
+               return statB - statA;
+            })
+                
+        const paginatedFiles = sortedFiles.slice(startIndex, endIndex);
+        
+        const thumbnails = fs.readdirSync(THUMBNAILS_DIR);
+
+        const videoList = paginatedFiles.map((v)=>{
+            const file = v.name;
+            const thumbnailName = file.replace(/\.mp4$/i, '.jpg');
+            const hasThumbnail = thumbnails.includes(thumbnailName);
+            return{
+                name: file,
+                url: `http://192.168.0.8:3004/${encodeURIComponent(file)}`,
+                thumbnail: hasThumbnail
+                    ?  `http://192.168.0.8:3004/thumbnails/${encodeURIComponent(thumbnailName)}`
+                    : null,
+            };
+        });
+    
+
+        res.json({
+            page,
+            total: sortedFiles.length,
+            hasNext: endIndex < sortedFiles.length,
+            videos: videoList
+        });
+
+
+});
+
+app.get("/check/:filename",(req,res)=>{
+    const filePath = path.join(VIDEO_DIR, req.params.filename);
+    fs.access(filePath, fs.constants.F_OK,(err)=>{
+        res.json({exists: !err});
+    });
+});
+
+app.use("/thumbnails",express.static(THUMBNAILS_DIR,{
+    fallthrough: false,
+    maxAge: "1d",
+}))
+
+app.post("/deleteVideo",async(req,res)=>{
+    const {videos} = req.body;
+    if(!videos || !Array.isArray(videos) || videos.length === 0) return res.status(400).json({error: 'No videos for erasing'});
+
+    const proc = spawn('node',[VIDEO_ERASER, 'fullErasing',...videos],{shell:true});
+    let output = '';
+    
+    proc.stdout.on('data',data => output += data.toString());
+    proc.stderr.on('data',data => console.error(data.toString()));
+
+    proc.on('close',video => {
+        res.json({message: 'Deletion completed',output});
+    });
+
+});
+
+
+app.use(express.static(VIDEO_DIR,{
+    fallthrough:false,
+    maxAge: "1d"
+}));
+
+
+
+app.listen(3004, ()=> console.log("✅ Video server running on port 3004"))
+
+
+/*
 app.get("/videos",(req, res)=>{
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 7;
@@ -189,43 +305,4 @@ app.get("/videos",(req, res)=>{
         });
     });
 });
-
-
-
-app.get("/check/:filename",(req,res)=>{
-    const filePath = path.join(VIDEO_DIR, req.params.filename);
-    fs.access(filePath, fs.constants.F_OK,(err)=>{
-        res.json({exists: !err});
-    });
-});
-
-app.use("/thumbnails",express.static(THUMBNAILS_DIR,{
-    fallthrough: false,
-    maxAge: "1d",
-}))
-
-app.post("/deleteVideo",async(req,res)=>{
-    const {videos} = req.body;
-    if(!videos || !Array.isArray(videos) || videos.length === 0) return res.status(400).json({error: 'No videos for erasing'});
-
-    const proc = spawn('node',[VIDEO_ERASER, 'fullErasing',...videos],{shell:true});
-    let output = '';
-    
-    proc.stdout.on('data',data => output += data.toString());
-    proc.stderr.on('data',data => console.error(data.toString()));
-
-    proc.on('close',video => {
-        res.json({message: 'Deletion completed',output});
-    });
-
-});
-
-
-app.use(express.static(VIDEO_DIR,{
-    fallthrough:false,
-    maxAge: "1d"
-}));
-
-
-
-app.listen(3004, ()=> console.log("✅ Video server running on port 3004"))
+*/
