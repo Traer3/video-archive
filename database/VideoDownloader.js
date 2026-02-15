@@ -5,7 +5,7 @@ const path = require("path");
 
 const VIDEOS_LINKS_PATH = path.join(__dirname, 'LinksGenerator', 'VideoForDownload.txt')
 const FAILED_FILE = path.join(__dirname, "failed.txt")
-const OUT_DIR = path.join(__dirname, "videos")
+const OUT_DIR = path.join(__dirname, "videos") // TYT
 const VIDEO_IMPORTER = path.join(__dirname, "VideoImporter.js")
 
 if(!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR);

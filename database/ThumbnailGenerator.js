@@ -3,7 +3,7 @@ const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 //npm install fluent-ffmpeg
 
-
+//ТУТ
 const VIDEOS_DIR =  path.join(__dirname, "videos");
 const THUMBNAILS_DIR = path.join(__dirname, "thumbnails");
 

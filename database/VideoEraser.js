@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 
-const VIDEOS_DIR =  path.join(__dirname, "videos");
+const VIDEOS_DIR =  path.join(__dirname, "videos"); // TYT
 const THUMBNAILS_DIR = path.join(__dirname, "thumbnails");
 
 const [,, command, ...videosIdRaw] = process.argv;
