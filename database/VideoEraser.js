@@ -148,12 +148,15 @@ async function deleteVideoInFolder(videoFiles, videoForDeletion){
     console.log("Video name",videoForDeletion)
 
     for(const file of videoFiles){
+
         const filePath = path.join(VIDEOS_DIR, file);
+        
         try{
             const originalFileName = path.parse(file).name
             if(originalFileName === videoForDeletion){
             
                 await fs.promises.rm(filePath,{recursive:true});
+
                 console.log(`File deleted: ${videoName}`)
             }
 

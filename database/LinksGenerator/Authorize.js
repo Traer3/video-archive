@@ -141,7 +141,6 @@ async function authorizeConsole() {
 }
 
 async function tokenCheck() {
-
     fs.open(TOKEN_PATH,(err, data)=>{
         if(err){
             console.log("No token")

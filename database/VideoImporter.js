@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const VIDEOS_DIR = path.join(__dirname, "TestVideos")
+
 function generateRequirePath(fileName){
    return "http://192.168.0.8:3004/" + encodeURIComponent(fileName);
 }
@@ -24,6 +26,34 @@ async function logWriter (type, message) {
     console.log(data);
  };
 
+async function FolderReader() {
+    const fsPromises = require("fs").promises
+    const videos = [];
+    try{
+        
+        const subFolders = await fsPromises.readdir(VIDEOS_DIR);
+        for(const folderName of subFolders){
+            const fullPath = path.join(VIDEOS_DIR,folderName);
+            const stats = await fsPromises.stat(fullPath);
+
+            if(stats.isDirectory()){
+                console.log(`--- Reading folder: ${folderName} ---`);
+                const videoFiles = await fsPromises.readdir(fullPath);
+                videoFiles.map(file => {
+                    videos.push({
+                        name: file,
+                        fullPath:path.join(fullPath, file)
+                    });
+                });
+            }
+        }
+        return videos;
+    }catch(err){
+        console.error("Error reading directories: ",err.message);
+        return [];
+    }; 
+}
+
 
 async function VideoImporter(folderPath){
    try {
@@ -33,7 +63,8 @@ async function VideoImporter(folderPath){
         return;
     }
 
-    const files = fs.readdirSync(folderPath);
+    //const files = fs.readdirSync(folderPath);
+    const files = await FolderReader();
     console.log(`Files amount: ${files.length}`);
 
     const existingVideos = await getExistingVideos();
@@ -44,15 +75,14 @@ async function VideoImporter(folderPath){
     let skippedCount = 0;
 
     for(const file of files){
-        const filePath = path.join(folderPath, file);
-
+        const filePath = file.fullPath
         try{
             const stat = fs.statSync(filePath);
 
-            if(stat.isFile() && isVideoFile(file)){
-                const originalName = path.parse(file).name;
+            if(stat.isFile() && isVideoFile(file.name)){
+                const originalName = path.parse(file.name).name;
+                console.log("originalName: ",originalName)
                 const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
-
                 const duplicate = findDuplicate(existingVideos, originalName, sizeMB);
 
                 if(duplicate){
@@ -64,18 +94,18 @@ async function VideoImporter(folderPath){
                 const finalName = await generateUniqueName(existingVideos, originalName);
                 const duration = "";
 
-                const requirePath = generateRequirePath(file);
+                const requirePath = generateRequirePath(file.name);
 
                 // не забудь включить 
                 //importVideos({name: finalName,url: requirePath,duration: duration,sizeMB: sizeMB,category: 'YouTube',});
-                await logWriter("ImporterLogs",`✅ Successfully imported: ${finalName}`)
+                //await logWriter("ImporterLogs",`✅ Successfully imported: ${finalName}`)
 
                 existingVideos.push({name: finalName , size_mb: sizeMB});
                 console.log(`✅ Added: ${finalName} (${sizeMB} MB)`);
                 importedCount++;
             }
         }catch(err){
-            console.error(`ERROR cant reed file ${file}:` , err.message);
+            console.error(`ERROR cant reed file ${file.name}:` , err.message);
         }
     }
 
@@ -85,7 +115,7 @@ async function VideoImporter(folderPath){
     console.log('Import end')
 
    }catch(err){
-        console.log(`Error file ${file} :`, err.message)
+        console.log(`Error :`, err.message)
    }
 }
 
@@ -169,5 +199,73 @@ function isVideoFile(fileName){
     return videoExtensions.includes(path.extname(fileName).toLocaleLowerCase());
 }
 
-const VIDEOS_FOLDER_PATH = path.join(__dirname, "videos") // TYT
-VideoImporter(VIDEOS_FOLDER_PATH);
+
+VideoImporter(VIDEOS_DIR);
+
+
+/*
+//OLD
+async function VideoImporter(folderPath){
+   try {
+
+    if(!fs.existsSync(folderPath)){
+        console.log(`Folder dose not exists: ${folderPath}`)
+        return;
+    }
+
+    const files = fs.readdirSync(folderPath);
+    console.log(`Files amount: ${files.length}`);
+
+    const existingVideos = await getExistingVideos();
+    //console.log(existingVideos)
+    console.log(`DB already have ${existingVideos.length} vids`);
+
+    let importedCount = 0;
+    let skippedCount = 0;
+
+    for(const file of files){
+        const filePath = path.join(folderPath, file);
+
+        try{
+            const stat = fs.statSync(filePath);
+
+            if(stat.isFile() && isVideoFile(file)){
+                const originalName = path.parse(file).name;
+                const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
+
+                const duplicate = findDuplicate(existingVideos, originalName, sizeMB);
+
+                if(duplicate){
+                    console.log(`Scip duplicate: ${originalName} (${sizeMB} MB)`);
+                    skippedCount++;
+                    continue;
+                }
+
+                const finalName = await generateUniqueName(existingVideos, originalName);
+                const duration = "";
+
+                const requirePath = generateRequirePath(file);
+
+                // не забудь включить 
+                //importVideos({name: finalName,url: requirePath,duration: duration,sizeMB: sizeMB,category: 'YouTube',});
+                await logWriter("ImporterLogs",`✅ Successfully imported: ${finalName}`)
+
+                existingVideos.push({name: finalName , size_mb: sizeMB});
+                console.log(`✅ Added: ${finalName} (${sizeMB} MB)`);
+                importedCount++;
+            }
+        }catch(err){
+            console.error(`ERROR cant reed file ${file}:` , err.message);
+        }
+    }
+
+    console.log('\n📊 RESULTS:');
+    console.log(`Added new files: ${importedCount}`);
+    console.log(`Skiped duplicates: ${skippedCount}`);
+    console.log('Import end')
+
+   }catch(err){
+        console.log(`Error file ${file} :`, err.message)
+   }
+}
+*/
