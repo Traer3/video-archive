@@ -7,7 +7,6 @@ function generateRequirePath(fileName){
    return "http://192.168.0.8:3004/" + encodeURIComponent(fileName);
 }
 
-
 async function logWriter (type, message) {
 
     const res = await fetch('http://192.168.0.8:3001/addLog',{
@@ -30,7 +29,6 @@ async function FolderReader() {
     const fsPromises = require("fs").promises
     const videos = [];
     try{
-        
         const subFolders = await fsPromises.readdir(VIDEOS_DIR);
         for(const folderName of subFolders){
             const fullPath = path.join(VIDEOS_DIR,folderName);
@@ -54,7 +52,6 @@ async function FolderReader() {
     }; 
 }
 
-
 async function VideoImporter(folderPath){
    try {
 
@@ -63,12 +60,10 @@ async function VideoImporter(folderPath){
         return;
     }
 
-    //const files = fs.readdirSync(folderPath);
     const files = await FolderReader();
     console.log(`Files amount: ${files.length}`);
 
     const existingVideos = await getExistingVideos();
-    //console.log(existingVideos)
     console.log(`DB already have ${existingVideos.length} vids`);
 
     let importedCount = 0;
@@ -81,7 +76,6 @@ async function VideoImporter(folderPath){
 
             if(stat.isFile() && isVideoFile(file.name)){
                 const originalName = path.parse(file.name).name;
-                console.log("originalName: ",originalName)
                 const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
                 const duplicate = findDuplicate(existingVideos, originalName, sizeMB);
 
@@ -93,7 +87,6 @@ async function VideoImporter(folderPath){
 
                 const finalName = await generateUniqueName(existingVideos, originalName);
                 const duration = "";
-
                 const requirePath = generateRequirePath(file.name);
 
                 // не забудь включить 
@@ -142,22 +135,16 @@ const importVideos = async (videoData) => {
 async function getExistingVideos() {
     try{
         const responce = await fetch("http://192.168.0.8:3001/videos");
-       
-
         if(!responce.ok){
             throw new Error(`Cant get vids from server status: ${responce.status}`);
         }
-
         const data = await responce.json();
-
         return data;
-
     }catch(err){
         console.log('Error! Cant get videos from Server 3001: ', err.message);
         return[];
     }
 }
-
 
 function findDuplicate(existingVideos, name, sizeMB){
     return existingVideos.find(video => 
@@ -199,9 +186,7 @@ function isVideoFile(fileName){
     return videoExtensions.includes(path.extname(fileName).toLocaleLowerCase());
 }
 
-
 VideoImporter(VIDEOS_DIR);
-
 
 /*
 //OLD

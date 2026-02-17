@@ -5,12 +5,14 @@ const path = require("path");
 
 const VIDEOS_LINKS_PATH = path.join(__dirname, 'LinksGenerator', 'VideoForDownload.txt')
 const FAILED_FILE = path.join(__dirname, "failed.txt")
-const OUT_DIR = path.join(__dirname, "videos") // TYT
+
+const VIDEOS_DIR = path.join(__dirname, "TestVideos") // TYT
+
 const VIDEO_IMPORTER = path.join(__dirname, "VideoImporter.js")
 
-if(!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR);
-
+if(!fs.existsSync(VIDEOS_DIR)) fs.mkdirSync(VIDEOS_DIR);
 fs.writeFileSync(FAILED_FILE, "");
+
 
 const links = fs.readFileSync(VIDEOS_LINKS_PATH, "utf-8")
     .split("\n")
@@ -33,7 +35,7 @@ function runComand(comand){
 async function VideoDownloader(url,index){
     console.log(`Downdloading: [${index +1}]/${links.length}: ${url}`);
 
-    const comand1 = `yt-dlp -o "${OUT_DIR}/%(title)s.%(ext)s" --merge-output-format mp4 "${url}"`;
+    const comand1 = `yt-dlp -o "${VIDEOS_DIR}/%(title)s.%(ext)s" --merge-output-format mp4 "${url}"`;
     const comand2 = `node "${VIDEO_IMPORTER}"`;
 
     try{
@@ -50,6 +52,25 @@ async function VideoDownloader(url,index){
         await logWriter("DownloaderLogs",`❌ Error: ${url} | ${err.message}`)
         fs.appendFileSync(FAILED_FILE, url + "\n");
     }
+    
+}
+
+async function CheckFolderCapacity() {
+
+    //df -h . --output=source | tail -n 1 позволяет увидеть имя раздела в конкретной вызванной папке 
+    // /dev/sda1
+    const getPartition = `df -h . --output=source | tail -n 1 `;
+    const partitionName = await runComand(getPartition);
+    const normalPartitionName = partitionName.trim()
+    
+    //df -h --output=size,used /dev/sdb3 | tail -n 1 
+    //получаем только 454G  6.0G
+    const getSize = `df -h --output=size,used ${normalPartitionName} | tail -n 1`
+    const output = await runComand(getSize)
+    const normalOutput = output.trim()
+    
+    console.log(normalOutput)
+    
     
 }
 
@@ -73,12 +94,14 @@ async function logWriter (type, message) {
  };
 
 async function main() {
+    /*
     for (let i = 0; i < links.length; i++){
         await VideoDownloader(links[i], i);
     }
     fs.writeFileSync(VIDEOS_LINKS_PATH, "");
     console.log("🔥 Completed")
-    
+    */
+   CheckFolderCapacity();
 }
 
 main();
