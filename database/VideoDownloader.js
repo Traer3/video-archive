@@ -55,23 +55,44 @@ async function VideoDownloader(url,index){
     
 }
 
-async function CheckFolderCapacity() {
+async function CheckFolderCapacity(folderPath) {
+    //const comand1 = ``
+    const fsPromises = require("fs").promises
+    const mainFolder = await fsPromises.readdir(folderPath)
+
+    for(const subFolder of mainFolder){
+        const subFolderPath = path.join(folderPath,subFolder)
+        const stats = await fsPromises.stat(subFolderPath);
+        if(stats.isDirectory()){
+            console.log(`Reading folder: ${subFolder}`)
+            const files = await fsPromises.readdir(subFolderPath);
+            const isFull = files.find(file => file === "isFull.txt")
+            if(!isFull){
+                console.log("FolderIsEmpty")
+            }else{
+                console.log(`Folder ${subFolder} is full`)
+            }
+        }
+    }
 
     //df -h . --output=source | tail -n 1 позволяет увидеть имя раздела в конкретной вызванной папке 
     // /dev/sda1
-    const getPartition = `df -h . --output=source | tail -n 1 `;
-    const partitionName = await runComand(getPartition);
-    const normalPartitionName = partitionName.trim()
+    const comand2 = `df -h . --output=source | tail -n 1 `;
+    const getPartition = await runComand(comand2);
+    const partitionName = getPartition.trim()
     
     //df -h --output=size,used /dev/sdb3 | tail -n 1 
     //получаем только 454G  6.0G
-    const getSize = `df -h --output=size,used ${normalPartitionName} | tail -n 1`
-    const output = await runComand(getSize)
-    const normalOutput = output.trim()
+    const comand3 = `df -h --output=avail ${partitionName} | tail -n 1`;
+    const getSize = await runComand(comand3);
+    const memoryLeft = getSize.trim();
     
-    console.log(normalOutput)
-    
-    
+    const getNumber = memoryLeft.replace(/\G$/i, '')
+    if(getNumber <= 4){
+        fs.writeFileSync('isFull.txt',memoryLeft)
+    }
+
+    //const thumbnailName = file.replace(/\.mp4$/i, '.jpg');
 }
 
 
@@ -101,7 +122,7 @@ async function main() {
     fs.writeFileSync(VIDEOS_LINKS_PATH, "");
     console.log("🔥 Completed")
     */
-   CheckFolderCapacity();
+   CheckFolderCapacity(VIDEOS_DIR);
 }
 
 main();
