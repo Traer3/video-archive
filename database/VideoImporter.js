@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const VIDEOS_DIR = path.join(__dirname, "TestVideos")
+const VIDEOS_DIR = path.join(__dirname, "videos")
 
 function generateRequirePath(fileName){
    return "http://192.168.0.8:3004/" + encodeURIComponent(fileName);
