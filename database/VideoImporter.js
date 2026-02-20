@@ -1,4 +1,5 @@
 const fs = require('fs');
+const fsPromises = require("fs").promises
 const path = require('path');
 
 const VIDEOS_DIR = path.join(__dirname, "videos")
@@ -6,6 +7,16 @@ const VIDEOS_DIR = path.join(__dirname, "videos")
 function generateRequirePath(fileName){
    return "http://192.168.0.8:3004/" + encodeURIComponent(fileName);
 }
+const exists = async (path) =>{
+    try{
+        await fsPromises.access(path);
+        return true;
+    }catch{
+        return false;
+    }
+};
+
+
 
 async function logWriter (type, message) {
 
@@ -26,7 +37,6 @@ async function logWriter (type, message) {
  };
 
 async function FolderReader() {
-    const fsPromises = require("fs").promises
     const videos = [];
     try{
         const subFolders = await fsPromises.readdir(VIDEOS_DIR);
@@ -55,7 +65,7 @@ async function FolderReader() {
 async function VideoImporter(folderPath){
    try {
 
-    if(!fs.existsSync(folderPath)){
+    if(!(await exists(folderPath))){
         console.log(`Folder dose not exists: ${folderPath}`)
         return;
     }

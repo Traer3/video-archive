@@ -7,9 +7,18 @@ const ffmpeg = require('fluent-ffmpeg');
 const VIDEOS_DIR = path.join(__dirname, "videos")
 const THUMBNAILS_DIR = path.join(__dirname, "thumbnails");
 
-if(!fs.existsSync(THUMBNAILS_DIR)){
+const exists = async (path) =>{
+    try{
+        await fsPromises.access(path);
+        return true;
+    }catch{
+        return false;
+    }
+};
+if(!(await exists(THUMBNAILS_DIR))){
     fs.mkdirSync(THUMBNAILS_DIR);
 }
+
 
 async function logWriter (type, message) {
 

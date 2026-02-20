@@ -2,25 +2,34 @@ const path = require('path');
 const fs = require('fs');
 const fsPromises = require("fs").promises
 
-const VIDEOS_DIR = path.join(__dirname, "videos") // TYT
+const VIDEOS_DIR = path.join(__dirname, "videos")
 const THUMBNAILS_DIR = path.join(__dirname, "thumbnails");
 
 const [,, command, ...videosIdRaw] = process.argv;
 const videosId = videosIdRaw.map(id => parseInt(id)).filter(id => !isNaN(id));
-console.log("Как приходят ids ",videosId)
 
 if(!videosId || videosId.length === 0) {
     console.log("No video for deletion") 
     return;
 }
 
-if(!fs.existsSync(VIDEOS_DIR)){
-    console.error("Missing videos folder");
+const exists = async (path) =>{
+    try{
+        await fsPromises.access(path);
+        return true;
+    }catch{
+        return false;
+    }
 };
 
-if(!fs.existsSync(THUMBNAILS_DIR)){
+if(!(await exists(VIDEOS_DIR))){
+    console.error("Missing videos folder");
+}
+
+if(!(await exists(THUMBNAILS_DIR))){
     console.error("Missing thumbnails folder");
-};
+}
+
 
 const mainFolder = fs.readdirSync(VIDEOS_DIR);
 

@@ -88,8 +88,8 @@ app.get("/:videoName",async(req,res,next)=>{
         const videoFile = allVideos.find(v => v.name === videoName);
         if(videoFile){
             res.sendFile(videoFile.fullPath,{
-                maxAge:"1d",
-                lastModified:true
+                maxAge: "1d",
+                lastModified: true
             });
         }else{
             res.status(404).send("Video not found in any subfolder");
@@ -245,6 +245,7 @@ app.get("/videos",async (req, res)=>{
 
 });
 
+//применить 
 app.get("/check/:filename", async (req,res)=>{
     const {filename} = req.params;
     const allVideos = await FolderReader();

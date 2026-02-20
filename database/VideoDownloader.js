@@ -10,7 +10,20 @@ const VIDEOS_DIR = path.join(__dirname, "videos") // TYT
 
 const VIDEO_IMPORTER = path.join(__dirname, "VideoImporter.js")
 
-if(!fs.existsSync(VIDEOS_DIR)) fs.mkdirSync(VIDEOS_DIR);
+
+const exists = async (path) =>{
+    try{
+        await fsPromises.access(path);
+        return true;
+    }catch{
+        return false;
+    }
+};
+
+if(!(await exists(VIDEOS_DIR))){
+    console.error("Missing videos folder");
+}
+
 fs.writeFileSync(FAILED_FILE, "");
 
 

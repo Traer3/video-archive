@@ -1,32 +1,28 @@
 const {exec, spawn} = require("child_process");
 
 const fs = require("fs");
+const fsPromises = require("fs").promises
 const path = require("path");
 
 const SQL_CONNECT = path.join(__dirname,"SQLConnect.js");
 const EXPRESS_SERVER = path.join(__dirname,"ExpressServer.js");
 
-if(!fs.existsSync(SQL_CONNECT) || !fs.existsSync(EXPRESS_SERVER)){
-    console.log("Missing server files ");
-    return;
-}
-
 const AUTHORIZE = path.join(__dirname,'LinksGenerator','Authorize.js')
 const YT_GET_LINKS = path.join(__dirname,'LinksGenerator','YTGetLinks.js');
-
-if(!fs.existsSync(AUTHORIZE) || !fs.existsSync(YT_GET_LINKS)){
-    console.log("Missing Authorize.js || YTGetLinks.js");
-    return;
-}
 
 const IS_IT_UNIQUE = path.join(__dirname,'IsItUnique.js') 
 const VIDEO_DOWNLOADER = path.join(__dirname,'VideoDownloader.js')
 
-if(!fs.existsSync(IS_IT_UNIQUE) || !fs.existsSync(VIDEO_DOWNLOADER)){
-    console.log("Error with IsItUnique.js || VideoDownloader.js")
-}
-
 const THUMBNAIL_GENERATOR = path.join(__dirname, 'ThumbnailGenerator.js');
+
+const exists = async (path) =>{
+    try{
+        await fsPromises.access(path);
+        return true;
+    }catch{
+        return false;
+    }
+};
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -112,7 +108,40 @@ async function ServersReboot() {
     await runComand(killPorts);
 }
 
+async function checkingFiles() {
+    const importantFiles = [
+        SQL_CONNECT,
+        EXPRESS_SERVER,
+        AUTHORIZE,
+        YT_GET_LINKS,
+        IS_IT_UNIQUE,
+        VIDEO_DOWNLOADER,
+        THUMBNAIL_GENERATOR
+    ];
+    const missingFiles = [];
+
+    for(const file of importantFiles){
+        if(!(await exists(file))){
+            missingFiles.push(file);
+        }
+    }
+    if(missingFiles.length > 0){
+        console.log("❌ Critical Error: Missing server files:");
+        missingFiles.map(file => console.log(`   - ${file}`));
+        return false;
+    }
+    
+    console.log("All system files are present.");
+    return true;
+}
+
 async function main() {
+    console.log("🔍 Checking system files...");
+    await checkingFiles() 
+    if(!(await checkingFiles())){
+        return;
+    }
+    
     console.log("Starting maintenance")
     await Cleanups();
     
