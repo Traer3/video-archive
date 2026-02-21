@@ -2,22 +2,9 @@ const fs = require('fs');
 const fsPromises = require("fs").promises
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
-//npm install fluent-ffmpeg
 
 const VIDEOS_DIR = path.join(__dirname, "videos")
 const THUMBNAILS_DIR = path.join(__dirname, "thumbnails");
-
-const exists = async (path) =>{
-    try{
-        await fsPromises.access(path);
-        return true;
-    }catch{
-        return false;
-    }
-};
-if(!(await exists(THUMBNAILS_DIR))){
-    fs.mkdirSync(THUMBNAILS_DIR);
-}
 
 
 async function logWriter (type, message) {
@@ -87,6 +74,9 @@ async function processAllVideos(folderPath) {
 
 async function main() {
     try{
+        console.log("🔍 Checking main folder")
+        await fsPromises.mkdir(THUMBNAILS_DIR,{recursive: true});
+
         const mainFolder = await fsPromises.readdir(VIDEOS_DIR);
 
         for(const subFolder of mainFolder){
