@@ -59,7 +59,12 @@ async function saveCredentials(client) {
         client_secret: key.client_secret,
         refresh_token: client.credentials.refresh_token,
     });
-    fs.writeFileSync(TOKEN_PATH, payload);
+    try{
+        await fsPromises.writeFile(TOKEN_PATH,payload);
+    }catch(err){
+        console.error("Error saving credentials");
+        return;
+    }
 }
 
 async function getAuthUrl() {

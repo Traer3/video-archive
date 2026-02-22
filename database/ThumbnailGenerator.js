@@ -23,7 +23,16 @@ async function logWriter (type, message) {
 
     const data = await res.json();
     console.log(data);
- };
+};
+
+async function readDirAsync(folderPath) {
+    try{
+        return await fsPromises.readdir(folderPath);
+    }catch(err){
+        console.error(`❌Error reading file ${folderPath} `,err.message)
+        return [];
+    }
+}
 
 async function generateThumbnail(videoPath, outputPath){
     return new Promise((resolve, reject)=>{
@@ -41,12 +50,15 @@ async function generateThumbnail(videoPath, outputPath){
 }
 
 async function processAllVideos(folderPath) {
-    const files = fs.readdirSync(folderPath)
-    const existingThumbnails = fs.readdirSync(THUMBNAILS_DIR)
+    //const files = fs.readdirSync(folderPath)
+    const files = await readDirAsync(folderPath);
+
+    //const existingThumbnails = fs.readdirSync(THUMBNAILS_DIR)
+    const existingThumbnails = await readDirAsync(THUMBNAILS_DIR)
 
     for(const file of files){
         const videoPath = path.join(folderPath, file);
-        
+
         let stats;
         try{
             stats = await fsPromises.stat(videoPath);
