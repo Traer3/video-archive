@@ -69,7 +69,7 @@ async function VideoDownloader(url,index,folderPath,links){
     }catch(err){
         console.log(`❌ error while processing ${url} :`,err.message);
         await logWriter("DownloaderLogs",`❌ Error: ${url} | ${err.message}`)
-        fs.appendFileSync(FAILED_FILE, url + "\n");
+        fsPromises.appendFile(FAILED_FILE,url + "\n");
     }
     
 }

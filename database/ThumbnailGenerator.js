@@ -46,7 +46,16 @@ async function processAllVideos(folderPath) {
 
     for(const file of files){
         const videoPath = path.join(folderPath, file);
-        if(!fs.statSync(videoPath).isFile() || !file.endsWith('.mp4')){
+        
+        let stats;
+        try{
+            stats = await fsPromises.stat(videoPath);
+        }catch(err){
+            console.error(`Error with ${file}`);
+            continue;
+        }
+
+        if(!stats.isFile() || !file.endsWith('.mp4')){
             continue;
         }
 

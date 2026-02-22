@@ -82,7 +82,7 @@ async function VideoImporter(folderPath){
     for(const file of files){
         const filePath = file.fullPath
         try{
-            const stat = fs.statSync(filePath);
+            const stat = await fsPromises.stat(filePath);
 
             if(stat.isFile() && isVideoFile(file.name)){
                 const originalName = path.parse(file.name).name;

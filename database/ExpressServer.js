@@ -1,5 +1,6 @@
 const express = require("express");
 const fs = require("fs");
+const fsPromises = require("fs").promises
 const path = require("path");
 const {spawn} = require("child_process");
 const app = express(); 
@@ -11,7 +12,7 @@ const VIDEO_ERASER = path.join(__dirname,"VideoEraser.js");
 const VIDEOS_DIR = path.join(__dirname, "videos");
 
 async function FolderReader() {
-    const fsPromises = require("fs").promises
+    
     const videos = [];
     try{
         
@@ -209,17 +210,23 @@ app.get("/videos",async (req, res)=>{
             return res.status(200).json({videos:[],total:0});
         }
 
-        const sortedFiles = allVideos
-            .filter(v => v.name.match(/\.(mp4|mov|mkv|webm|avi)$/i))
-            .sort((a,b)=> {
-               const statA = fs.statSync(a.fullPath).mtime;
-               const statB = fs.statSync(b.fullPath).mtime;  
-               return statB - statA;
+        const fileteredFiles = allVideos.filter(v => v.name.match(/\.(mp4|mov|mkv|webm|avi)$/i));
+        const filesWithStats = await Promise.all(
+            fileteredFiles.map(async (file)=>{
+                try{
+                    const stats = await fsPromises.stat(file.fullPath);
+                    return {...file, mtime: stats.mtime};
+                }catch(err){
+                    return {...file, mtime: 0};
+                }
             })
+        );
+
+        const sortedFiles = filesWithStats.sort((a,b)=> b.mtime - a.mtime);
                 
         const paginatedFiles = sortedFiles.slice(startIndex, endIndex);
         
-        const thumbnails = fs.readdirSync(THUMBNAILS_DIR);
+        const thumbnails = await fsPromises.readdir(THUMBNAILS_DIR);
 
         const videoList = paginatedFiles.map((v)=>{
             const file = v.name;

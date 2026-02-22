@@ -144,7 +144,7 @@ async function deleteThumbnailInFolder(thumbnailFiles, videoName) {
             const originalFileName = path.parse(file).name
             if(originalFileName === videoName){
                 
-                await fs.promises.rm(filePath,{recursive:true});
+                await fsPromises.rm(filePath,{recursive:true});
                 console.log(`File deleted: ${videoName}`)
                 return;
             }
@@ -160,11 +160,19 @@ async function deleteVideoInFolder(mainFolder, videoForDeletion){
     console.log("Searching for file to delete: ",videoForDeletion);
     for(const subFolder of mainFolder){
         const subFolderPath = path.join(VIDEOS_DIR,subFolder);
-        
-        if(!fs.statSync(subFolderPath).isDirectory()) continue;
 
+        let stats;
         try{
-            const filesInSubFolder = fs.readdirSync(subFolderPath);
+            stats = await fsPromises.stat(subFolderPath)
+        }catch(err){
+            console.error(`Error with subfolder: ${subFolderPath}`);
+            continue;
+        }
+
+        if(!stats.isDirectory()) continue;
+        
+        try{
+            const filesInSubFolder = await fsPromises.readdir(subFolderPath)
             
             for(const file of filesInSubFolder){
                 if(path.parse(file).name === videoForDeletion){

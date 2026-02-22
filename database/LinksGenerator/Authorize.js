@@ -1,4 +1,5 @@
 const fs = require('fs');
+const fsPromises = require("fs").promises
 const path = require('path');
 const readline = require('readline')
 const {google} = require('googleapis');
@@ -15,9 +16,19 @@ let authorizePromise = null;
 
 const [,, command, maybeCode] = process.argv;
 
+async function readMyFile(filePath) {
+    try{
+        const content = await fsPromises.readFile(filePath,'utf-8');
+        return content
+    }catch(err){
+        console.error(`❌Error reading file ${filePath} `,err.message)
+        return null;
+    }
+}
+
 async function loadCredentials() {
     try{
-        const content = fs.readFileSync(TOKEN_PATH, 'utf-8');
+        const content = await readMyFile(TOKEN_PATH);
         const credentials = JSON.parse(content);
 
         const client = new UserRefreshClient({
@@ -39,7 +50,7 @@ async function loadCredentials() {
 }
 
 async function saveCredentials(client) {
-    const content = fs.readFileSync(CREDENTIALS_PATH);
+    const content = await readMyFile(CREDENTIALS_PATH)
     const keys = JSON.parse(content);
     const key = keys.installed || keys.web;
     const payload = JSON.stringify({
@@ -52,7 +63,7 @@ async function saveCredentials(client) {
 }
 
 async function getAuthUrl() {
-    const content = fs.readFileSync(CREDENTIALS_PATH);
+    const content = await readMyFile(CREDENTIALS_PATH)
     const credentials = JSON.parse(content);
     const {client_secret, client_id, redirect_uris} = credentials.web;
         
@@ -72,7 +83,7 @@ async function getAuthUrl() {
 };
 
 async function finishAuth(code) {
-    const content = fs.readFileSync(CREDENTIALS_PATH);
+    const content = await readMyFile(CREDENTIALS_PATH)
     const credentials = JSON.parse(content);
     const {client_secret, client_id, redirect_uris} = credentials.web;
         
@@ -114,11 +125,9 @@ async function authorizeConsole() {
         output: process.stdout,
     });
 
-    
-
     const code = await new Promise((resolve)=>{
         readL.question('Code: ',(answer)=>{
-            /*
+            
             try{
                 const parsed = new URL(answer);
                 const codeParam = parsed.searchParams.get("code");
@@ -131,7 +140,7 @@ async function authorizeConsole() {
             }catch(err){
                 console.log("Error parsing URL",err)
             }
-            */
+            
             readL.close();
             resolve(answer.trim());
         });
@@ -141,14 +150,14 @@ async function authorizeConsole() {
 }
 
 async function tokenCheck() {
-    fs.open(TOKEN_PATH,(err, data)=>{
-        if(err){
-            console.log("No token")
-            return false;
-        }
+    try{
+        await fsPromises.access(TOKEN_PATH)
         console.log("Yes token")
-        return true;
-    })
+        return true
+    }catch(err){
+        console.log("No token")
+        return false
+    }
 }
 
 async function deleteToken() {
@@ -174,7 +183,7 @@ async function authorizeByHand() {
                 console.log("🔁 Token deprecated, updating...");
             }
         }
-        const content = fs.readFileSync(CREDENTIALS_PATH);
+        const content = await readMyFile(CREDENTIALS_PATH)
         const credentials = JSON.parse(content);
         const {client_secret, client_id, redirect_uris} = credentials.web;
         
@@ -254,6 +263,7 @@ if(require.main === module){
             console.log('   node Authorize.js getUrl');
             console.log('   node Authorize.js finish <code>');
             console.log('   node Authorize.js authorize');
+            console.log('   node Authorize.js tokenCheck');
         }
     })();
 }
