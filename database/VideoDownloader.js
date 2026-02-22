@@ -6,10 +6,9 @@ const path = require("path");
 const VIDEOS_LINKS_PATH = path.join(__dirname, 'LinksGenerator', 'VideoForDownload.txt')
 const FAILED_FILE = path.join(__dirname, "failed.txt")
 
-const VIDEOS_DIR = path.join(__dirname, "videos") // TYT
+const VIDEOS_DIR = path.join(__dirname, "videos")
 
 const VIDEO_IMPORTER = path.join(__dirname, "VideoImporter.js")
-
 
 const exists = async (path) =>{
     try{
@@ -20,17 +19,25 @@ const exists = async (path) =>{
     }
 };
 
-if(!(await exists(VIDEOS_DIR))){
-    console.error("Missing videos folder");
+async function writeInfo(filePath, data) {
+    try{
+        await fsPromises.writeFile(filePath,data,'utf-8');
+        console.log(`File successfully written: ${filePath}`)
+    }catch(err){
+        console.error(`❌Error writing: ${err.message}`)
+    }
 }
 
-fs.writeFileSync(FAILED_FILE, "");
+async function readMyFile(filePath) {
+    try{
+        const content = await fsPromises.readFile(filePath,'utf-8');
+        return content
+    }catch(err){
+        console.error(`❌Error reading file ${filePath} `,err.message)
+        return null;
+    }
+}
 
-
-const links = fs.readFileSync(VIDEOS_LINKS_PATH, "utf-8")
-    .split("\n")
-    .map(line => line.trim())
-    .filter(Boolean);
 
 function runComand(comand){
     return new Promise((resolve, reject)=>{
@@ -44,7 +51,7 @@ function runComand(comand){
     });
 }
 
-async function VideoDownloader(url,index,folderPath){
+async function VideoDownloader(url,index,folderPath,links){
     console.log(`Downdloading: [${index +1}]/${links.length}: ${url}`);
 
     const comand1 = `yt-dlp -o "${folderPath}/%(title)s.%(ext)s" --merge-output-format mp4 "${url}"`;
@@ -67,7 +74,6 @@ async function VideoDownloader(url,index,folderPath){
     
 }
 
-
 async function CheckFolderCapacity(mainFolderPath,subFolder) {
     const subFolderPath = path.join(mainFolderPath,subFolder)
     const stats = await fsPromises.stat(subFolderPath);
@@ -88,7 +94,7 @@ async function CheckFolderCapacity(mainFolderPath,subFolder) {
 
             const getNumber = parseInt(memoryLeft);
             if(getNumber <= 4){
-                fs.writeFileSync(path.join(subFolderPath,'isFull.txt'),memoryLeft)
+                await  writeInfo(path.join(subFolderPath,'isFull.txt'),memoryLeft)
             }else{
                 console.log(`Download video in folder ${subFolder}`)
                 return true;
@@ -98,26 +104,7 @@ async function CheckFolderCapacity(mainFolderPath,subFolder) {
             return false;
         }
     }
-    /*
-    //df -h . --output=source | tail -n 1 позволяет увидеть имя раздела в конкретной вызванной папке 
-    // /dev/sda1
-    const comand2 = `df -h . --output=source | tail -n 1 `;
-    const getPartition = await runComand(comand2);
-    const partitionName = getPartition.trim()
-    
-    //df -h --output=size,used /dev/sdb3 | tail -n 1 
-    //получаем только 454G  6.0G
-    const comand3 = `df -h --output=avail ${partitionName} | tail -n 1`;
-    const getSize = await runComand(comand3);
-    const memoryLeft = getSize.trim();
-    
-    const getNumber = memoryLeft.replace(/\G$/i, '')
-    if(getNumber <= 4){
-        fs.writeFileSync('isFull.txt',memoryLeft)
-    }
-    */
 }
-
 
 async function logWriter (type, message) {
 
@@ -135,35 +122,77 @@ async function logWriter (type, message) {
 
     const data = await res.json();
     console.log(data);
- };
+};
 
 async function main() {
-    const mainFolder = await fsPromises.readdir(VIDEOS_DIR)
-    let targetFolder = null;
-    for(const subFolder of mainFolder){
-        const isOk = await CheckFolderCapacity(VIDEOS_DIR,subFolder);
-        if(isOk){
-            targetFolder = path.join(VIDEOS_DIR,subFolder);
-            break;
-        }
+    if(!(await exists(VIDEOS_DIR))){
+        console.error("Missing videos folder");
+        return
     }
-    if(targetFolder){
-        for (let i = 0; i < links.length; i++){
-            await VideoDownloader(links[i], i,targetFolder);
+
+    await writeInfo(FAILED_FILE, "")
+
+    try{
+        const fileContent = await readMyFile(VIDEOS_LINKS_PATH);
+        if(!fileContent) return;
+        
+        const links = fileContent
+            .split("\n")
+            .map(line => line.trim())
+            .filter(Boolean);
+
+        if(links.length === 0){
+            console.log("📭 No links to download.");
+            return;
         }
-        fs.writeFileSync(VIDEOS_LINKS_PATH, "");
-        console.log("🔥 Completed");
-    }else{
-        console.error("❌ No available folder for download (all full or missing)");
-        await logWriter("DownloaderLogs","❌ Error: All folders are full.");
+
+        const mainFolder = await fsPromises.readdir(VIDEOS_DIR)
+        let targetFolder = null;
+        for(const subFolder of mainFolder){
+            const isOk = await CheckFolderCapacity(VIDEOS_DIR,subFolder);
+            if(isOk){
+                targetFolder = path.join(VIDEOS_DIR,subFolder);
+                break;
+            }
+        }
+        if(targetFolder){
+            for (let i = 0; i < links.length; i++){
+                await VideoDownloader(links[i], i,targetFolder,links);
+            }
+            await writeInfo(VIDEOS_LINKS_PATH,"")
+            console.log("🔥 Completed");
+        }else{
+            console.error("❌ No available folder for download (all full or missing)");
+            await logWriter("DownloaderLogs","❌ Error: All folders are full.");
+        }
+    }catch(err){
+        console.error(`❌ Error in main loop: ${err.message}`)
     }
-    
-    
+     
 }
 
 main();
 
-/* old
+/* old 1
+    //df -h . --output=source | tail -n 1 позволяет увидеть имя раздела в конкретной вызванной папке 
+    // /dev/sda1
+    const comand2 = `df -h . --output=source | tail -n 1 `;
+    const getPartition = await runComand(comand2);
+    const partitionName = getPartition.trim()
+    
+    //df -h --output=size,used /dev/sdb3 | tail -n 1 
+    //получаем только 454G  6.0G
+    const comand3 = `df -h --output=avail ${partitionName} | tail -n 1`;
+    const getSize = await runComand(comand3);
+    const memoryLeft = getSize.trim();
+    
+    const getNumber = memoryLeft.replace(/\G$/i, '')
+    if(getNumber <= 4){
+        fs.writeFileSync('isFull.txt',memoryLeft)
+    }
+*/
+
+/* old 2
 const { exec } = require("child_process");
 
 const fs = require("fs");

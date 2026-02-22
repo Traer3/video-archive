@@ -1,3 +1,4 @@
+//node VideoEraser.js fullErasing 4996
 const path = require('path');
 const fs = require('fs');
 const fsPromises = require("fs").promises
@@ -22,19 +23,15 @@ const exists = async (path) =>{
     }
 };
 
-if(!(await exists(VIDEOS_DIR))){
-    console.error("Missing videos folder");
+async function readDirAsync(folderPath) {
+    try{
+        return await fsPromises.readdir(folderPath);
+    }catch(err){
+        console.error(`❌Error reading file ${folderPath} `,err.message)
+        return [];
+    }
 }
 
-if(!(await exists(THUMBNAILS_DIR))){
-    console.error("Missing thumbnails folder");
-}
-
-
-const mainFolder = fs.readdirSync(VIDEOS_DIR);
-
-const thumbnailFiles = fs.readdirSync(THUMBNAILS_DIR);
-console.log(`Thumbnails amount ${thumbnailFiles.length}`)
 
 async function logWriter (type, message) {
 
@@ -72,7 +69,7 @@ async function videoFromDB() {
 }
 
 
-async function VideoEraser(videosId) {
+async function VideoEraser(videosId,mainFolder,thumbnailFiles) {
     const existingVideos = await videoFromDB();
     console.log("Ids for deletion: ", videosId)
     
@@ -149,6 +146,7 @@ async function deleteThumbnailInFolder(thumbnailFiles, videoName) {
                 
                 await fs.promises.rm(filePath,{recursive:true});
                 console.log(`File deleted: ${videoName}`)
+                return;
             }
 
         }catch(err){
@@ -166,7 +164,7 @@ async function deleteVideoInFolder(mainFolder, videoForDeletion){
         if(!fs.statSync(subFolderPath).isDirectory()) continue;
 
         try{
-            const filesInSubFolder = fs.readFileSync(subFolderPath);
+            const filesInSubFolder = fs.readdirSync(subFolderPath);
             
             for(const file of filesInSubFolder){
                 if(path.parse(file).name === videoForDeletion){
@@ -182,23 +180,30 @@ async function deleteVideoInFolder(mainFolder, videoForDeletion){
     }
 }
 
+async function main(command) {
+    if(!(await exists(VIDEOS_DIR)) || !(await exists(THUMBNAILS_DIR))){
+        console.error("Missing videos or thumbnails folder");
+    }
+    
+    const mainFolder = await readDirAsync(VIDEOS_DIR);
+    
+    const thumbnailFiles =  await readDirAsync(THUMBNAILS_DIR);
+    console.log(`Thumbnails amount ${thumbnailFiles.length}`)
 
-VideoEraser(videosId)
+    
 
-
-if(require.main === module){
-    (async ()=>{
-        if(!videosId){
-            console.error('❌ No video provided for deletion');
-            process.exit(1);
-        }
-        if(command === 'fullErasing'){
-            await VideoEraser(videosId);
-        }else if(command === 'thumbnailDeletion'){
-            await ThumbnailEraser(thumbnailFiles, videoName);
-        }
-    })
+    if(!videosId){
+        console.error('❌ No video provided for deletion');
+        process.exit(1);
+    }
+    if(command === 'fullErasing'){
+        await VideoEraser(videosId,mainFolder,thumbnailFiles)
+    }else if(command === 'thumbnailDeletion'){
+        await ThumbnailEraser(thumbnailFiles, videosId);
+    }
 }
+
+main(command);
 
 /*
 //old

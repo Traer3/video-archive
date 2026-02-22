@@ -1,3 +1,119 @@
+const fsPromises = require("fs").promises
+const path = require("path");
+const {authorizeByHand} = require('./Authorize');
+const {google} = require('googleapis');
+
+const VIDEOS_LINKS_PATH = path.join(__dirname, 'VideoForDownload.txt');
+const LIKES_LINKS_PATH = path.join(__dirname, 'likes.txt');
+
+const getVids = async () => {
+    try{
+        const responce = await fetch("http://192.168.0.8:3001/videos");
+        const data = await responce.json();
+        videoReader(data)
+    }catch(err){
+        console.log("DB error: ", err)
+    }
+}
+
+let videoFromDB = [];
+
+const videoReader = (DBvideos) => {
+    const parsedVideos = DBvideos.map((vid)=>({
+     ...vid,
+     name: vid.name,
+     duration: vid.duration,
+     size: vid.size_mb,
+     category: vid.category
+    }))
+    
+    videoFromDB = parsedVideos;
+     
+ }
+
+ async function writeInfo(filePath, data) {
+    try{
+        await fsPromises.writeFile(filePath,data,'utf-8');
+        console.log(`File successfully written: ${filePath}`)
+    }catch(err){
+        console.error(`Error writing: ${err.message}`)
+    }
+}
+
+
+async function newNameChecker (YTVideos) {
+    if(!YTVideos) return;
+    const NamesFromDB = videoFromDB.map(video => video.name)
+
+    const newVids = YTVideos.filter(
+        video => !NamesFromDB.includes(video.name)
+    );
+
+    const textOutput = newVids
+        .map(v => `${v.url}`)
+        .reverse()
+        .join('\n');
+    await writeInfo(VIDEOS_LINKS_PATH, textOutput)
+
+}
+
+
+async function youTubeVideoData(auth){
+    const service = google.youtube('v3');
+    let nextPageToken = null;
+    const allVideos = [];
+
+    do{
+        const res = await service.playlistItems.list({
+            playlistId: 'LL',
+            part: ['snippet', 'contentDetails'],
+            maxResults: 50,
+            pageToken: nextPageToken || undefined,
+            auth,
+        });
+
+        res.data.items.forEach(item => {
+            const name = item.snippet.title;
+            const videoId = item.contentDetails.videoId;
+            const url = `https://youtu.be/${videoId}`;
+
+            allVideos.push({name, url});
+        });
+        nextPageToken = res.data.nextPageToken;
+        console.log(`📥 Loaded: ${allVideos.length} so far...`);
+
+       //if(allVideos.length >= 100) break; //ссылки для первых 100 видео 
+
+    }while(nextPageToken);
+
+    const textOutput = allVideos.map(v => `${v.name} | ${v.url}`).join('\n'); //allVideos.map(v => `${v.name} | ${v.url}`).join('\n')
+    await writeInfo(LIKES_LINKS_PATH, textOutput)
+
+    console.log(`✅ Saved ${allVideos.length} videos in likes.txt`)
+    return allVideos;
+}
+
+async function main() {
+    try{
+        console.log("Starting geting links...");
+        await getVids();
+
+        const auth = await authorizeByHand();
+        const currentYTVideos =  await youTubeVideoData(auth);
+
+        await newNameChecker(currentYTVideos);
+        console.log("🏁 Links written");
+    }catch(err){
+        console.error("Error in main",err);
+    }
+}
+
+main();
+
+
+
+/*
+old1
 //You need credentials.json from Google Cloud Console  ->   OAuth client ID  
 const fs = require('fs');
 const {authorizeByHand} = require('./Authorize');
@@ -39,7 +155,7 @@ const videoReader = (DBvideos) => {
      console.log("Video name : ",vid.name , "Video size: ", vid.size, "Video Category: ", vid.category)
     })
 })();
-*/
+
 
 
 async function newNameChecker () {
@@ -83,7 +199,7 @@ async function youTubeVideoData(auth){
         nextPageToken = res.data.nextPageToken;
         console.log(`📥 Loaded: ${allVideos.length} so far...`);
 
-       //if(allVideos.length >= 100) break; //ссылки для первых 100 видео 
+       if(allVideos.length >= 50) break; //ссылки для первых 100 видео 
 
     }while(nextPageToken);
 
@@ -151,8 +267,10 @@ async function listLikedVideos(auth) {
     const YTvidsName = await listLikedVideoTitles(auth);
     console.log(YTvidsName)
 })();
+
+
+
+
+
+
 */
-
-
-
-
