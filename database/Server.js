@@ -1,5 +1,4 @@
 const {exec, spawn} = require("child_process");
-
 const fs = require("fs");
 const fsPromises = require("fs").promises
 const path = require("path");
@@ -50,6 +49,16 @@ function deleteOldLinks(comand){
     });
 }
 
+function startBackgroundProcess(scriptPath){
+    const process = spawn("node",[scriptPath],{
+        stdio: 'inherit',
+        detached: true,
+        shell:false
+    });
+    process.unref();
+    return process;
+}
+  
 async function StartServer() {
     console.log("📥 Booting servers...")
     const SQLConnect = `node "${SQL_CONNECT}"`;
@@ -72,12 +81,13 @@ async function StartServer() {
 }
 
 async function Cleanups() {
+
+    //const UpdateYTdlp = "sudo yt-dlp --update";
     
-    const UpdateYTdlp = "sudo yt-dlp --update";
     const deleteOldFiles = "rm LinksGenerator/VideoForDownload.txt"
     try{
-        console.log("📥 Updating yt-dlp")
-        await runComand(UpdateYTdlp);
+        //console.log("📥 Updating yt-dlp")
+        //await runComand(UpdateYTdlp);
 
         console.log("⚠️ Deleting old files...")
         await deleteOldLinks(deleteOldFiles);
@@ -93,9 +103,10 @@ async function GetingVideos() {
     const YTGetLinks = `node "${YT_GET_LINKS}"`;
     const VideoDownloader = `node "${VIDEO_DOWNLOADER}"`;
     const GenerateThumbnails = `node "${THUMBNAIL_GENERATOR}"`;
-    const downloadingVideos = `gnome-terminal -- /bin/sh -c '${YTGetLinks}; ${VideoDownloader}; ${GenerateThumbnails}; exec bash'`
+    //const downloadingVideos = `gnome-terminal -- /bin/sh -c '${YTGetLinks}; ${VideoDownloader}; ${GenerateThumbnails}; exec bash'`
+    const startAll = `${YTGetLinks} && ${VideoDownloader} && ${GenerateThumbnails}`
     
-    await runComand(downloadingVideos);
+    await runComand(startAll);
 }
 
 async function ServersReboot() {
@@ -137,7 +148,7 @@ async function checkingFiles() {
 
 async function main() {
     console.log("🔍 Checking system files...");
-    await checkingFiles() 
+    //await checkingFiles() 
     if(!(await checkingFiles())){
         return;
     }
@@ -149,7 +160,15 @@ async function main() {
     console.log("⏳ Waiting for ports to clear ...")
     await sleep(3000);
 
-    await StartServer();
+    //await StartServer();
+    startBackgroundProcess(SQL_CONNECT)
+    console.log("✅ SQL connected!")
+
+    sleep(2000);
+
+    startBackgroundProcess(EXPRESS_SERVER);
+    console.log("✅ Express server started!");
+
 
     await sleep(5000);
 
@@ -161,25 +180,3 @@ async function main() {
 }
 
 main();
-
-
-//Хоть и скрипт завершиться , но серваки будут работать 
-/*
-function startBackgroundProcess(scriptPath){
-    const process = spawn("node",[scriptPath],{
-        stdio: 'inherit',
-        detached: true
-    });
-    process.unref();
-    return process;
-}
-
-    //запуск
-    startBackgroundProcess(SQL_CONNECT)
-    console.log("✅ SQL connected!")
-
-    sleep(2000);
-
-    startBackgroundProcess(EXPRESS_SERVER);
-    console.log("✅ Express server started!");
-*/
