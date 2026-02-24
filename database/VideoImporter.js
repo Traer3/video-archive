@@ -100,7 +100,7 @@ async function VideoImporter(folderPath){
                 const requirePath = generateRequirePath(file.name);
 
                 // не забудь включить 
-                //importVideos({name: finalName,url: requirePath,duration: duration,sizeMB: sizeMB,category: 'YouTube',});
+                //importVideos({name: finalName,duration: duration,sizeMB: sizeMB,category: 'YouTube',});
                 //await logWriter("ImporterLogs",`✅ Successfully imported: ${finalName}`)
 
                 existingVideos.push({name: finalName , size_mb: sizeMB});

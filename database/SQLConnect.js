@@ -115,22 +115,20 @@ app.post('/saveVidDuration', async(req,res)=>{
 
 app.post('/importVideo',async(req,res)=>{
     try{
-        const {name, url, duration, sizeMB,category} = req.body;
-        //console.log("Name: ",name , " Url: ", url, " Duration: ", duration , " Size: ", sizeMB , " Category: ", category)
-        if(!name || !url) {
-            return res.status(400).json({message: "Missing video name & url"});
+        const {name, duration, sizeMB,category} = req.body;
+        //console.log("Name: ",name , " Duration: ", duration , " Size: ", sizeMB , " Category: ", category)
+        if(!name) {
+            return res.status(400).json({message: "Missing video name"});
         };
 
         await pool.query(
-            `INSERT INTO videos (name, url, duration, size_mb, category, thumbnail)
-             VALUES ($1, $2, $3, $4, $5, $6)`,
+            `INSERT INTO videos (name, duration, size_mb, category)
+             VALUES ($1, $2, $3, $4)`,
              [
                 name,
-                url,
                 duration,
                 sizeMB, 
                 category,
-                'default-thumbnail.jpg'
              ]        
         );
 
