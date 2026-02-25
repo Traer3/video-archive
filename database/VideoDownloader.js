@@ -75,26 +75,37 @@ async function VideoDownloader(url,index,folderPath,links){
 }
 
 async function CheckFolderCapacity(mainFolderPath,subFolder) {
-    const subFolderPath = path.join(mainFolderPath,subFolder)
+    const subFolderPath = path.join(mainFolderPath,subFolder);
     const stats = await fsPromises.stat(subFolderPath);
+    let reserveCapacity;
+    console.log("Folder name: ",subFolder);
+
+    if(subFolder === "videos1"){
+        reserveCapacity = 50;
+    }else{
+        reserveCapacity = 4;
+    }
+    console.log("Capacity: ",reserveCapacity);
+
     if(stats.isDirectory()){
         console.log(`Reading folder: ${subFolder}`)
         const files = await fsPromises.readdir(subFolderPath);
         const isFull = files.find(file => file === "isFull.txt")
         if(!isFull){
             console.log("Checking subFolder capacity");
-
             const comand1 = `df -h ${subFolderPath} --output=source | tail -n 1 `;
             const getPartition = await runComand(comand1);
             const partitionName = getPartition.trim()
-                
-            const comand2 = `df -h --output=avail ${partitionName} | tail -n 1`;
+            
+            const comand2 = `df -h --output=avail --block-size=G ${partitionName} | tail -n 1`;
             const getSize = await runComand(comand2);
             const memoryLeft = getSize.trim();
+            console.log(`Folder ${subFolder} : ${memoryLeft} gb`)
 
             const getNumber = parseInt(memoryLeft);
-            if(getNumber <= 4){
+            if(getNumber <= reserveCapacity){
                 await  writeInfo(path.join(subFolderPath,'isFull.txt'),memoryLeft)
+                return false;
             }else{
                 console.log(`Download video in folder ${subFolder}`)
                 return true;
