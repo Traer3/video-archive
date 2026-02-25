@@ -1,10 +1,11 @@
 import { View, StyleSheet, Pressable,} from "react-native"
 import YTAssembler from "./YTAssembler";
 import { useEffect, useState } from "react";
-
-const DB_URL = 'http://192.168.0.8:3001';
+import { useDatabase } from "../../../DatabaseContext";
 
 export default function SwipeArea() {
+    const {DB_URL} = useDatabase();
+
     const [dbVideos,setDbVideos] = useState([]);   
     const [showVideos, setShowVideos] = useState(false);
     useEffect(()=>{

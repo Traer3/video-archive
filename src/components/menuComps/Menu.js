@@ -3,8 +3,10 @@ import ToolButton from "../buttons/ToolButton"
 import { useEffect, useState } from "react"
 import { Linking } from "react-native";
 import QuestionForUser from "./QuestionForUser";
+import { useDatabase } from "../../../DatabaseContext";
 
 export default function Menu ({areaState}) {
+    const {VIDEO_URL} = useDatabase(); 
     const [authorized,setAuthorized] = useState(false);
     const [logout, setLogout] = useState(false);
     const [question, setQuestion] = useState(false);
@@ -27,7 +29,7 @@ export default function Menu ({areaState}) {
     useEffect(()=>{
         const checkToken = async () => {
             try{
-                const responce = await fetch("http://192.168.0.8:3004/tokenCheck");
+                const responce = await fetch(`${VIDEO_URL}/tokenCheck`);
                 const answer = await responce.json();
                 setAuthorized(answer)
             }catch(err){
@@ -42,7 +44,7 @@ export default function Menu ({areaState}) {
         setAnswer(true)
 
         try{
-            const responce = await fetch("http://192.168.0.8:3004/authorize");
+            const responce = await fetch(`${VIDEO_URL}/authorize`);
             const data = await responce.json();
             //console.log(data)
             if(data.url){
@@ -57,7 +59,7 @@ export default function Menu ({areaState}) {
     }
 
     const sendCode = async (code) => {
-        const res =  await fetch("http://192.168.0.8:3004/authorize/callback",{
+        const res =  await fetch(`${VIDEO_URL}/authorize/callback`,{
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({code})
@@ -69,7 +71,7 @@ export default function Menu ({areaState}) {
     };
 
     const onDeleteToken = async () => {
-        const responce = await fetch("http://192.168.0.8:3004/deleteToken");
+        const responce = await fetch(`${VIDEO_URL}/deleteToken`);
         const answer = await responce.json();
         deleteToken(answer)
     }

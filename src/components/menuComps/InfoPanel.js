@@ -1,13 +1,13 @@
 import { View, StyleSheet, FlatList, Pressable } from "react-native";
 import InfoForm from "./InfoForm";
 import { useEffect, useState } from "react";
-
-const DB_URL = 'http://192.168.0.8:3001';
+import { useDatabase } from "../../../DatabaseContext";
 
 /* sort this
 "SQLLogs","ExpressLogs","DownloaderLogs","ImporterLogs","EraserLogs","IsItUniqueLogs","ThumbnailGeneratorLogs"
 */
 export default function InfoPanel () {
+    const {DB_URL} = useDatabase();
     const [dbLogs, setDBLogs] = useState(null);
     const [logs,setLogs] = useState(null)
 

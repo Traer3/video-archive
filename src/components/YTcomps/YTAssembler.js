@@ -1,15 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { TouchableOpacity, View, StyleSheet, FlatList, Text, Modal} from "react-native";
-import { VideoView, useVideoPlayer, } from "expo-video";
+import { useRef, useState } from "react";
+import {View, StyleSheet, FlatList, Text, Modal} from "react-native";
 import { DurationFetcher } from "./VideoProcessing/DurationFetcher";
 import RenderItem from "./VideoProcessing/RenderItem";
 import { useSaveVideo } from "./VideoProcessing/SaveVideoData";
 import ServerLoading from "../ServerLoading";
 import VideoPlayer from "./VideoPlayer";
-
-const VIDEO_URL = 'http://192.168.0.8:3004'
+import { useDatabase } from "../../../DatabaseContext";
 
 export default function YTAssembler ({dbVideos}) {
+    const {VIDEO_URL} = useDatabase();
     const [videos, setVideos] = useState([]);
 
     const [selectedVideo, setSelectedVideo] = useState(null);

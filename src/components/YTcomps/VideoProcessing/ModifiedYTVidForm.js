@@ -2,9 +2,10 @@ import { View, StyleSheet, Text, Pressable} from "react-native"
 import { useEffect, useRef, useState } from "react"
 import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import YTVidForm from "./YTVidForm"
+import { useDatabase } from "../../../../DatabaseContext";
 
 export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,isItUnique,setDeletionTrigger,deletionTrigger,url}){
-
+    const {DB_URL} = useDatabase();
     const translateX = useSharedValue(0);
     const offsetRefX = useRef(0);
     const translateY = useSharedValue(0);
@@ -45,7 +46,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
         translateX.value = withSpring(0);
         console.log("VideoFILTERED ", id);
         try{
-            const res = await fetch("http://192.168.0.8:3001/filterVideo",{
+            const res = await fetch(`${DB_URL}/filterVideo`,{
                 method:'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({

@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, View,} from "react-native";
 import RenderItem from "./VideoProcessing/RenderItem";
 import VideoPlayer from "./VideoPlayer";
-
-const DB_URL = 'http://192.168.0.8:3001';
-const VIDEO_URL = 'http://192.168.0.8:3004';
+import { useDatabase } from "../../../DatabaseContext";
 
 export default function FilteredVideos({setShowFiltered}) {
+    const {DB_URL, VIDEO_URL} = useDatabase();
     const [videos, setVideos] = useState(null);
     const [scrollAnimation, setScrollAnimation] = useState(true);
     const [deletionTrigger, setDeletionTrigger] = useState(0);

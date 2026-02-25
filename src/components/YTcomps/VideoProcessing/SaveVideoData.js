@@ -1,7 +1,8 @@
 import { useRef } from "react";
-const DB_URL = 'http://192.168.0.8:3001';
+import { useDatabase } from "../../../../DatabaseContext";
 
 export const useSaveVideo = () =>{
+    const {DB_URL} = useDatabase();
     const savedIds = useRef(new Set());
     
     const saveVideoData = async (vidId, vidDuration) =>{
