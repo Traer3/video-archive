@@ -5,6 +5,8 @@ const path = require("path");
 const {spawn} = require("child_process");
 const app = express(); 
 
+const config = require('./config')
+
 const THUMBNAILS_DIR = path.join(__dirname, "./thumbnails");
 const AUTHNIFICATION = path.join(__dirname,"LinksGenerator","Authorize.js");
 const VIDEO_ERASER = path.join(__dirname,"VideoEraser.js"); 
@@ -41,7 +43,7 @@ async function FolderReader() {
 
 async function logWriter (type, message) {
 
-    const res = await fetch('http://192.168.0.8:3001/addLog',{
+    const res = await fetch(`${config.VIDEO_URL}/addLog`,{
      method: "POST",
      headers:{"Content-Type":"application/json"},
      body: JSON.stringify({type, message})
@@ -234,9 +236,9 @@ app.get("/videos",async (req, res)=>{
             const hasThumbnail = thumbnails.includes(thumbnailName);
             return{
                 name: file,
-                url: `http://192.168.0.8:3004/${encodeURIComponent(file)}`,
+                url: `${config.VIDEO_URL}/${encodeURIComponent(file)}`,
                 thumbnail: hasThumbnail
-                    ?  `http://192.168.0.8:3004/thumbnails/${encodeURIComponent(thumbnailName)}`
+                    ?  `${config.VIDEO_URL}/thumbnails/${encodeURIComponent(thumbnailName)}`
                     : null,
             };
         });

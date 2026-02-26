@@ -3,12 +3,15 @@ const path = require("path");
 const {authorizeByHand} = require('./Authorize');
 const {google} = require('googleapis');
 
+const config = require('../config')
+
 const VIDEOS_LINKS_PATH = path.join(__dirname, 'VideoForDownload.txt');
 const LIKES_LINKS_PATH = path.join(__dirname, 'likes.txt');
 
+
 const getVids = async () => {
     try{
-        const responce = await fetch("http://192.168.0.8:3001/videos");
+        const responce = await fetch(`${config.DB_URL}/videos`);
         const data = await responce.json();
         videoReader(data)
     }catch(err){

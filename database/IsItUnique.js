@@ -2,11 +2,12 @@ const fs = require('fs');
 const {authorizeByHand} = require ('./LinksGenerator/Authorize');
 const {google} = require('googleapis');
 
-const DB_URL = 'http://192.168.0.8:3001'
+const config = require('./config')
+
 
     const getVideos = async () => {
         try{
-            const responce = await fetch(`${DB_URL}/videos`);
+            const responce = await fetch(`${config.DB_URL}/videos`);
             const data = await responce.json();
             IsItUnique(data)
         }catch(err){
@@ -17,7 +18,7 @@ const DB_URL = 'http://192.168.0.8:3001'
 
     async function logWriter (type, message) {
 
-        const res = await fetch('http://192.168.0.8:3001/addLog',{
+        const res = await fetch(`${config.DB_URL}/addLog`,{
          method: "POST",
          headers:{"Content-Type":"application/json"},
          body: JSON.stringify({type, message})
@@ -39,7 +40,7 @@ const DB_URL = 'http://192.168.0.8:3001'
             return;
         }
         try{
-            const res = await fetch(`${DB_URL}/saveUniqueData`,{
+            const res = await fetch(`${config.DB_URL}/saveUniqueData`,{
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({

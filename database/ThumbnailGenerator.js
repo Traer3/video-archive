@@ -3,13 +3,15 @@ const fsPromises = require("fs").promises
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 
+const config = require('./config')
+
 const VIDEOS_DIR = path.join(__dirname, "videos")
 const THUMBNAILS_DIR = path.join(__dirname, "thumbnails");
 
 
 async function logWriter (type, message) {
 
-    const res = await fetch('http://192.168.0.8:3001/addLog',{
+    const res = await fetch(`${config.DB_URL}/addLog`,{
      method: "POST",
      headers:{"Content-Type":"application/json"},
      body: JSON.stringify({type, message})

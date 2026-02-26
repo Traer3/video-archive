@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const fsPromises = require("fs").promises
 
+const config = require('./config')
+
 const VIDEOS_DIR = path.join(__dirname, "videos")
 const THUMBNAILS_DIR = path.join(__dirname, "thumbnails");
 
@@ -35,7 +37,7 @@ async function readDirAsync(folderPath) {
 
 async function logWriter (type, message) {
 
-    const res = await fetch('http://192.168.0.8:3001/addLog',{
+    const res = await fetch(`${config.DB_URL}/addLog`,{
      method: "POST",
      headers:{"Content-Type":"application/json"},
      body: JSON.stringify({type, message})
@@ -53,7 +55,7 @@ async function logWriter (type, message) {
 
 async function videoFromDB() {
     try{
-        const responce = await fetch("http://192.168.0.8:3001/videos");
+        const responce = await fetch(`${config.DB_URL}/videos`);
 
         if(!responce.ok){
             throw new Error(`Cant get videos from server status: ${responce.status}`)
@@ -106,7 +108,7 @@ async function ThumbnailEraser(thumbnailFiles,videosId) {
 
 async function deleteVideoInDB(videoId) {
     
-    const res = await fetch("http://192.168.0.8:3001/deleteVideo",{
+    const res = await fetch(`${config.DB_URL}/deleteVideo`,{
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({videoId: videoId})

@@ -1,10 +1,12 @@
 import { createContext, useContext} from "react";
+const config = require('./database/config');
 
 export const DatabaseContext = createContext();
 
 export const DatabaseProvider = ({children}) =>{
-    const DB_URL = 'http://192.168.0.9:3001';
-    const VIDEO_URL = 'http://192.168.0.9:3004';
+    const DB_URL = `${config.DB_URL}`;
+    const VIDEO_URL = `${config.VIDEO_URL}`;
+
 
     return(
         <DatabaseContext.Provider value={{VIDEO_URL, DB_URL}}>
@@ -20,3 +22,4 @@ export const useDatabase = () => {
     }
     return context
 };
+

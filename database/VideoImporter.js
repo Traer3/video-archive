@@ -2,10 +2,12 @@ const fs = require('fs');
 const fsPromises = require("fs").promises
 const path = require('path');
 
+const config = require('./config')
+
 const VIDEOS_DIR = path.join(__dirname, "videos")
 
 function generateRequirePath(fileName){
-   return "http://192.168.0.8:3004/" + encodeURIComponent(fileName);
+   return `${config.VIDEO_URL}/` + encodeURIComponent(fileName);
 }
 const exists = async (path) =>{
     try{
@@ -20,7 +22,7 @@ const exists = async (path) =>{
 
 async function logWriter (type, message) {
 
-    const res = await fetch('http://192.168.0.8:3001/addLog',{
+    const res = await fetch(`${config.DB_URL}/addLog`,{
      method: "POST",
      headers:{"Content-Type":"application/json"},
      body: JSON.stringify({type, message})
@@ -125,7 +127,7 @@ async function VideoImporter(folderPath){
 const importVideos = async (videoData) => {
     //console.log(videoData)
 
-    const res =  await fetch("http://192.168.0.8:3001/importVideo",{
+    const res =  await fetch(`${config.DB_URL}/importVideo`,{
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(videoData)
@@ -144,7 +146,7 @@ const importVideos = async (videoData) => {
 
 async function getExistingVideos() {
     try{
-        const responce = await fetch("http://192.168.0.8:3001/videos");
+        const responce = await fetch(`${config.DB_URL}/videos`);
         if(!responce.ok){
             throw new Error(`Cant get vids from server status: ${responce.status}`);
         }
