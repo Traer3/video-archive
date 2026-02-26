@@ -184,8 +184,6 @@ const styles = StyleSheet.create({
         height: '92%',
         zIndex:1,
         borderWidth:0.1,
-        //borderColor:'green',
-        //borderWidth:2
     },
     conteiner: {
         position:'absolute',
@@ -193,15 +191,8 @@ const styles = StyleSheet.create({
         height: '8%',
         top:771,
         backgroundColor:'rgb(71, 103, 151)',
-        //backgroundColor:'rgb(255, 255, 0)',
-        //borderColor:'yellow',
-        //borderWidth:2
     },
     containerAnser:{
-        //backgroundColor:'rgb(71, 103, 151)',
-        //borderColor:'rgb(43,75,123)',
-        //borderRadius:2,
-        //borderWidth:1,
     },
     buttonPlacement:{
         flex:1,

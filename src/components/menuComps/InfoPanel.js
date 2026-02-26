@@ -1,4 +1,4 @@
-import { View, StyleSheet, FlatList, Pressable } from "react-native";
+import { View, StyleSheet, FlatList } from "react-native";
 import InfoForm from "./InfoForm";
 import { useEffect, useState } from "react";
 import { useDatabase } from "../../../DatabaseContext";
