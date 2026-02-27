@@ -284,7 +284,7 @@ app.post("/deleteVideo",async(req,res)=>{
 });
 
 
-app.listen(3004, ()=> console.log("✅ Video server running on port 3004"))
+app.listen(config.ExpressServerPort, ()=> console.log(`✅ Video server running on port ${config.ExpressServerPort}`))
 
 
 /*

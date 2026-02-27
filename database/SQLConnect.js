@@ -14,6 +14,8 @@ const pool = new Pool({
     port: 5432,
 });
 
+const config = require('./config')
+
 async function logWriter (type, message) {
     try{
         await pool.query(
@@ -222,8 +224,8 @@ app.post('/filterVideo',async(req,res)=>{
 })
 
 
-app.listen(3001, ()=>{
-    console.log("✅ API initiated")
+app.listen(config.SQLConnectPort, ()=>{
+    console.log(`✅ API initiated running on port ${config.SQLConnectPort}`)
 });
 
 
