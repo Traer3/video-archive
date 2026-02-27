@@ -6,15 +6,8 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-const pool = new Pool({
-    user: "postgres",
-    host: "localhost",
-    database: "Vids",
-    password: "Wedfvb01",
-    port: 5432,
-});
-
 const config = require('./config')
+const pool = new Pool(config.TABLE_AUTHORIZATION);
 
 async function logWriter (type, message) {
     try{

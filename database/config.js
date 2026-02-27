@@ -7,4 +7,11 @@ module.exports = {
     ExpressServerPort: EXPRESS_PORT,
     DB_URL: `http://${IP}:${SQL_PORT}`,
     VIDEO_URL: `http://${IP}:${EXPRESS_PORT}`,
+    TABLE_AUTHORIZATION:{
+        user: "postgres",
+        host: "localhost",
+        database: "Vids",
+        password: "Wedfvb01",
+        port: 5432,
+    }
 }
