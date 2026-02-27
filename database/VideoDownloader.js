@@ -80,14 +80,12 @@ async function CheckFolderCapacity(mainFolderPath,subFolder) {
     const subFolderPath = path.join(mainFolderPath,subFolder);
     const stats = await fsPromises.stat(subFolderPath);
     let reserveCapacity;
-    console.log("Folder name: ",subFolder);
 
     if(subFolder === "videos1"){
         reserveCapacity = 50;
     }else{
         reserveCapacity = 4;
     }
-    console.log("Capacity: ",reserveCapacity);
 
     if(stats.isDirectory()){
         console.log(`Reading folder: ${subFolder}`)
@@ -102,7 +100,7 @@ async function CheckFolderCapacity(mainFolderPath,subFolder) {
             const comand2 = `df -h --output=avail --block-size=G ${partitionName} | tail -n 1`;
             const getSize = await runComand(comand2);
             const memoryLeft = getSize.trim();
-            console.log(`Folder ${subFolder} : ${memoryLeft} gb`)
+            console.log(`Memory left : ${memoryLeft} gb`)
 
             const getNumber = parseInt(memoryLeft);
             if(getNumber <= reserveCapacity){
