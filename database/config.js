@@ -1,6 +1,6 @@
 const SQL_PORT = 3001;
 const EXPRESS_PORT = 3004;
-const IP = '192.168.0.8';
+const IP = '192.168.0.9';
 
 module.exports = {
     SQLConnectPort: SQL_PORT,

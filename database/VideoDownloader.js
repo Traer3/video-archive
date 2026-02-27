@@ -159,25 +159,40 @@ async function main() {
             return;
         }
 
-        const mainFolder = await fsPromises.readdir(VIDEOS_DIR)
         let targetFolder = null;
-        for(const subFolder of mainFolder){
-            const isOk = await CheckFolderCapacity(VIDEOS_DIR,subFolder);
-            if(isOk){
-                targetFolder = path.join(VIDEOS_DIR,subFolder);
-                break;
+        const subFolders = await fsPromises.readdir(VIDEOS_DIR)
+
+        const findAvailableFolder = async () => {
+            for(const subFolder of subFolders){
+                if(await CheckFolderCapacity(VIDEOS_DIR,subFolder)){
+                    return path.join(VIDEOS_DIR,subFolder);
+                }
             }
+            return null;
+        };
+        
+        targetFolder = await findAvailableFolder();
+        if(!targetFolder){
+            console.error("❌ No available folder");
+            return;
         }
-        if(targetFolder){
-            for (let i = 0; i < links.length; i++){
-                await VideoDownloader(links[i], i,targetFolder,links);
+
+        for(let i = 0; i < links.length; i++){
+            let isOk = await CheckFolderCapacity(VIDEOS_DIR, path.basename(targetFolder));
+            if(!isOk){
+                console.log("🔄 Current folder full, searching for a new one...");
+                targetFolder = await findAvailableFolder();
+
+                if(!targetFolder){
+                    console.error("All folders are full!");
+                    await logWriter("DownloaderLogs","❌ Error: All folders are full");
+                    break;
+                }
             }
-            await writeInfo(VIDEOS_LINKS_PATH,"")
-            console.log("🔥 Completed");
-        }else{
-            console.error("❌ No available folder for download (all full or missing)");
-            await logWriter("DownloaderLogs","❌ Error: All folders are full.");
+            await VideoDownloader(links[i],i,targetFolder,links);
         }
+        await writeInfo(VIDEOS_LINKS_PATH, "");
+        console.log("🔥 Completed");
     }catch(err){
         console.error(`❌ Error in main loop: ${err.message}`)
     }
