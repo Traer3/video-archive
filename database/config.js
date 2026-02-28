@@ -1,13 +1,30 @@
+const os = require('os')
 const SQL_PORT = 3001;
 const EXPRESS_PORT = 3004;
-const IP = '192.168.0.9';
+const STATIC_IP = '192.168.0.9'
 
-async function getIp() {
-    const comand = `ip -br a`;
+const platform = process.platform;
 
+function getLocalIP () {
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)){
+        for(const net of interfaces[name]){
+            if(net.family === 'IPv4' && !net.internal){
+                return net.address;
+            }
+        }
+    }
+    return '127.0.0.1';
 }
-//Только рабочий 
-// ip -br a | grep UP
+
+const IP = (platform === 'win32') ? STATIC_IP : getLocalIP();
+
+if(platform !== 'win32'){
+    console.log("Linux detected. Adaptive IP:",IP);
+}else{
+    console.log("Windows detected. Static IP:",IP);
+}
+
 
 module.exports = {
     SQLConnectPort: SQL_PORT,
