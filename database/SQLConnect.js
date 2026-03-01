@@ -132,7 +132,7 @@ app.post('/importVideo',async(req,res)=>{
         })
     }catch(err){
         console.error('❌ Error importing video: ', err);
-        res.status(500).json({message: 'Server cant import vid', error: err.message})
+        res.status(500).json({message: `Server cant import vid: ${err.message}`})
     }
 });
 
