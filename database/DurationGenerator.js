@@ -1,8 +1,8 @@
-const config = require('./config');
 const fsPromises = require("fs").promises;
 const path = require('path');
+const ffmpeg = require('fluent-ffmpeg')
+const config = require('./config');
 const VIDEOS_DIR = path.join(__dirname, "videos")
-
 
 const getDBData = async () => {
     try{
@@ -16,7 +16,7 @@ const getDBData = async () => {
             isitunique: v.isitunique,
             filtered: v.filtered
         }));
-        const filtered = formatted.filter(vid => vid.duration === '')
+        const filtered = formatted.filter(vid => !vid.duration)
 
         console.log('DB videos loaded:',formatted.length);
         return filtered
@@ -35,7 +35,6 @@ const saveVideoDuration = async (vidId, vidDuration) =>{
     }
 
     try{
-
         const res = await fetch(`${config.DB_URL}/saveVidDuration`,{
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -50,7 +49,6 @@ const saveVideoDuration = async (vidId, vidDuration) =>{
         }
 
         const data = await res.json();
-        savedIds.current.add(vidId);
         console.log(`⏱ Duration saved for video ${vidId} : ${vidDuration}`)
         console.log("✅Updated video: ", data.updatedVideo);
                 
@@ -85,25 +83,74 @@ async function FolderReader() {
     }; 
 }
 
+async function logWriter (type, message) {
+
+    const res = await fetch(`${config.DB_URL}/addLog`,{
+     method: "POST",
+     headers:{"Content-Type":"application/json"},
+     body: JSON.stringify({type, message})
+    });
+
+    if(!res.ok){
+     const errorData = await res.text();
+     console.error(`❌ Failed writing log: ${errorData}`);
+     return;
+    }
+
+    const data = await res.json();
+    console.log(data);
+ };
+
+async function getVideoDuration(filePath) {
+    return new Promise((resolve, reject)=>{
+        console.log("filePath ", filePath)
+        const absolutePath = path.resolve(filePath)
+        ffmpeg.ffprobe(absolutePath,(err,metadata)=>{
+            if(err){
+                console.error("FFprobe for path:",absolutePath)
+                return reject(err);
+            }
+            const duration = metadata.format.duration;
+            const minutes = Math.floor(duration / 60);
+            const seconds =  Math.floor(duration % 60) ;
+            const formatted = `${minutes}:${seconds.toString().padStart(2,"0")}`
+            resolve(formatted);
+        })
+    })
+}
+
+
+
 async function main() {
     console.log("Saving video duration");
-    const DBvideos = [];
-    DBvideos.push( await getDBData())
-    //console.log(DBvideos)
+    const DBvideos = await getDBData();
+    const folderVideos = await FolderReader();
 
-    const folderVideos = [];
-    folderVideos.push( await FolderReader())
-
-    const noDurationVids = [];
-
-    folderVideos.map(vid => console.log(vid[0]))
-
-    for(const dbVid of DBvideos){
-        noDurationVids.push(folderVideos.map(vid => {
-           vid[0].name === dbVid.name
-        }))
+    if(!DBvideos || !folderVideos){
+        console.log("DBvideos or folderVideos empty")
     }
-    
+
+    for(const vid of DBvideos){
+        let vidName = vid.name+'.mp4'
+        let folderVideo = folderVideos.find(vid => vid.name === vidName)
+
+        if(folderVideo){
+            try{
+                const duration = await getVideoDuration(folderVideo.fullPath)
+                console.log("Duration ",duration);
+                console.log("Id: ", vid.id)
+                //await saveVideoDuration(vid.id , duration)
+                //await logWriter("DurationFethcer",`Generated for video ${vid.id} , duration ${duration}`)
+            }catch(err){
+                console.error(`Error getting duration for ${vidName} && ${err.message}`)
+                //await logWriter("DurationFethcer",`❌ Error generating duration for video ${vid.id} `)
+            }
+        }else{
+            console.log("Video not found")
+        }
+
+    }
+
 }
 
 main ()

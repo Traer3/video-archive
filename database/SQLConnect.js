@@ -174,7 +174,7 @@ app.post('/addLog',async(req,res)=>{
         const {type, message} = req.body;
 
         const allowedLogs = [
-            "SQLLogs","ExpressLogs","DownloaderLogs","ImporterLogs","EraserLogs","IsItUniqueLogs","ThumbnailGeneratorLogs"
+            "SQLLogs","ExpressLogs","DownloaderLogs","ImporterLogs","EraserLogs","IsItUniqueLogs","ThumbnailGeneratorLogs","DurationFethcer"
         ];
 
         if(!type || !allowedLogs.includes(type)){
