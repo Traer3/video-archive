@@ -1,10 +1,10 @@
-//const os = require('os')
+const os = require('os')
 const SQL_PORT = 3001;
 const EXPRESS_PORT = 3004;
-const STATIC_IP = '192.168.0.8'
+const STATIC_IP = '192.168.0.9'
 
 const platform = process.platform;
-/*
+
 function getLocalIP () {
     const interfaces = os.networkInterfaces();
     for (const name of Object.keys(interfaces)){
@@ -16,10 +16,9 @@ function getLocalIP () {
     }
     return '127.0.0.1';
 }
-*/
 
-//const IP = (platform === 'win32') ? STATIC_IP : getLocalIP();
-const IP = STATIC_IP
+const IP = (platform === 'win32') ? STATIC_IP : getLocalIP();
+
 
 if(platform !== 'win32'){
     console.log("Linux detected. Adaptive IP:",IP);

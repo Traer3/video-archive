@@ -13,6 +13,7 @@ const IS_IT_UNIQUE = path.join(__dirname,'IsItUnique.js')
 const VIDEO_DOWNLOADER = path.join(__dirname,'VideoDownloader.js')
 
 const THUMBNAIL_GENERATOR = path.join(__dirname, 'ThumbnailGenerator.js');
+const DURATION_GENERATOR = path.join(__dirname, 'DurationGenerator.js');
 
 const exists = async (path) =>{
     try{
@@ -103,8 +104,9 @@ async function GetingVideos() {
     const YTGetLinks = `node "${YT_GET_LINKS}"`;
     const VideoDownloader = `node "${VIDEO_DOWNLOADER}"`;
     const GenerateThumbnails = `node "${THUMBNAIL_GENERATOR}"`;
+    const GenerateDurations = `node "${DURATION_GENERATOR}"`
     //const downloadingVideos = `gnome-terminal -- /bin/sh -c '${YTGetLinks}; ${VideoDownloader}; ${GenerateThumbnails}; exec bash'`
-    const startAll = `${YTGetLinks} && ${VideoDownloader} && ${GenerateThumbnails}`
+    const startAll = `${YTGetLinks} && ${VideoDownloader} && ${GenerateThumbnails} && ${GenerateDurations}`
     
     await runComand(startAll);
 }
@@ -127,7 +129,8 @@ async function checkingFiles() {
         YT_GET_LINKS,
         IS_IT_UNIQUE,
         VIDEO_DOWNLOADER,
-        THUMBNAIL_GENERATOR
+        THUMBNAIL_GENERATOR,
+        DURATION_GENERATOR,
     ];
     const missingFiles = [];
 
