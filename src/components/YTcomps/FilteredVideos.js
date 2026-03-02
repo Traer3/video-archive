@@ -56,6 +56,7 @@ export default function FilteredVideos({setShowFiltered}) {
                 setSelectedVideo={setSelectedVideo}
                 setDeletionTrigger={setDeletionTrigger}
                 deletionTrigger={deletionTrigger}
+                eraseVideoFlag={true}
             />
         )
     }

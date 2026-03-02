@@ -4,12 +4,14 @@ import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withSpring } 
 import YTVidForm from "./YTVidForm"
 import { useDatabase } from "../../../../DatabaseContext";
 
-export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,isItUnique,setDeletionTrigger,deletionTrigger,url}){
+export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,isItUnique,setDeletionTrigger,deletionTrigger,url,eraseVideoFlag}){
     const {DB_URL} = useDatabase();
     const translateX = useSharedValue(0);
     const offsetRefX = useRef(0);
     const translateY = useSharedValue(0);
     const offsetRefY = useRef(0);
+    
+    const [hideVideo, setHideVideo] = useState(true)
 
     const [disableDeletion,setDisableDeletion] = useState(false);
    
@@ -54,6 +56,9 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
                     state: true,
                 })
             });
+
+            hideVideos();
+
             if(!res.ok){
                 throw new Error(`Error changing filtered state for if: ${id}`);
             }
@@ -134,8 +139,6 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
     
         const hadleEnd = () => {
             translateX.value = withSpring(0);
-            //console.log("hadleEnd",translateX.value)
-            
             if(translateX.value < 40){
                 translateX.value = withSpring(0);
             }else{
@@ -143,6 +146,11 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
             }
             
         }
+    
+    const hideVideos = () => {
+        setHideVideo(false)
+
+    }
 
     return(
         <View style={{justifyContent:'center' }}>
@@ -159,17 +167,17 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
                         onPress={()=>{setDeletionTrigger(false)}}
                     />
                 }
-            <View style={styles.deletionForm}>
+
+            {hideVideo && <View style={styles.deletionForm}>
                <Pressable 
                     style={{ height:"100%",width:'100%',}}
-                    //onPress={()=>deleteVideo(id)}
-                    onPress={()=>filteredVideo(id)}
+                    onPress={()=> {eraseVideoFlag ? deleteVideo(id) : filteredVideo(id)}}
                >
                     <Text style={styles.deleteButton}>
-                        delete
+                        {eraseVideoFlag ? "delete" : "filter"}
                     </Text>
                </Pressable>
-            </View>
+            </View>}
            
             <Animated.View 
                 style={[
@@ -180,7 +188,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
                 onTouchMove={hadleMove}
                 onTouchEnd={hadleEnd}
             >
-                <YTVidForm 
+                {hideVideo && <YTVidForm 
                     thumbnail={thumbnail} 
                     name={name} 
                     date={date} 
@@ -188,7 +196,8 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
                     id={id}
                     isItUnique={isItUnique}
                     url={url}
-                />
+                />}
+
             </Animated.View >   
         </View>     
     );

@@ -6,6 +6,7 @@ import { useSaveVideo } from "./VideoProcessing/SaveVideoData";
 import ServerLoading from "../ServerLoading";
 import VideoPlayer from "./VideoPlayer";
 import { useDatabase } from "../../../DatabaseContext";
+import Animated from "react-native-reanimated";
 
 export default function YTAssembler ({dbVideos}) {
     const {VIDEO_URL} = useDatabase();
@@ -116,11 +117,11 @@ export default function YTAssembler ({dbVideos}) {
             {offline && 
                 <ServerLoading/>
             }
-            <FlatList
+            {true && <FlatList
                 style={{flex:1,}}
                 contentContainerStyle={{paddingBottom: 105}}
                 data={videos}
-                scrollEnabled={scrollAnimation}
+                //scrollEnabled={scrollAnimation}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 onEndReached={loadMore}
@@ -129,7 +130,7 @@ export default function YTAssembler ({dbVideos}) {
                 initialNumToRender={10}
                 windowSize={10}
                 ListFooterComponent={loading ? <Text style={{textAlign:'center',marginTop:"50%",fontWeight:'600',fontSize:20}}>loading...</Text> : null}
-            />
+            />}
 
             <VideoPlayer setSelectedVideo={setSelectedVideo} selectedVideo={selectedVideo}/>
             

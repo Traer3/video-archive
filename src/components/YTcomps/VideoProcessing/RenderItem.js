@@ -4,7 +4,7 @@ import * as  Haptics from 'expo-haptics';
 import ModifiedYTVidForm from "./ModifiedYTVidForm";
 import YTLoading from "./YTLoading";
 
-export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,setDeletionTrigger,deletionTrigger}){
+export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,setDeletionTrigger,deletionTrigger,eraseVideoFlag}){
     if(!item.id) return null;
     if(!item.duration || !item.thumbnail) {
         const placeholder = Array.from({length: 7}, (_,i)=>(
@@ -20,7 +20,7 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
     const startX = useRef(null);
     const startY = useRef(null);
     const direction = useRef(null);
-    const THRESHOLD = 4
+    const THRESHOLD = 2
 
     const hadlePressIn = (event) =>{
         pressStartTime.current = Date.now();
@@ -102,6 +102,7 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
     
                     setDeletionTrigger={setDeletionTrigger}
                     deletionTrigger={deletionTrigger}
+                    eraseVideoFlag={eraseVideoFlag}
                 />
         </Pressable>
     )
