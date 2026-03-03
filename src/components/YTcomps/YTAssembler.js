@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {View, StyleSheet, FlatList, Text, Modal} from "react-native";
 import { DurationFetcher } from "./VideoProcessing/DurationFetcher";
 import RenderItem from "./VideoProcessing/RenderItem";
@@ -23,10 +23,10 @@ export default function YTAssembler ({dbVideos}) {
     const [deletionTrigger, setDeletionTrigger] = useState(0);
     const [scrollAnimation, setScrollAnimation] = useState(true);
     
-    const fetchAllVideos = async (pageNum = 1) => {
+    const fetchAllVideos = async (pageNum = 1,limit) => {
        // console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
        try{
-        const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=10`);
+        const urlResponse = await fetch(`${VIDEO_URL}/videos?page=${pageNum}&limit=${limit}`);
         const urlData = await urlResponse.json()
 
         hasNext.current = urlData.hasNext
@@ -57,20 +57,28 @@ export default function YTAssembler ({dbVideos}) {
     }
 
     const loadMore = async () => {
-        const nextPage = page.current + 1;
-        
-        if(hasNext.current && nextPage <= 5){
-            const newFormPage = await fetchAllVideos(nextPage)
-            page.current = nextPage;
-            loadMore()
+        const INITIAL_BATHC_LIMIT = 50;
+        const STANDARD_BATHC_LIMIT = 10;
 
-            updateVideo(newFormPage)
-        }else{
-            console.log("SlowerPase")
-            const newFormPage = await fetchAllVideos(nextPage)
-            page.current = nextPage;
-            updateVideo(newFormPage)
+        const nextPage = page.current + 1;
+        if(!hasNext.current) return;
+
+        try{
+            if(hasNext.current && nextPage <= 1){
+                const newFormPage = await fetchAllVideos(nextPage,INITIAL_BATHC_LIMIT)
+                page.current = Math.floor(INITIAL_BATHC_LIMIT / 10);
+                updateVideo(newFormPage)
+            }else{
+                console.log("SlowerPase")
+                const newFormPage = await fetchAllVideos(nextPage,STANDARD_BATHC_LIMIT)
+                page.current = nextPage;
+                updateVideo(newFormPage)
+            }
+        }catch(err){
+            console.error("Error in loadMore: ",err)
         }
+        
+            
     };
 
     const updateVideo = (vids) =>{
@@ -85,17 +93,16 @@ export default function YTAssembler ({dbVideos}) {
 
     const {saveVideoData} = useSaveVideo();
    
-    const renderItem = ({item}) => {
-        return(
-            <RenderItem
-                item={item}
-                setScrollAnimation={setScrollAnimation}
-                setSelectedVideo={setSelectedVideo}
-                setDeletionTrigger={setDeletionTrigger}
-                deletionTrigger={deletionTrigger}
-            />
-        )
-    }
+    const renderItem = useCallback (({item}) => (
+        <RenderItem
+            item={item}
+            setScrollAnimation={setScrollAnimation}
+            setSelectedVideo={setSelectedVideo}
+            setDeletionTrigger={setDeletionTrigger}
+            deletionTrigger={deletionTrigger}
+        />
+    ),[deletionTrigger])
+    
 
     return(
         <View style={{flex:1}}>
@@ -117,11 +124,11 @@ export default function YTAssembler ({dbVideos}) {
             {offline && 
                 <ServerLoading/>
             }
-            {true && <FlatList
+            <FlatList
                 style={{flex:1,}}
                 contentContainerStyle={{paddingBottom: 105}}
                 data={videos}
-                //scrollEnabled={scrollAnimation}
+                scrollEnabled={scrollAnimation}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 onEndReached={loadMore}
@@ -130,7 +137,7 @@ export default function YTAssembler ({dbVideos}) {
                 initialNumToRender={10}
                 windowSize={10}
                 ListFooterComponent={loading ? <Text style={{textAlign:'center',marginTop:"50%",fontWeight:'600',fontSize:20}}>loading...</Text> : null}
-            />}
+            />
 
             <VideoPlayer setSelectedVideo={setSelectedVideo} selectedVideo={selectedVideo}/>
             

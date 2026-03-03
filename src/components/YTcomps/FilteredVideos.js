@@ -4,6 +4,11 @@ import RenderItem from "./VideoProcessing/RenderItem";
 import VideoPlayer from "./VideoPlayer";
 import { useDatabase } from "../../../DatabaseContext";
 
+//Может переделать 
+/*
+Я могу буквально импортировать YTAssembler 
+Во время удаления сверять имя и ссылку из VIDEO_URL с SQL и передавать на удаление 
+*/
 export default function FilteredVideos({setShowFiltered}) {
     const {DB_URL, VIDEO_URL} = useDatabase();
     const [videos, setVideos] = useState(null);
@@ -48,18 +53,15 @@ export default function FilteredVideos({setShowFiltered}) {
     
     const keyExtractor = item => (item.id ? item.id.toString() : item.url);
 
-    const renderItem = ({item}) =>{
-        return(
+    const renderItem = useCallback (({item}) => (
             <RenderItem
                 item={item}
                 setScrollAnimation={setScrollAnimation}
                 setSelectedVideo={setSelectedVideo}
                 setDeletionTrigger={setDeletionTrigger}
                 deletionTrigger={deletionTrigger}
-                eraseVideoFlag={true}
             />
-        )
-    }
+        ),[deletionTrigger])
 
     return(
         <View style={styles.componentContainer}>

@@ -1,11 +1,16 @@
-import { useRef } from "react";
+import { memo, useRef } from "react";
 import { Pressable } from "react-native";
 import * as  Haptics from 'expo-haptics';
 import ModifiedYTVidForm from "./ModifiedYTVidForm";
 import YTLoading from "./YTLoading";
 
-export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,setDeletionTrigger,deletionTrigger,eraseVideoFlag}){
+ function RenderItem ({item,setScrollAnimation,setSelectedVideo,setDeletionTrigger,deletionTrigger,eraseVideoFlag}){
     if(!item.id) return null;
+    if(!item.duration || !item.thumbnail) {
+        console.log("Loading duration ore thumbnail")
+        return  <YTLoading />
+    }
+    /*
     if(!item.duration || !item.thumbnail) {
         const placeholder = Array.from({length: 7}, (_,i)=>(
             <YTLoading key={i} delay={i * 150}/>
@@ -14,6 +19,7 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
             <>{placeholder}</>
         );
     }
+    */
 
     const pressStartTime = useRef(null);
 
@@ -107,3 +113,5 @@ export default function RenderItem ({item,setScrollAnimation,setSelectedVideo,se
         </Pressable>
     )
 }
+
+export default memo(RenderItem)
