@@ -56,6 +56,7 @@ function runComand(comand){
 async function VideoDownloader(url,index,folderPath,links){
     console.log(`Downdloading: [${index +1}]/${links.length}: ${url}`);
 
+    //fix
     const comand1 = `yt-dlp -o "${folderPath}/%(title)s.%(ext)s" --merge-output-format mp4 "${url}"`;
     const comand2 = `node "${VIDEO_IMPORTER}"`;
 
