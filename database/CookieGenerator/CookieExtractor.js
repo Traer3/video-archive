@@ -83,9 +83,18 @@ const CookieExtractor = async () =>{
         console.error("Missing cookies.sqlite");
         return
     }
-    console.log("Extracting cookies from cookies.sqlite");
-    const ExtractingCookies = `sqlite3 -separator '       ' cookies.sqlite "SELECT host, 'TRUE', path, CASE WHEN isSecure THEN 'TRUE' ELSE 'FALSE' END, expiry, name, value FROM moz_cookies WHERE host LIKE '%youtube.com%';" > ./youtubeCookies.txt`
-    await runComand(ExtractingCookies);
+    try{
+        console.log(`Creating youtubeCookies.txt`);
+        const headers = '# Netscape HTTP Cookie File\n';
+        await fsPromises.writeFile(COOKIES_TXT_PATH,headers);
+
+        console.log("Extracting cookies from cookies.sqlite");
+        const ExtractingCookies = `sqlite3 -separator $'\\t' "${COOKIES_LITE}" "SELECT host, 'TRUE', path, CASE WHEN isSecure THEN 'TRUE' ELSE 'FALSE' END, expiry, name, value FROM moz_cookies WHERE host LIKE '%youtube.com%';" >> "${COOKIES_TXT_PATH}"`;
+        await runComand(ExtractingCookies);
+        console.log("✅ YouTube cookie extracted!")
+    }catch(err){
+        console.log("Error in CookieExtractor : ",err)
+    }
 }
 
 const DeleteOldCookies = async(filePath) =>{
@@ -100,8 +109,8 @@ async function main() {
     }
 
 
-    //await DeleteOldCookies(COOKIES_SQLITE_PATH);
-    //await DeleteOldCookies(COOKIES_TXT_PATH);
+    await DeleteOldCookies(COOKIES_SQLITE_PATH);
+    await DeleteOldCookies(COOKIES_TXT_PATH);
 
     const urlForExtraction = await readMyFile(GUILTY_URL_PATH);
     if(!urlForExtraction) return;
@@ -113,6 +122,7 @@ async function main() {
     await CookieSearcher();
 
     await CookieExtractor()
+
 }
 
 main();
