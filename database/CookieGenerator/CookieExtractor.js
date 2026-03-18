@@ -102,12 +102,51 @@ const DeleteOldCookies = async(filePath) =>{
     await fsPromises.rm(filePath,{recursive:true})
 }
 
+const ResetFirefoxHealth = async () => {
+    console.log("Reseting Firefox health");
+    const findPrefsJS = `find ~/snap/firefox/common/.mozilla/firefox/ -name "prefs.js"`
+    let prefsJsPath = await runComand(findPrefsJS)
+    prefsJsPath = prefsJsPath.trim();
+    console.log(`prefs.js path: ${prefsJsPath}`)
+
+    if(prefsJsPath){
+        console.log("Reading prefs.js");
+        try{
+            let prefsJsContent = await fsPromises.readFile(prefsJsPath, 'utf-8');
+            prefsJsContent = prefsJsContent.replace(
+                /user_pref\("toolkit.startup.recent_crashes", \d+\);/g, 
+                'user_pref("toolkit.startup.recent_crashes", 0);'
+            );
+
+            prefsJsContent = prefsJsContent.replace(
+                /user_pref\("browser.startup.couldRestoreSession.conunt", \d+\);/g, 
+                'user_pref("browser.startup.couldRestoreSession.conunt", 0);'
+            );
+            
+            if(!prefsJsContent.includes("browser.sessionstore.resume_from_crash")){
+                prefsJsContent += '\nuser_pref("browser.sessionstore.resume_from_crash", false);';
+            }else{
+                prefsJsContent = prefsJsContent.replace(
+                    /user_pref\("browser.sessionstore.resume_from_crash", \d+\);/g, 
+                    'user_pref("browser.sessionstore.resume_from_crash", false);'
+                );
+            }
+
+            await fsPromises.writeFile(prefsJsPath, prefsJsContent);
+            console.log("Firefox health reset!")
+        }catch(err){
+            console.log("Error reseting health ", err.message)
+        }
+    }
+}
+
 async function main() {
     if(!(await exists(GUILTY_URL_PATH))){
         console.error("Missing url for cookie extraction");
         return
     }
 
+    await ResetFirefoxHealth();
 
     await DeleteOldCookies(COOKIES_SQLITE_PATH);
     await DeleteOldCookies(COOKIES_TXT_PATH);
