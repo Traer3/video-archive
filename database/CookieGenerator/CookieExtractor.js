@@ -41,6 +41,25 @@ async function readMyFile(filePath) {
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+async function logWriter (type, message) {
+
+    const res = await fetch(`${config.DB_URL}/addLog`,{
+     method: "POST",
+     headers:{"Content-Type":"application/json"},
+     body: JSON.stringify({type, message})
+    });
+
+    if(!res.ok){
+     const errorData = await res.text();
+     console.error(`❌ Failed writing log: ${errorData}`);
+     return;
+    }
+
+    const data = await res.json();
+    console.log(data);
+};
+
+
 const BrowserStarter = async (url) => {
     console.log(`Starting browser using url: ${url}`);
     try{
@@ -112,27 +131,23 @@ const ResetFirefoxHealth = async () => {
     if(prefsJsPath){
         console.log("Reading prefs.js");
         try{
-            let prefsJsContent = await fsPromises.readFile(prefsJsPath, 'utf-8');
-            prefsJsContent = prefsJsContent.replace(
-                /user_pref\("toolkit.startup.recent_crashes", \d+\);/g, 
-                'user_pref("toolkit.startup.recent_crashes", 0);'
-            );
+            let content = await fsPromises.readFile(prefsJsPath, 'utf-8');
+            const setPref = (data,key,value) => {
+                const regex = new RegExp(`user_pref\\("${key}",.*\\)`);
+                const newLine = `user_pref("${key}",${value});`;
 
-            prefsJsContent = prefsJsContent.replace(
-                /user_pref\("browser.startup.couldRestoreSession.conunt", \d+\);/g, 
-                'user_pref("browser.startup.couldRestoreSession.conunt", 0);'
-            );
-            
-            if(!prefsJsContent.includes("browser.sessionstore.resume_from_crash")){
-                prefsJsContent += '\nuser_pref("browser.sessionstore.resume_from_crash", false);';
-            }else{
-                prefsJsContent = prefsJsContent.replace(
-                    /user_pref\("browser.sessionstore.resume_from_crash", \d+\);/g, 
-                    'user_pref("browser.sessionstore.resume_from_crash", false);'
-                );
-            }
+                if(regex.test(data)){
+                    return data.replace(regex,newLine);
+                }else{
+                    return data + `\n${newLine}`;
+                }
+            };
 
-            await fsPromises.writeFile(prefsJsPath, prefsJsContent);
+            content = setPref(content, "toolkit.startup.recent_crashes",0);
+            content = setPref(content, "browser.startup.couldRestoreSession.count",0);
+            content = setPref(content, "browser.sessionstore.resume_from_crash","false");
+
+            await fsPromises.writeFile(prefsJsPath, content);
             console.log("Firefox health reset!")
         }catch(err){
             console.log("Error reseting health ", err.message)
@@ -146,21 +161,28 @@ async function main() {
         return
     }
 
-    await ResetFirefoxHealth();
+    try{
+        await ResetFirefoxHealth();
 
-    await DeleteOldCookies(COOKIES_SQLITE_PATH);
-    await DeleteOldCookies(COOKIES_TXT_PATH);
-
-    const urlForExtraction = await readMyFile(GUILTY_URL_PATH);
-    if(!urlForExtraction) return;
-
-    await BrowserStarter(urlForExtraction);
-
-    await BrowserKiller();
+        await DeleteOldCookies(COOKIES_SQLITE_PATH);
+        await DeleteOldCookies(COOKIES_TXT_PATH);
     
-    await CookieSearcher();
+        const urlForExtraction = await readMyFile(GUILTY_URL_PATH);
+        if(!urlForExtraction) return;
+    
+        await BrowserStarter(urlForExtraction);
+    
+        await BrowserKiller();
+        
+        await CookieSearcher();
+    
+        await CookieExtractor()
 
-    await CookieExtractor()
+        await logWriter("CookieExtractor",`✅ Generated new cookie`)
+    }catch(err){
+        console.error("Error in main loop : ",err.message)
+        await logWriter("CookieExtractor",`❌ Error in main loop : ${err.message}`)
+    }
 
 }
 
