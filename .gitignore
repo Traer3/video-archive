@@ -22,7 +22,9 @@ assets/videos/*
 /database/LinksGenerator/*
 !database/LinksGenerator/YTGetLinks.js
 !database/LinksGenerator/Authorize.js
-!database/CookieGenerator/GuiltyURL.txt
+
+/database/CookieGenerator*
+!database/CookieGenerator/CookieExtractor.js
 
 # Native
 .kotlin/

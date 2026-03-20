@@ -46,17 +46,24 @@ const videoReader = (DBvideos) => {
 
 async function newNameChecker (YTVideos) {
     if(!YTVideos) return;
-    const NamesFromDB = videoFromDB.map(video => video.name)
+    const NamesFromDB = new Set(videoFromDB.map(video => video.name))
 
-    const newVids = YTVideos.filter(
-        video => !NamesFromDB.includes(video.name)
-    );
-
+    const newVids = YTVideos.filter(video =>{
+        const name = video.name;
+        const isTrash = name === "Private video" || name === "Deleted video";
+        if(isTrash) return false;
+        const isAlreadyInDB = NamesFromDB.has(name);
+        return !isAlreadyInDB
+    });
+    
     const textOutput = newVids
         .map(v => `${v.url}`)
         .reverse()
         .join('\n');
-    await writeInfo(VIDEOS_LINKS_PATH, textOutput)
+    if(textOutput.length > 0){
+        await writeInfo(VIDEOS_LINKS_PATH, textOutput);
+    }
+    
 
 }
 
