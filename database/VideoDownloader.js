@@ -51,7 +51,9 @@ function runComand(comand){
             }
         });
     });
-}
+};
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function VideoDownloader(url,index,folderPath,links){
     console.log(`Downdloading: [${index +1}]/${links.length}: ${url}`);
@@ -177,6 +179,8 @@ async function main() {
         }
 
         for(let i = 0; i < links.length; i++){
+            let success = false;
+            let attempts = 3;
             let isOk = await CheckFolderCapacity(VIDEOS_DIR, path.basename(targetFolder));
             if(!isOk){
                 console.log("🔄 Current folder full, searching for a new one...");
@@ -187,8 +191,23 @@ async function main() {
                     await logWriter("DownloaderLogs","❌ Error: All folders are full");
                     break;
                 }
+            };
+            while(attempts > 0 && !success){
+                try{
+                    await VideoDownloader(links[i],i,targetFolder,links);
+                    success = true;
+                }catch(err){
+                    attempts--;
+                    console.log(`⚠️ Attempts left: ${attempts}. Error: ${err.message}`);
+                    if(attempts > 0){
+                        await sleep(5000);
+                    }else{
+                        console.error(`Video ${links[i]} won't load`)
+                    }
+                }
             }
-            await VideoDownloader(links[i],i,targetFolder,links);
+
+            
         }
         await writeInfo(VIDEOS_LINKS_PATH, "");
         console.log("🔥 Completed");

@@ -120,17 +120,22 @@ async function getVideoDuration(filePath) {
 }
 
 
-
 async function main() {
     console.log("Saving video duration");
     const DBvideos = await getDBData();
     const folderVideos = await FolderReader();
 
     if(!DBvideos || !folderVideos){
-        console.log("DBvideos or folderVideos empty")
+        console.log("DBvideos or folderVideos empty");
+        return;
     }
 
     for(const vid of DBvideos){
+        if(vid.duration){
+            console.log(`⏭️ Already has duration: ${vid.name}`);
+            continue;
+        };
+
         let vidName = vid.name+'.mp4'
         let folderVideo = folderVideos.find(vid => vid.name === vidName)
 
@@ -139,16 +144,16 @@ async function main() {
                 const duration = await getVideoDuration(folderVideo.fullPath)
                 console.log("Duration ",duration);
                 console.log("Id: ", vid.id)
-                //await saveVideoDuration(vid.id , duration)
-                //await logWriter("DurationFethcer",`Generated for video ${vid.id} , duration ${duration}`)
+                await saveVideoDuration(vid.id , duration)
+                await logWriter("DurationFethcer",`Generated for video ${vid.id} , duration ${duration}`)
+               
             }catch(err){
                 console.error(`Error getting duration for ${vidName} && ${err.message}`)
-                //await logWriter("DurationFethcer",`❌ Error generating duration for video ${vid.id} `)
+                await logWriter("DurationFethcer",`❌ Error generating duration for video ${vid.id} `)
             }
         }else{
-            console.log("Video not found")
-        }
-
+            console.log(`Video not found ${vidName}`)
+        };
     }
 
 }
