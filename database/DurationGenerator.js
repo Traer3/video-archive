@@ -144,12 +144,12 @@ async function main() {
                 const duration = await getVideoDuration(folderVideo.fullPath)
                 console.log("Duration ",duration);
                 console.log("Id: ", vid.id)
-                await saveVideoDuration(vid.id , duration)
-                await logWriter("DurationFethcer",`Generated for video ${vid.id} , duration ${duration}`)
+                //await saveVideoDuration(vid.id , duration)
+                //await logWriter("DurationFethcer",`Generated for video ${vid.id} , duration ${duration}`)
                
             }catch(err){
                 console.error(`Error getting duration for ${vidName} && ${err.message}`)
-                await logWriter("DurationFethcer",`❌ Error generating duration for video ${vid.id} `)
+                //await logWriter("DurationFethcer",`❌ Error generating duration for video ${vid.id} `)
             }
         }else{
             console.log(`Video not found ${vidName}`)

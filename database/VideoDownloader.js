@@ -10,7 +10,9 @@ const FAILED_FILE = path.join(__dirname, "failed.txt")
 
 const VIDEOS_DIR = path.join(__dirname, "videos")
 
-const VIDEO_IMPORTER = path.join(__dirname, "VideoImporter.js")
+const VIDEO_IMPORTER = path.join(__dirname, "VideoImporter.js");
+
+const COOKIE_EXTRACTOR = path.join(__dirname,"CookieGenerator","CookieExtractor.js")
 
 const exists = async (path) =>{
     try{
@@ -58,25 +60,54 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 async function VideoDownloader(url,index,folderPath,links){
     console.log(`Downdloading: [${index +1}]/${links.length}: ${url}`);
 
-    //fix
     const comand1 = `yt-dlp -o "${folderPath}/%(title)s.%(ext)s" --cookies youtubeCookies.txt --merge-output-format mp4 "${url}"`;
     const comand2 = `node "${VIDEO_IMPORTER}"`;
 
+    let success = false;
+    let attempts = 3;
+
+    while(attempts > 0 && !success){
+        try{
+            await runComand(comand1);
+            console.log("✅ Downloaded");
+    
+            console.log("📥 Importing downloaded video(s) to DB...");
+            await runComand(comand2);
+            console.log("✅ Imported successfully");
+            await logWriter("DownloaderLogs",`✅ Successfully processed: ${url}`)
+            success = true;
+        }catch(err){
+            attempts--;
+            console.log(`⚠️ Attempts left: ${attempts}. Error: ${err.message}`);
+
+            const errorText = err.message + (err.stderr || "");
+            const cookieErrorPattern = "Sign in to conf... Эту хуйню нужно опять задетектить блять ";
+            if(errorText.includes(cookieErrorPattern)){
+                console.log("Error pattern detected!");
+                await GenerateCookie();
+            };
+
+            if(attempts > 0){
+                await sleep(5000);
+            }else{
+                console.log(`❌ error while processing ${url} :`,err.message);
+                await logWriter("DownloaderLogs",`❌ Error: ${url} | ${err.message}`)
+                await fsPromises.appendFile(FAILED_FILE, `❌ Error while processing ${url}: ${err.message}\n`);
+            };
+        }
+    };
+};
+
+async function GenerateCookie() {
+    const comand1 = `node "${COOKIE_EXTRACTOR}"`;
+    console.log("🍪 Generating fresh cookies");
     try{
         await runComand(comand1);
-        console.log("✅ Downloaded");
-
-        console.log("📥 Importing downloaded video(s) to DB...");
-        await runComand(comand2);
-        console.log("✅ Imported successfully");
-
-        await logWriter("DownloaderLogs",`✅ Successfully processed: ${url}`)
+        await logWriter("DownloaderLogs",`✅ Successfully generated new cookies`)
     }catch(err){
-        console.log(`❌ error while processing ${url} :`,err.message);
-        await logWriter("DownloaderLogs",`❌ Error: ${url} | ${err.message}`)
-        await fsPromises.appendFile(FAILED_FILE, `❌ Error while processing ${url}: ${err.message}\n`);
+        console.error(`❌ error while generating new cookies : `,err.message);
+        await logWriter("DownloaderLogs",`❌ Error: generating new cookies | ${err.message}`);
     }
-    
 }
 
 async function CheckFolderCapacity(mainFolderPath,subFolder) {
@@ -179,8 +210,6 @@ async function main() {
         }
 
         for(let i = 0; i < links.length; i++){
-            let success = false;
-            let attempts = 3;
             let isOk = await CheckFolderCapacity(VIDEOS_DIR, path.basename(targetFolder));
             if(!isOk){
                 console.log("🔄 Current folder full, searching for a new one...");
@@ -192,21 +221,7 @@ async function main() {
                     break;
                 }
             };
-            while(attempts > 0 && !success){
-                try{
-                    await VideoDownloader(links[i],i,targetFolder,links);
-                    success = true;
-                }catch(err){
-                    attempts--;
-                    console.log(`⚠️ Attempts left: ${attempts}. Error: ${err.message}`);
-                    if(attempts > 0){
-                        await sleep(5000);
-                    }else{
-                        console.error(`Video ${links[i]} won't load`)
-                    }
-                }
-            }
-
+            await VideoDownloader(links[i],i,targetFolder,links);
             
         }
         await writeInfo(VIDEOS_LINKS_PATH, "");
