@@ -8,6 +8,8 @@ const config = require('../config')
 const VIDEOS_LINKS_PATH = path.join(__dirname, 'VideoForDownload.txt');
 const LIKES_LINKS_PATH = path.join(__dirname, 'likes.txt');
 
+const LOCKED_VIDEOS = path.join(__dirname,'lockedVideos.txt')
+const FAILED_FILE = path.join(__dirname,'../failed.txt');
 
 const getVids = async () => {
     try{
@@ -41,6 +43,16 @@ const videoReader = (DBvideos) => {
     }catch(err){
         console.error(`Error writing: ${err.message}`)
     }
+};
+
+async function readMyFile(filePath) {
+    try{
+        const content = await fsPromises.readFile(filePath,'utf-8');
+        return content
+    }catch(err){
+        console.error(`❌Error reading file ${filePath} `,err.message)
+        return null;
+    }
 }
 
 
@@ -66,7 +78,6 @@ async function newNameChecker (YTVideos) {
     
 
 }
-
 
 async function youTubeVideoData(auth){
     const service = google.youtube('v3');
@@ -101,17 +112,49 @@ async function youTubeVideoData(auth){
 
     console.log(`✅ Saved ${allVideos.length} videos in likes.txt`)
     return allVideos;
+};
+
+
+
+async function lockedLinks() {
+    const ignorURL = [
+        'https://www.youtube.com/s/player','https://github.com/'
+    ];
+    const fileContent = await readMyFile(FAILED_FILE);
+    if(!fileContent) return;
+    //https://youtu.be/
+    //.includes('https://youtu.be/');
+
+    try{
+        const lines = fileContent.split(/\r?\n/);
+
+        const youtubeLinks = lines
+        .filter(line => line.includes('https://youtu.be/'))
+        .map(line => {
+            const match = line.match(/https:\/\/youtu\.be\/[\w-]+/);
+            return match ? match[0] : null;
+        })
+        .filter(Boolean);
+        youtubeLinks.forEach(link => console.log("Link: ",link))
+        console.log("youtubeLinks lengh : ", youtubeLinks.length)
+    }catch(err){
+        console.error("Error while reading file: ",err.message);
+    }
+
 }
 
 async function main() {
     try{
         console.log("Starting geting links...");
-        await getVids();
+        //await getVids();
+        
 
-        const auth = await authorizeByHand();
-        const currentYTVideos =  await youTubeVideoData(auth);
+        //const auth = await authorizeByHand();
+        //const currentYTVideos =  await youTubeVideoData(auth);
 
-        await newNameChecker(currentYTVideos);
+        //await newNameChecker(currentYTVideos);
+
+        await lockedLinks()
         console.log("🏁 Links written");
     }catch(err){
         console.error("Error in main",err);
