@@ -115,15 +115,12 @@ async function youTubeVideoData(auth){
 };
 
 
-
-async function lockedLinks() {
-    const ignorURL = [
-        'https://www.youtube.com/s/player','https://github.com/'
-    ];
+async function extractFailedLinks() {
     const fileContent = await readMyFile(FAILED_FILE);
-    if(!fileContent) return;
-    //https://youtu.be/
-    //.includes('https://youtu.be/');
+    if(!fileContent) {
+        console.log(`Missing ${FAILED_FILE}`)
+        return;
+    };
 
     try{
         const lines = fileContent.split(/\r?\n/);
@@ -135,10 +132,47 @@ async function lockedLinks() {
             return match ? match[0] : null;
         })
         .filter(Boolean);
-        youtubeLinks.forEach(link => console.log("Link: ",link))
-        console.log("youtubeLinks lengh : ", youtubeLinks.length)
+        //youtubeLinks.forEach(link => console.log("Link: ",link))
+        //console.log("youtubeLinks lengh : ", youtubeLinks.length)
+        return youtubeLinks
+        
     }catch(err){
-        console.error("Error while reading file: ",err.message);
+        console.error(`❌ Error while extracting links from ${FAILED_FILE}: `,err.message);
+    }   
+};
+
+async function extractingLikesLinks() {
+    const likesContent = await readMyFile(LIKES_LINKS_PATH);
+    if(!likesContent) {
+        console.log(`Missing ${LIKES_LINKS_PATH}`)
+        return;
+    };
+    try{
+        const lines = likesContent.split(/\r?\n/);
+        return lines
+    }catch(err){
+        console.error(`❌ Error while extracting links from ${LIKES_LINKS_PATH}: `,err.message);
+    }
+
+
+}
+
+async function lockedLinks() {
+    await writeInfo(LOCKED_VIDEOS, "");
+
+    try{
+        const failedLinks = await extractFailedLinks();
+        const likesLinks = await extractingLikesLinks();
+        
+        failedLinks.forEach(link =>{
+            likesLinks.filter(async likeLink => {
+               if(likeLink.includes(link)){
+                    await fsPromises.appendFile(LOCKED_VIDEOS, `${likeLink}\n`);
+               }
+            })
+        });
+    }catch(err){
+        console.error(`❌ Error while sorting lockedLinks `,err.message);
     }
 
 }
@@ -146,16 +180,17 @@ async function lockedLinks() {
 async function main() {
     try{
         console.log("Starting geting links...");
-        //await getVids();
+        await getVids();
         
+        const auth = await authorizeByHand();
+        const currentYTVideos =  await youTubeVideoData(auth);
 
-        //const auth = await authorizeByHand();
-        //const currentYTVideos =  await youTubeVideoData(auth);
+        await newNameChecker(currentYTVideos);
 
-        //await newNameChecker(currentYTVideos);
-
+        
         await lockedLinks()
         console.log("🏁 Links written");
+
     }catch(err){
         console.error("Error in main",err);
     }

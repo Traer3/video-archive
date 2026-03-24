@@ -175,7 +175,7 @@ async function main() {
         return
     }
 
-    await writeInfo(FAILED_FILE, "")
+    //await writeInfo(FAILED_FILE, "")
 
     try{
         const fileContent = await readMyFile(VIDEOS_LINKS_PATH);
