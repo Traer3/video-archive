@@ -1,4 +1,5 @@
 const fsPromises = require("fs").promises
+const { exec } = require("child_process");
 const path = require("path");
 const {authorizeByHand} = require('./Authorize');
 const {google} = require('googleapis');
@@ -9,7 +10,7 @@ const VIDEOS_LINKS_PATH = path.join(__dirname, 'VideoForDownload.txt');
 const LIKES_LINKS_PATH = path.join(__dirname, 'likes.txt');
 
 const LOCKED_VIDEOS = path.join(__dirname,'lockedVideos.txt')
-const FAILED_FILE = path.join(__dirname,'../failed.txt');
+//const FAILED_FILE = path.join(__dirname,'../failed.txt');
 
 const getVids = async () => {
     try{
@@ -53,7 +54,19 @@ async function readMyFile(filePath) {
         console.error(`❌Error reading file ${filePath} `,err.message)
         return null;
     }
-}
+};
+
+function runComand(comand){
+    return new Promise((resolve, reject)=>{
+        exec(comand,(error, stdout, stderr)=>{
+            if(error){
+                reject(error);
+            }else{
+                resolve(stdout || stderr);
+            }
+        });
+    });
+};
 
 
 async function newNameChecker (YTVideos) {
@@ -67,16 +80,47 @@ async function newNameChecker (YTVideos) {
         const isAlreadyInDB = NamesFromDB.has(name);
         return !isAlreadyInDB
     });
+
     
-    const textOutput = newVids
+    const checkedVideos = await lockedLinks(newVids);
+    const canDownload = [];
+
+    console.log("Simulating a download")
+    if(checkedVideos){
+        for(const video of checkedVideos){
+            try{
+                const comand1 = `yt-dlp -s "${video.url}"`
+                const respond = await runComand(comand1);
+                if(respond){
+                    canDownload.push(video)
+                }
+            }catch(err){
+                //console.log(`Error processing link: ${video.url}`);
+                console.log(`Error processing link: ${video.url} " ${err.message} "`);
+                const errorMessage = err.message;
+                let category =  "General error";
+
+                if(errorMessage.includes("Sign in to confirm your age")){
+                    category = "Age restriction"
+                }else if(errorMessage.includes("This video is only available to Music Premium members")){
+                    category = "Music Premium";
+                }else if(errorMessage.includes("blocked it in your country")){
+                    category = "Country restriction";
+                }
+                const logLine = `[${category}] ${video.name} | ${video.url}\n`
+                await fsPromises.appendFile(LOCKED_VIDEOS, logLine);
+                
+            }
+        };
+    }
+    
+    const textOutput = canDownload
         .map(v => `${v.url}`)
         .reverse()
         .join('\n');
     if(textOutput.length > 0){
         await writeInfo(VIDEOS_LINKS_PATH, textOutput);
     }
-    
-
 }
 
 async function youTubeVideoData(auth){
@@ -115,6 +159,75 @@ async function youTubeVideoData(auth){
 };
 
 
+
+
+async function extractingLockedLinks() {
+    const lockedVideos = await readMyFile(LOCKED_VIDEOS);
+    if(!lockedVideos) {
+        console.log(`lockedVideos.txt empty or Missing ${LOCKED_VIDEOS}`);
+        return [];
+    };
+    
+    try{
+        const lines = lockedVideos.split(/\r?\n/);
+        return lines
+    }catch(err){
+        console.error(`❌ Error while extracting links from ${LOCKED_VIDEOS}: " ${err.message} "`); 
+    }
+
+
+}
+
+async function lockedLinks(newVids) {
+    const canDownload = []
+    try{
+        const lockedVideos = await extractingLockedLinks(); 
+        if(lockedVideos.length === 0){
+            return newVids;
+        }
+        
+        newVids.forEach(vid =>{
+            const isLocked = lockedVideos.some(lockedLine => lockedLine.includes(vid.name));
+            if(!isLocked){
+                canDownload.push(vid);
+            }else{
+                console.log(`Skiping! Allready in list:  ${vid.name}`)
+            }
+        });
+        return canDownload;
+    }catch(err){
+        console.error(`❌ Error while sorting lockedLinks `,err.message);
+    }
+
+};
+
+async function main() {
+    try{
+        console.log("Starting geting links...");
+        await getVids();
+        
+        const auth = await authorizeByHand();
+        const currentYTVideos =  await youTubeVideoData(auth);
+        const test = [{
+            name: "Hotline Miami 2: Wrong Number - Dial Tone Trailer",
+            url: "https://youtu.be/Kqr0yUuSiTs"
+        }]
+
+        await newNameChecker(currentYTVideos);
+
+        await extractingLockedLinks()
+        
+        console.log("🏁 Links written");
+
+    }catch(err){
+        console.error("Error in main",err);
+    }
+}
+
+main();
+
+/*
+//deprecated
 async function extractFailedLinks() {
     const fileContent = await readMyFile(FAILED_FILE);
     if(!fileContent) {
@@ -140,65 +253,7 @@ async function extractFailedLinks() {
         console.error(`❌ Error while extracting links from ${FAILED_FILE}: `,err.message);
     }   
 };
-
-async function extractingLikesLinks() {
-    const likesContent = await readMyFile(LIKES_LINKS_PATH);
-    if(!likesContent) {
-        console.log(`Missing ${LIKES_LINKS_PATH}`)
-        return;
-    };
-    try{
-        const lines = likesContent.split(/\r?\n/);
-        return lines
-    }catch(err){
-        console.error(`❌ Error while extracting links from ${LIKES_LINKS_PATH}: `,err.message);
-    }
-
-
-}
-
-async function lockedLinks() {
-    await writeInfo(LOCKED_VIDEOS, "");
-
-    try{
-        const failedLinks = await extractFailedLinks();
-        const likesLinks = await extractingLikesLinks();
-        
-        failedLinks.forEach(link =>{
-            likesLinks.filter(async likeLink => {
-               if(likeLink.includes(link)){
-                    await fsPromises.appendFile(LOCKED_VIDEOS, `${likeLink}\n`);
-               }
-            })
-        });
-    }catch(err){
-        console.error(`❌ Error while sorting lockedLinks `,err.message);
-    }
-
-}
-
-async function main() {
-    try{
-        console.log("Starting geting links...");
-        await getVids();
-        
-        const auth = await authorizeByHand();
-        const currentYTVideos =  await youTubeVideoData(auth);
-
-        await newNameChecker(currentYTVideos);
-
-        
-        await lockedLinks()
-        console.log("🏁 Links written");
-
-    }catch(err){
-        console.error("Error in main",err);
-    }
-}
-
-main();
-
-
+*/
 
 /*
 old1
