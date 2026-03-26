@@ -12,6 +12,16 @@ const LIKES_LINKS_PATH = path.join(__dirname, 'likes.txt');
 const LOCKED_VIDEOS = path.join(__dirname,'lockedVideos.txt')
 //const FAILED_FILE = path.join(__dirname,'../failed.txt');
 
+const getLockedVideos = async () => {
+    try{
+        const responce = await fetch(`${config.DB_URL}/lockedVideos`);
+        const data = await responce.json();
+        console.log("LockedVideos data: ", data)
+    }catch(err){
+        console.log("DB error: ", err)
+    }
+};
+
 const getVids = async () => {
     try{
         const responce = await fetch(`${config.DB_URL}/videos`);
@@ -68,6 +78,22 @@ function runComand(comand){
     });
 };
 
+async function writeLockedVideos (scriptName,type,videoName,videoUrl) {
+    const res = await fetch(`${config.DB_URL}/writeLockedVideos`,{
+     method: "POST",
+     headers:{"Content-Type":"application/json"},
+     body: JSON.stringify({scriptName,type,videoName,videoUrl})
+    });
+
+    if(!res.ok){
+     const errorData = await res.text();
+     console.error(`❌ Failed writing Locked Videos: ${errorData}`);
+     return;
+    }
+
+    const data = await res.json();
+    console.log(data);
+ };
 
 async function newNameChecker (YTVideos) {
     if(!YTVideos) return;
@@ -95,8 +121,8 @@ async function newNameChecker (YTVideos) {
                     canDownload.push(video)
                 }
             }catch(err){
-                //console.log(`Error processing link: ${video.url}`);
-                console.log(`Error processing link: ${video.url} " ${err.message} "`);
+                console.log(`❌ Error processing link: ${video.url}`);
+                //console.log(`❌ Error processing link: ${video.url} " ${err.message} "`);
                 const errorMessage = err.message;
                 let category =  "General error";
 
@@ -107,8 +133,9 @@ async function newNameChecker (YTVideos) {
                 }else if(errorMessage.includes("blocked it in your country")){
                     category = "Country restriction";
                 }
-                const logLine = `[${category}] ${video.name} | ${video.url}\n`
-                await fsPromises.appendFile(LOCKED_VIDEOS, logLine);
+                //const logLine = `[${category}] ${video.name} | ${video.url}\n`
+                await writeLockedVideos("YTGetLinks",`${category}`,`${video.name}`,`${video.url}`)
+                //await fsPromises.appendFile(LOCKED_VIDEOS, logLine);
                 
             }
         };
@@ -201,22 +228,26 @@ async function lockedLinks(newVids) {
 
 };
 
+
+
 async function main() {
     try{
         console.log("Starting geting links...");
         await getVids();
+        //await getFailed()
         
-        const auth = await authorizeByHand();
-        const currentYTVideos =  await youTubeVideoData(auth);
+        //const auth = await authorizeByHand();
+        //const currentYTVideos =  await youTubeVideoData(auth);
         const test = [{
             name: "Hotline Miami 2: Wrong Number - Dial Tone Trailer",
             url: "https://youtu.be/Kqr0yUuSiTs"
         }]
 
-        await newNameChecker(currentYTVideos);
+        //await newNameChecker(test);
 
-        await extractingLockedLinks()
-        
+        //await extractingLockedLinks()
+
+        await getLockedVideos();
         console.log("🏁 Links written");
 
     }catch(err){

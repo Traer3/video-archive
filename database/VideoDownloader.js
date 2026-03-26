@@ -55,6 +55,24 @@ function runComand(comand){
     });
 };
 
+async function writeFailed (scriptName,videoUrl,developerMessage, compilerMessage) {
+
+    const res = await fetch(`${config.DB_URL}/writeFailed`,{
+     method: "POST",
+     headers:{"Content-Type":"application/json"},
+     body: JSON.stringify({scriptName,videoUrl,developerMessage, compilerMessage})
+    });
+
+    if(!res.ok){
+     const errorData = await res.text();
+     console.error(`❌ Failed writing failed: ${errorData}`);
+     return;
+    }
+
+    const data = await res.json();
+    console.log(data);
+ };
+
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function VideoDownloader(url,index,folderPath,links){
@@ -90,9 +108,10 @@ async function VideoDownloader(url,index,folderPath,links){
             if(attempts > 0){
                 await sleep(5000);
             }else{
-                console.log(`❌ error while processing ${url} :`,err.message);
+                console.log(`❌ error while processing ${url}`);
                 await logWriter("DownloaderLogs",`❌ Error: ${url} | ${err.message}`)
-                await fsPromises.appendFile(FAILED_FILE, `❌ Error while processing ${url}: ${err.message}\n`);
+                await writeFailed("VideoDownloader",`${url}`,`❌ Error while processing url:`, `${err.message}`)
+                //await fsPromises.appendFile(FAILED_FILE, `❌ Error while processing ${url}: ${err.message}\n`);
             };
         }
     };

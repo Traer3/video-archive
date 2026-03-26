@@ -195,6 +195,68 @@ app.post('/addLog',async(req,res)=>{
     }
 });
 
+app.post('/writeFailed',async(req,res)=>{
+    try{
+        const {scriptName,videoUrl,developerMessage, compilerMessage } = req.body;
+        if(!scriptName){
+            return(res.status(400).json({message: "Missing script name"}));
+        };
+
+        await pool.query(
+            `INSERT INTO failed (script_name,video_url, developer_message, compiler_message)
+             VALUES ($1, $2, $3, $4)`,
+             [scriptName,videoUrl,developerMessage, compilerMessage]
+        );
+        res.status(200).json({
+            message:  '✅ Error written successfully',
+        })
+    }catch(err){
+        console.error("Error while writing failed attempts ",err);
+        res.status(500).json({error:"Error table failed ", err })
+    }
+});
+
+app.get("/failed",async(req,res)=>{
+    try{
+        const result = await pool.query("SELECT * FROM failed");
+        res.json(result.rows);
+    }catch(err){
+        console.error(err);
+        res.status(500).json({error:"Table failed error",err})
+    }
+});
+
+app.post('/writeLockedVideos',async(req,res)=>{
+    try{
+        const {scriptName,type,videoName,videoUrl} = req.body;
+        if(!scriptName){
+            return(res.status(400).json({message: "Missing script name"}));
+        };
+
+        await pool.query(
+            `INSERT INTO lockedVideos (script_name,type,video_name,video_url)
+             VALUES ($1, $2, $3, $4)`,
+             [scriptName,type,videoName,videoUrl]
+        );
+        res.status(200).json({
+            message:  '✅ Video written successfully',
+        })
+    }catch(err){
+        console.error("❌ Error while writing locked videos ",err);
+        res.status(500).json({error:"Error table lockedVideos ", err})
+    }
+});
+
+app.get("/lockedVideos",async(req,res)=>{
+    try{
+        const result = await pool.query("SELECT * FROM lockedVideos");
+        res.json(result.rows);
+    }catch(err){
+        console.error(err);
+        res.status(500).json({error:"Table lockedVideos error",err})
+    }
+});
+
 app.post('/filterVideo',async(req,res)=>{
     try{
         const {id, state} = req.body;
