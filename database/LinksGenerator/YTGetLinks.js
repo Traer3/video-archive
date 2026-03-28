@@ -40,7 +40,7 @@ async function newNameChecker (YTVideos, videoFromDB) {
                 const comand1 = `yt-dlp -s "${video.url}"`
                 const respond = await runComand(comand1);
                 if(respond){
-                    await writeVideoForDownload(video.name, video.url)
+                    await sendData({url: video.url, name: video.name});
                 }
             }catch(err){
                 console.log(`❌ Error processing link: ${video.url}`);
@@ -54,8 +54,7 @@ async function newNameChecker (YTVideos, videoFromDB) {
                 }else if(errorMessage.includes("blocked it in your country")){
                     category = "Country restriction";
                 }
-
-                await writeLockedVideos("YTGetLinks",`${category}`,`${video.name}`,`${video.url}`)
+                await sendData({type: "YTGetLinks", category: category, name: video.name, url: video.url})
             }
         };
     }
@@ -85,7 +84,7 @@ async function youTubeVideoData(auth){
         nextPageToken = res.data.nextPageToken;
         console.log(`📥 Loaded: ${allVideos.length} so far...`);
 
-       if(allVideos.length >= 100) break; //ссылки для первых 100 видео 
+       //if(allVideos.length >= 100) break; //ссылки для первых 100 видео 
 
     }while(nextPageToken);
     console.log(`✅ Received ${allVideos.length} videos from YT`)
@@ -148,38 +147,36 @@ function runComand(comand){
     });
 };
 
-async function writeLockedVideos (scriptName,type,videoName,videoUrl) {
-    const res = await fetch(`${config.DB_URL}/writeLockedVideos`,{
-     method: "POST",
-     headers:{"Content-Type":"application/json"},
-     body: JSON.stringify({scriptName,type,videoName,videoUrl})
-    });
-
-    if(!res.ok){
-     const errorData = await res.text();
-     console.error(`❌ Failed writing Locked Videos: ${errorData}`);
-     return;
+async function sendData({url, name, scriptName, type}) {
+    let body = {
+        scriptName: scriptName,
+        type: type,
+        videoName: name,
+        videoUrl: url
+    };
+    let res;
+    if(body.scriptName && body.type){
+        res = await fetch(`${config.DB_URL}/writeLockedVideos`,{
+            method: "POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify(body) //scriptName,type,videoName,videoUrl
+           });
+    }else{
+        res = await fetch(`${config.DB_URL}/writeVideoForDownload`,{
+            method: "POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify(body) //videoName,videoUrl
+           });
     }
-
-    const data = await res.json();
-    console.log(data);
- };
-
-async function writeVideoForDownload (videoName,videoUrl) {
-    const res = await fetch(`${config.DB_URL}/writeVideoForDownload`,{
-     method: "POST",
-     headers:{"Content-Type":"application/json"},
-     body: JSON.stringify({videoName,videoUrl})
-    });
-
-    if(!res.ok){
-     const errorData = await res.text();
-     console.error(`❌ Failed writing downloading Videos: ${errorData}`);
-     return;
-    }
-
-    const data = await res.json();
-    console.log(data);
-};
+   
+       if(!res.ok){
+        const errorData = await res.text();
+        console.error(`❌ Failed writing Locked Videos: ${errorData}`);
+        return;
+       }
+   
+       const response = await res.json();
+       console.log(response);
+}
 
 main();
