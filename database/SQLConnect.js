@@ -257,6 +257,37 @@ app.get("/lockedVideos",async(req,res)=>{
     }
 });
 
+app.post('/writeVideoForDownload',async(req,res)=>{
+    try{
+        const {videoName,videoUrl} = req.body;
+        if(!videoName || !videoUrl){
+            return(res.status(400).json({message: "Missing video name or url"}));
+        };
+
+        await pool.query(
+            `INSERT INTO videoForDownload (video_name,video_url)
+             VALUES ($1, $2)`,
+             [videoName,videoUrl]
+        );
+        res.status(200).json({
+            message:  '✅ Video written successfully',
+        })
+    }catch(err){
+        console.error("❌ Error while writing downloaded videos ",err);
+        res.status(500).json({error:"Error table lockedVideos ", err})
+    }
+});
+
+app.get("/VideoForDownload",async(req,res)=>{
+    try{
+        const result = await pool.query("SELECT * FROM videoForDownload");
+        res.json(result.rows);
+    }catch(err){
+        console.error(err);
+        res.status(500).json({error:"Table videoForDownload error",err})
+    }
+});
+
 app.post('/filterVideo',async(req,res)=>{
     try{
         const {id, state} = req.body;
