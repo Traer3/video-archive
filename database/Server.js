@@ -1,5 +1,4 @@
 const {exec, spawn} = require("child_process");
-const fs = require("fs");
 const fsPromises = require("fs").promises
 const path = require("path");
 
@@ -38,18 +37,6 @@ function runComand(comand){
     });
 }
 
-function deleteOldLinks(comand){
-    return new Promise((resolve, reject)=>{
-        exec(comand,(error,stdout,stderr)=>{
-            if(error){
-                reject(console.log("❌Already deleted!"));
-            }else{
-                resolve(stdout || stderr);
-            }
-        });
-    });
-}
-
 function startBackgroundProcess(scriptPath){
     const process = spawn("node",[scriptPath],{
         stdio: 'inherit',
@@ -78,23 +65,6 @@ async function StartServer() {
         console.log("✅ Express server started!");
     }catch(err){
         console.log("❌ Error starting servers ", err);
-    }
-}
-
-async function Cleanups() {
-
-    //const UpdateYTdlp = "sudo yt-dlp --update";
-    
-    const deleteOldFiles = "rm LinksGenerator/VideoForDownload.txt"
-    try{
-        //console.log("📥 Updating yt-dlp")
-        //await runComand(UpdateYTdlp);
-
-        console.log("⚠️ Deleting old files...")
-        await deleteOldLinks(deleteOldFiles);
-
-    }catch(err){
-        console.log("❌ Error during preparation ", err)
     }
 }
 
@@ -155,9 +125,6 @@ async function main() {
     if(!(await checkingFiles())){
         return;
     }
-    
-    console.log("Starting maintenance")
-    await Cleanups();
     
     await ServersReboot();
     console.log("⏳ Waiting for ports to clear ...")

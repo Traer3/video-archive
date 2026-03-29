@@ -5,10 +5,10 @@ const {google} = require('googleapis');
 const config = require('../config')
 
 async function main() {
+    await deleteOldLinks();
     try{
-        const DBvideos = await getVids();
-
         console.log("Starting geting links...");
+        const DBvideos = await getData("videos");
         const auth = await authorizeByHand();
         const currentYTVideos =  await youTubeVideoData(auth);
 
@@ -94,7 +94,7 @@ async function youTubeVideoData(auth){
 async function lockedLinks(newVids) {
     const canDownload = []
     try{
-        const lockedVideos =  await getLockedVideos();
+        const lockedVideos =  await getData("lockedVideos");
         if(lockedVideos.length === 0){
             return newVids;
         };
@@ -112,26 +112,14 @@ async function lockedLinks(newVids) {
     }catch(err){
         console.error(`❌ Error while sorting lockedLinks `,err.message);
     }
-
 };
 
-const getLockedVideos = async () => {
+async function deleteOldLinks() {
+    console.log("⚠️ Deleting old files...")
     try{
-        const responce = await fetch(`${config.DB_URL}/lockedVideos`);
-        const data = await responce.json();
-        return data;
+        await sendData({url:"deleteVideoForDownload"})
     }catch(err){
-        console.log("DB error: ", err)
-    }
-};
-
-const getVids = async () => {
-    try{
-        const responce = await fetch(`${config.DB_URL}/videos`);
-        const data = await responce.json();
-        return data;
-    }catch(err){
-        console.log("DB error: ", err)
+        console.log("Error while deleting old links: ",err.message)
     }
 }
 
@@ -147,14 +135,43 @@ function runComand(comand){
     });
 };
 
+async function getData(dbAddress) {
+    try{
+        const responce = await fetch(`${config.DB_URL}/${dbAddress}`);
+        const data = await responce.json();
+        return data;
+    }catch(err){
+        console.log("DB error: ", err)
+    }
+};
+
 async function sendData({url, name, scriptName, type}) {
+    if(url === "deleteVideoForDownload"){
+       const res = await fetch(`${config.DB_URL}/deleteVideoForDownload`,{
+            method: "POST",
+            headers:{"Content-Type":"application/json"},
+           });
+
+        if(!res.ok){
+            const errorData = await res.text();
+            console.error(`❌ ${errorData}`)
+            return;
+        }
+
+        const response = await res.json();
+        console.log(response);
+        return;
+    };
+
     let body = {
         scriptName: scriptName,
         type: type,
         videoName: name,
         videoUrl: url
     };
+
     let res;
+
     if(body.scriptName && body.type){
         res = await fetch(`${config.DB_URL}/writeLockedVideos`,{
             method: "POST",

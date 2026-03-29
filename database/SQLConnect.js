@@ -278,6 +278,19 @@ app.post('/writeVideoForDownload',async(req,res)=>{
     }
 });
 
+app.post('/deleteVideoForDownload',async(req,res)=>{
+    try{
+        await pool.query("TRUNCATE TABLE videofordownload RESTART IDENTITY");
+        res.status(200).json({
+            success:true,
+            message:'Table videofordownload has been reseted'
+        });
+    }catch(err){
+        
+        res.status(500).json({error:"Table videoForDownload error",err})
+    }
+});
+
 app.get("/VideoForDownload",async(req,res)=>{
     try{
         const result = await pool.query("SELECT * FROM videoForDownload");
