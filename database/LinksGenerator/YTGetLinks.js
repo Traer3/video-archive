@@ -12,6 +12,9 @@ async function main() {
         const auth = await authorizeByHand();
         const currentYTVideos =  await youTubeVideoData(auth);
 
+        console.log("Sending curent likes... ")
+        await sendCurentLikes(currentYTVideos);
+        
         await newNameChecker(currentYTVideos, DBvideos);
         console.log("🏁 Links written");
     }catch(err){
@@ -74,11 +77,11 @@ async function youTubeVideoData(auth){
             auth,
         });
 
-        res.data.items.forEach(item => {
+        res.data.items.forEach(async item => {
             const name = item.snippet.title;
             const videoId = item.contentDetails.videoId;
             const url = `https://youtu.be/${videoId}`;
-
+           
             allVideos.push({name, url});
         });
         nextPageToken = res.data.nextPageToken;
@@ -117,10 +120,21 @@ async function lockedLinks(newVids) {
 async function deleteOldLinks() {
     console.log("⚠️ Deleting old files...")
     try{
+        //удаляем старые лайки 
         await sendData({url:"deleteVideoForDownload"})
     }catch(err){
         console.log("Error while deleting old links: ",err.message)
     }
+};
+
+async function sendCurentLikes(videos) {
+    videos.map(async video => {
+        await sendData({
+            scriptName: "writeLikes", 
+            name: video.name, 
+            url: video.url
+        })
+    })
 }
 
 function runComand(comand){
@@ -172,7 +186,13 @@ async function sendData({url, name, scriptName, type}) {
 
     let res;
 
-    if(body.scriptName && body.type){
+    if(body.scriptName === "writeLikes"){
+        res = await fetch(`${config.DB_URL}/writeLikes`,{
+            method: "POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify(body) //videoName,videoUrl
+           });
+    }else if(body.scriptName && body.type){
         res = await fetch(`${config.DB_URL}/writeLockedVideos`,{
             method: "POST",
             headers:{"Content-Type":"application/json"},

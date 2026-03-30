@@ -3,56 +3,24 @@ const path  = require("path");
 const {Pool} = require("pg");
 
 const config = require("./config");
-const LIKED_VIDEOS = path.join(__dirname, 'LinksGenerator', 'likes.txt');
 const VIDEOS_DIR = path.join(__dirname, "videos");
 
 const pool = new Pool(config.TABLE_AUTHORIZATION);
 
-const exists = async (path) =>{
-    try{
-        await fsPromises.access(path);
-        return true;
-    }catch{
-        return false;
-    }
-};
-
-async function FolderReader() {
-    const videos = [];
-    try{
-        const subFolders = await fsPromises.readdir(VIDEOS_DIR);
-        for(const folderName of subFolders){
-            const fullPath = path.join(VIDEOS_DIR,folderName);
-            const stats = await fsPromises.stat(fullPath);
-
-            if(stats.isDirectory()){
-                console.log(`--- Reading folder: ${folderName} ---`);
-                const videoFiles = await fsPromises.readdir(fullPath);
-                videoFiles.map(file => {
-                    videos.push({
-                        name: file,
-                        fullPath:path.join(fullPath, file)
-                    });
-                });
-            }
-        }
-        return videos;
-    }catch(err){
-        console.error("Error reading directories: ",err.message);
-        return [];
-    }; 
+async function main() {
+    console.log("Sorting videos id DB");
+    console.log("📂 Searching video from Folders");
+    const folderVideos = await FolderReader();
+    const likedVideos =  await getData("likes");
+    
+    const sortedList = await SortedList(likedVideos,folderVideos)
+    await DatabaseOverwrite(sortedList)
 };
 
 const SortedList = async (likedList, folderVideos) =>{
     const existedVidoes = [];
-
-    const lines = likedList.split(/\r?\n/);
-    const onlyNames = lines
-        .filter(line => line.includes('|'))
-        .map(line => {
-            return line.split('|')[0].trim();
-        })
-    const resersLikedList = onlyNames.reverse()
+    const likedListName = likedList.map(video => video.video_name)
+    const resersLikedList = likedListName.reverse()
 
     resersLikedList.map(vid => {
         let finedVideo = folderVideos.find(folderVid => {
@@ -67,7 +35,6 @@ const SortedList = async (likedList, folderVideos) =>{
     return existedVidoes;
     
 };
-
 
 const importVideos = async (videoData) => {
     const res =  await fetch(`${config.DB_URL}/importVideo`,{
@@ -110,24 +77,44 @@ const DatabaseOverwrite= async (newList) => {
          }
     }catch(err){
         console.error("❌ Database logging failed: ",err.message);
-    };
+    };  
+};
 
-    
-}
+async function getData(dbAddress) {
+    try{
+        const responce = await fetch(`${config.DB_URL}/${dbAddress}`);
+        const data = await responce.json();
+        return data;
+    }catch(err){
+        console.log("DB error: ", err)
+    }
+};
 
-async function main() {
-    console.log("Sorting videos id DB");
-    console.log("📂 Searching video from Folders");
-    const folderVideos = await FolderReader();
+async function FolderReader() {
+    const videos = [];
+    try{
+        const subFolders = await fsPromises.readdir(VIDEOS_DIR);
+        for(const folderName of subFolders){
+            const fullPath = path.join(VIDEOS_DIR,folderName);
+            const stats = await fsPromises.stat(fullPath);
 
-    if(!(await exists(LIKED_VIDEOS))){
-        console.error("Missing like.txt");
-        return
-    };
+            if(stats.isDirectory()){
+                console.log(`--- Reading folder: ${folderName} ---`);
+                const videoFiles = await fsPromises.readdir(fullPath);
+                videoFiles.map(file => {
+                    videos.push({
+                        name: file,
+                        fullPath:path.join(fullPath, file)
+                    });
+                });
+            }
+        }
+        return videos;
+    }catch(err){
+        console.error("Error reading directories: ",err.message);
+        return [];
+    }; 
+};
 
-    const likedList = await fsPromises.readFile(LIKED_VIDEOS,'utf-8');
-    const sortedList = await SortedList(likedList,folderVideos)
-    await DatabaseOverwrite(sortedList)
-}
 
 main();

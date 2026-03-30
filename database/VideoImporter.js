@@ -1,4 +1,3 @@
-const fs = require('fs');
 const fsPromises = require("fs").promises
 const path = require('path');
 
@@ -17,8 +16,6 @@ const exists = async (path) =>{
         return false;
     }
 };
-
-
 
 async function logWriter (type, message) {
 
@@ -125,8 +122,6 @@ async function VideoImporter(folderPath){
 }
 
 const importVideos = async (videoData) => {
-    //console.log(videoData)
-
     const res =  await fetch(`${config.DB_URL}/importVideo`,{
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -199,70 +194,3 @@ function isVideoFile(fileName){
 }
 
 VideoImporter(VIDEOS_DIR);
-
-/*
-//OLD
-async function VideoImporter(folderPath){
-   try {
-
-    if(!fs.existsSync(folderPath)){
-        console.log(`Folder dose not exists: ${folderPath}`)
-        return;
-    }
-
-    const files = fs.readdirSync(folderPath);
-    console.log(`Files amount: ${files.length}`);
-
-    const existingVideos = await getExistingVideos();
-    //console.log(existingVideos)
-    console.log(`DB already have ${existingVideos.length} vids`);
-
-    let importedCount = 0;
-    let skippedCount = 0;
-
-    for(const file of files){
-        const filePath = path.join(folderPath, file);
-
-        try{
-            const stat = fs.statSync(filePath);
-
-            if(stat.isFile() && isVideoFile(file)){
-                const originalName = path.parse(file).name;
-                const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
-
-                const duplicate = findDuplicate(existingVideos, originalName, sizeMB);
-
-                if(duplicate){
-                    console.log(`Scip duplicate: ${originalName} (${sizeMB} MB)`);
-                    skippedCount++;
-                    continue;
-                }
-
-                const finalName = await generateUniqueName(existingVideos, originalName);
-                const duration = "";
-
-                const requirePath = generateRequirePath(file);
-
-                // не забудь включить 
-                //importVideos({name: finalName,url: requirePath,duration: duration,sizeMB: sizeMB,category: 'YouTube',});
-                await logWriter("ImporterLogs",`✅ Successfully imported: ${finalName}`)
-
-                existingVideos.push({name: finalName , size_mb: sizeMB});
-                console.log(`✅ Added: ${finalName} (${sizeMB} MB)`);
-                importedCount++;
-            }
-        }catch(err){
-            console.error(`ERROR cant reed file ${file}:` , err.message);
-        }
-    }
-
-    console.log('\n📊 RESULTS:');
-    console.log(`Added new files: ${importedCount}`);
-    console.log(`Skiped duplicates: ${skippedCount}`);
-    console.log('Import end')
-
-   }catch(err){
-        console.log(`Error file ${file} :`, err.message)
-   }
-}
-*/

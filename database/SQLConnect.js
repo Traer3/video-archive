@@ -1,4 +1,3 @@
-//only for tests 
 const express = require("express");
 const {Pool} = require("pg");
 const cors = require("cors");
@@ -297,6 +296,48 @@ app.get("/VideoForDownload",async(req,res)=>{
         res.json(result.rows);
     }catch(err){
         console.error(err);
+        res.status(500).json({error:"Table videoForDownload error",err})
+    }
+});
+
+app.post('/writeLikes',async(req,res)=>{
+    try{
+        const {videoName,videoUrl} = req.body;
+        if(!videoName || !videoUrl){
+            return(res.status(400).json({message: "Missing video name or url"}));
+        };
+
+        await pool.query(
+            `INSERT INTO likes (video_name,video_url)
+             VALUES ($1, $2)`,
+             [videoName,videoUrl]
+        );
+        res.status(200)
+    }catch(err){
+        console.error("❌ Error while writing likes videos ",err);
+        res.status(500).json({error:"Error table likes ", err})
+    }
+});
+
+app.get("/likes",async(req,res)=>{
+    try{
+        const result = await pool.query("SELECT * FROM likes");
+        res.json(result.rows);
+    }catch(err){
+        console.error(err);
+        res.status(500).json({error:"Table likes error",err})
+    }
+});
+
+app.post('/deleteLikes',async(req,res)=>{
+    try{
+        await pool.query("TRUNCATE TABLE likes RESTART IDENTITY");
+        res.status(200).json({
+            success:true,
+            message:'Table likes has been reseted'
+        });
+    }catch(err){
+        
         res.status(500).json({error:"Table videoForDownload error",err})
     }
 });

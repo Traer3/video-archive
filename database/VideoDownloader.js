@@ -10,55 +10,55 @@ const VIDEO_IMPORTER = path.join(__dirname, "VideoImporter.js");
 
 const COOKIE_EXTRACTOR = path.join(__dirname,"CookieGenerator","CookieExtractor.js")
 
-const exists = async (path) =>{
-    try{
-        await fsPromises.access(path);
-        return true;
-    }catch{
-        return false;
+async function main() {
+    if(!(await exists(VIDEOS_DIR))){
+        console.error("Missing videos folder");
+        return
     }
-};
 
-async function writeInfo(filePath, data) {
     try{
-        await fsPromises.writeFile(filePath,data,'utf-8');
-        console.log(`File successfully written: ${filePath}`)
-    }catch(err){
-        console.error(`❌Error writing: ${err.message}`)
-    }
-}
+       const dbLinks = await getData("VideoForDownload")
+       let links = dbLinks.map(video => video.video_url)
+       links.reverse();
 
-function runComand(comand){
-    return new Promise((resolve, reject)=>{
-        exec(comand,(error, stdout, stderr)=>{
-            if(error){
-                reject(error);
-            }else{
-                resolve(stdout || stderr);
+        let targetFolder = null;
+        const subFolders = await fsPromises.readdir(VIDEOS_DIR)
+
+        const findAvailableFolder = async () => {
+            for(const subFolder of subFolders){
+                if(await CheckFolderCapacity(VIDEOS_DIR,subFolder)){
+                    return path.join(VIDEOS_DIR,subFolder);
+                }
             }
-        });
-    });
+            return null;
+        };
+        
+        targetFolder = await findAvailableFolder();
+        if(!targetFolder){
+            console.error("❌ No available folder");
+            return;
+        }
+
+        for(let i = 0; i < links.length; i++){
+            let isOk = await CheckFolderCapacity(VIDEOS_DIR, path.basename(targetFolder));
+            if(!isOk){
+                console.log("🔄 Current folder full, searching for a new one...");
+                targetFolder = await findAvailableFolder();
+
+                if(!targetFolder){
+                    console.error("All folders are full!");
+                    await logWriter("DownloaderLogs","❌ Error: All folders are full");
+                    break;
+                }
+            };
+            await VideoDownloader(links[i],i,targetFolder,links);
+            
+        }
+        console.log("🔥 Completed");
+    }catch(err){
+        console.error(`❌ Error in main loop: ${err.message}`)
+    }    
 };
-
-async function writeFailed (scriptName,videoUrl,developerMessage, compilerMessage) {
-
-    const res = await fetch(`${config.DB_URL}/writeFailed`,{
-     method: "POST",
-     headers:{"Content-Type":"application/json"},
-     body: JSON.stringify({scriptName,videoUrl,developerMessage, compilerMessage})
-    });
-
-    if(!res.ok){
-     const errorData = await res.text();
-     console.error(`❌ Failed writing failed: ${errorData}`);
-     return;
-    }
-
-    const data = await res.json();
-    console.log(data);
- };
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function VideoDownloader(url,index,folderPath,links){
     console.log(`Downdloading: [${index +1}]/${links.length}: ${url}`);
@@ -96,7 +96,6 @@ async function VideoDownloader(url,index,folderPath,links){
                 console.log(`❌ error while processing ${url}`);
                 await logWriter("DownloaderLogs",`❌ Error: ${url} | ${err.message}`)
                 await writeFailed("VideoDownloader",`${url}`,`❌ Error while processing url:`, `${err.message}`)
-                //await fsPromises.appendFile(FAILED_FILE, `❌ Error while processing ${url}: ${err.message}\n`);
             };
         }
     };
@@ -155,6 +154,56 @@ async function CheckFolderCapacity(mainFolderPath,subFolder) {
     }
 }
 
+const exists = async (path) =>{
+    try{
+        await fsPromises.access(path);
+        return true;
+    }catch{
+        return false;
+    }
+};
+
+async function writeInfo(filePath, data) {
+    try{
+        await fsPromises.writeFile(filePath,data,'utf-8');
+        console.log(`File successfully written: ${filePath}`)
+    }catch(err){
+        console.error(`❌Error writing: ${err.message}`)
+    }
+}
+
+function runComand(comand){
+    return new Promise((resolve, reject)=>{
+        exec(comand,(error, stdout, stderr)=>{
+            if(error){
+                reject(error);
+            }else{
+                resolve(stdout || stderr);
+            }
+        });
+    });
+};
+
+async function writeFailed (scriptName,videoUrl,developerMessage, compilerMessage) {
+
+    const res = await fetch(`${config.DB_URL}/writeFailed`,{
+     method: "POST",
+     headers:{"Content-Type":"application/json"},
+     body: JSON.stringify({scriptName,videoUrl,developerMessage, compilerMessage})
+    });
+
+    if(!res.ok){
+     const errorData = await res.text();
+     console.error(`❌ Failed writing failed: ${errorData}`);
+     return;
+    }
+
+    const data = await res.json();
+    console.log(data);
+ };
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function logWriter (type, message) {
 
     const res = await fetch(`${config.DB_URL}/addLog`,{
@@ -182,56 +231,5 @@ async function getData(dbAddress) {
         console.log("DB error: ", err)
     }
 };
-
-async function main() {
-    if(!(await exists(VIDEOS_DIR))){
-        console.error("Missing videos folder");
-        return
-    }
-
-    try{
-       const dbLinks = await getData("VideoForDownload")
-       let links = dbLinks.map(video => video.video_url)
-       links.reverse();
-
-        let targetFolder = null;
-        const subFolders = await fsPromises.readdir(VIDEOS_DIR)
-
-        const findAvailableFolder = async () => {
-            for(const subFolder of subFolders){
-                if(await CheckFolderCapacity(VIDEOS_DIR,subFolder)){
-                    return path.join(VIDEOS_DIR,subFolder);
-                }
-            }
-            return null;
-        };
-        
-        targetFolder = await findAvailableFolder();
-        if(!targetFolder){
-            console.error("❌ No available folder");
-            return;
-        }
-
-        for(let i = 0; i < links.length; i++){
-            let isOk = await CheckFolderCapacity(VIDEOS_DIR, path.basename(targetFolder));
-            if(!isOk){
-                console.log("🔄 Current folder full, searching for a new one...");
-                targetFolder = await findAvailableFolder();
-
-                if(!targetFolder){
-                    console.error("All folders are full!");
-                    await logWriter("DownloaderLogs","❌ Error: All folders are full");
-                    break;
-                }
-            };
-            await VideoDownloader(links[i],i,targetFolder,links);
-            
-        }
-        console.log("🔥 Completed");
-    }catch(err){
-        console.error(`❌ Error in main loop: ${err.message}`)
-    }
-     
-}
 
 main();
