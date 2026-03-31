@@ -1,6 +1,5 @@
 //node VideoEraser.js fullErasing 4996
 const path = require('path');
-const fs = require('fs');
 const fsPromises = require("fs").promises
 
 const config = require('./config')
