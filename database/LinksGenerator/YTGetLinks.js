@@ -17,6 +17,7 @@ async function main() {
         
         await newNameChecker(currentYTVideos, DBvideos);
         console.log("🏁 Links written");
+        return;
     }catch(err){
         console.error("Error in main",err);
     }
@@ -38,12 +39,15 @@ async function newNameChecker (YTVideos, videoFromDB) {
 
     if(checkedVideos){
         console.log("🥽 Simulating a download")
+        let i = 0;
         for(const video of checkedVideos){
+            i++
             try{
                 const comand1 = `yt-dlp -s "${video.url}"`
                 const respond = await runComand(comand1);
                 if(respond){
-                    await sendData({url: video.url, name: video.name});
+                    console.log(`[${i}/${checkedVideos.length}] processing video : ${video.name}\n`)
+                    await sendData({scriptName:"", url: video.url, name: video.name});
                 }
             }catch(err){
                 console.log(`❌ Error processing link: ${video.url}`);
@@ -57,7 +61,7 @@ async function newNameChecker (YTVideos, videoFromDB) {
                 }else if(errorMessage.includes("blocked it in your country")){
                     category = "Country restriction";
                 }
-                await sendData({type: "YTGetLinks", category: category, name: video.name, url: video.url})
+                await sendData({scriptName: "writeLockedVideos", type: category, name: video.name, url: video.url})
             }
         };
     }
@@ -87,7 +91,7 @@ async function youTubeVideoData(auth){
         nextPageToken = res.data.nextPageToken;
         console.log(`📥 Loaded: ${allVideos.length} so far...`);
 
-       //if(allVideos.length >= 100) break; //ссылки для первых 100 видео 
+       if(allVideos.length >= 100) break; //ссылки для первых 100 видео 
 
     }while(nextPageToken);
     console.log(`✅ Received ${allVideos.length} videos from YT`)
@@ -99,6 +103,7 @@ async function lockedLinks(newVids) {
     try{
         const lockedVideos =  await getData("lockedVideos");
         if(lockedVideos.length === 0){
+            console.log("lockedVideos is empty")
             return newVids;
         };
         const lockedNames = new Set(lockedVideos.map(video => video.video_name))
@@ -121,7 +126,8 @@ async function deleteOldLinks() {
     console.log("⚠️ Deleting old files...")
     try{
         //удаляем старые лайки 
-        await sendData({url:"deleteVideoForDownload"})
+        await sendData({url:"deleteLikes"});
+        await sendData({url:"deleteVideoForDownload"});
     }catch(err){
         console.log("Error while deleting old links: ",err.message)
     }
@@ -160,8 +166,8 @@ async function getData(dbAddress) {
 };
 
 async function sendData({url, name, scriptName, type}) {
-    if(url === "deleteVideoForDownload"){
-       const res = await fetch(`${config.DB_URL}/deleteVideoForDownload`,{
+    if(url === "deleteVideoForDownload" || url === "deleteLikes"){
+       const res = await fetch(`${config.DB_URL}/${url}`,{
             method: "POST",
             headers:{"Content-Type":"application/json"},
            });
@@ -185,35 +191,32 @@ async function sendData({url, name, scriptName, type}) {
     };
 
     let res;
-
-    if(body.scriptName === "writeLikes"){
-        res = await fetch(`${config.DB_URL}/writeLikes`,{
-            method: "POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify(body) //videoName,videoUrl
-           });
-    }else if(body.scriptName && body.type){
-        res = await fetch(`${config.DB_URL}/writeLockedVideos`,{
-            method: "POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify(body) //scriptName,type,videoName,videoUrl
-           });
-    }else{
-        res = await fetch(`${config.DB_URL}/writeVideoForDownload`,{
-            method: "POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify(body) //videoName,videoUrl
-           });
+    let endpoint;
+    switch (body.scriptName){
+        case "writeLikes":
+            endpoint = "writeLikes" //videoName,videoUrl
+            break;    
+        case "writeLockedVideos":
+            endpoint = "writeLockedVideos" //scriptName,type,videoName,videoUrl
+            break;
+        case "" :
+            endpoint = "writeVideoForDownload" //videoName,videoUrl
+            break;
+    };
+    res = await fetch(`${config.DB_URL}/${endpoint}`,{
+        method: "POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(body) //videoName,videoUrl
+       });  
+   
+    if(!res.ok){
+        const errorData = await res.text();
+        console.error(`❌ Error at: ${endpoint} : ${errorData}`);
+        return;
     }
    
-       if(!res.ok){
-        const errorData = await res.text();
-        console.error(`❌ Failed writing Locked Videos: ${errorData}`);
-        return;
-       }
-   
-       const response = await res.json();
-       console.log(response);
+    const response = await res.json();
+    console.log(response);
 }
 
 main();

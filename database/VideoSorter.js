@@ -51,7 +51,7 @@ const importVideos = async (videoData) => {
     }
 
     const data = await res.json();
-    console.log(data);
+    //console.log(data);
 };
 
 const DatabaseOverwrite= async (newList) => {
@@ -66,7 +66,7 @@ const DatabaseOverwrite= async (newList) => {
             if(stat.isFile()){
                 const originalName = path.parse(video.name).name;
                 const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
-                
+               
                 await importVideos({
                     name: originalName,
                     duration: "",

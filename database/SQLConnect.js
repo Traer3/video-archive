@@ -23,12 +23,13 @@ async function logWriter (type, message) {
 
  app.use(express.json());
 
+const ignoreList = ['/addLog','/logs','/writeFailed','/writeLockedVideos','/writeVideoForDownload','/writeLikes']
 app.use((req, res, next)=>{
     const oldJson = res.json;
 
     res.json = function (data){
-        if(req.url !== '/addLog' && req.url !== '/logs'){
-            logWriter("SQLLogs",`Path: ${req.url} | Status: ${res.statusCode}`);
+        if(!ignoreList.includes(req.path)){
+            logWriter("SQLLogs",`Path: ${req.path} | Status: ${res.statusCode}`);
         }
         return oldJson.call(this, data);
     };
@@ -38,11 +39,8 @@ app.use((req, res, next)=>{
 
 app.get("/videos", async(req, res) => {
     try{
-        //console.log("Попытка взять данные ")
         const result = await pool.query("SELECT * FROM videos");
-        //console.log("Результат ")
-        //console.log(result)
-       res.json(result.rows);
+        res.json(result.rows);
     }catch(err){
         console.error(err);
         res.status(500).json({error: "Table videos error",err});
@@ -53,14 +51,14 @@ app.get("/videos", async(req, res) => {
 
 app.post('/saveUniqueData',async(req,res)=>{
     try{
-        const {vidId, isisunique} = req.body;
+        const {vidId, isitunique} = req.body;
         if(!vidId){
             return res.status(400).json({message: "Missing video ID"});
         }
 
         const result = await pool.query(
             'UPDATE videos SET isitunique = $1 WHERE id = $2 RETURNING *',
-            [isisunique, vidId]
+            [isitunique, vidId]
         );
 
         if(result.rowCount === 0){
@@ -72,7 +70,7 @@ app.post('/saveUniqueData',async(req,res)=>{
             updatedVideo: result.rows[0]
         });
     }catch(err){
-        console.error("Error saving isisunique data", err);
+        console.error("Error saving isitunique data", err);
         res.status(500).json({message: 'Server error', error: err.message})
     }
 })
