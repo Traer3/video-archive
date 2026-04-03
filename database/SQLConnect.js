@@ -192,7 +192,8 @@ app.post('/addLog',async(req,res)=>{
     }
 });
 
-app.post('/writeFailed',async(req,res)=>{
+
+app.post('/writeFailed',async(req,res)=>{///////////////////////////////////////
     try{
         const {scriptName,videoUrl,developerMessage, compilerMessage } = req.body;
         if(!scriptName){
@@ -213,7 +214,7 @@ app.post('/writeFailed',async(req,res)=>{
     }
 });
 
-app.get("/failed",async(req,res)=>{
+app.get("/failed",async(req,res)=>{///////////////////////////////////////
     try{
         const result = await pool.query("SELECT * FROM failed");
         res.json(result.rows);
@@ -223,7 +224,7 @@ app.get("/failed",async(req,res)=>{
     }
 });
 
-app.post('/writeLockedVideos',async(req,res)=>{
+app.post('/writeLockedVideos',async(req,res)=>{///////////////////////////////////////
     try{
         const {scriptName,type,videoName,videoUrl} = req.body;
         if(!scriptName){
@@ -244,7 +245,7 @@ app.post('/writeLockedVideos',async(req,res)=>{
     }
 });
 
-app.get("/lockedVideos",async(req,res)=>{
+app.get("/lockedVideos",async(req,res)=>{///////////////////////////////////////
     try{
         const result = await pool.query("SELECT * FROM lockedVideos");
         res.json(result.rows);

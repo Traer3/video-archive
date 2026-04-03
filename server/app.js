@@ -1,27 +1,20 @@
 const express = require("express");
 const cors = require("cors");
+const requestLogger = require("./middleware/logger.js");
 const videoRoutes = require('./routes/videoRoutes.js');
-const videoService = require('./services/videoService.js');
+const failedRoutes = require('./routes/failedRoutes.js');
+const lockedVideosRoutes = require('./routes/lockedVideosRoutes.js')
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const ignoreList = ['/addLog','/logs','/writeFailed','/writeLockedVideos','/writeVideoForDownload','/writeLikes']
-app.use((req, res, next)=>{
-    const oldJson = res.json;
+app.use(requestLogger);
 
-    res.json = function (data){
-        if(!ignoreList.includes(req.path)){
-            videoService.saveLog("ExpressLogs",`Path: ${req.path} | Status: ${res.statusCode}`)
-                .catch(console.error);
-        }
-        return oldJson.call(this, data);
-    };
+//app.use('/api/videos',videoRoutes);
 
-    next();
-});
-
-app.use('/api/videos',videoRoutes);
+app.use('/api/failed',failedRoutes);
+app.use('/api/lockedVideos',lockedVideosRoutes);
 
 module.exports = app;
+
