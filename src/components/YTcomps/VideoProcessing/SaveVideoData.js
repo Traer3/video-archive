@@ -35,7 +35,7 @@ export const useSaveVideo = () =>{
             const data = await res.json();
             savedIds.current.add(vidId);
             console.log(`⏱ Duration saved for video ${vidId} : ${vidDuration}`)
-            console.log("✅Updated video: ", data.updatedVideo);
+            console.log("✅Updated video: ", data.data);
                     
         }catch(err){
             console.error('❌ Error saving video: ', err);

@@ -36,7 +36,7 @@ async function logWriter (type, message) {//////////////////////////////////////
  app.use(express.json());
 
 const ignoreList = ['/addLog','/logs','/writeFailed','/writeLockedVideos','/writeVideoForDownload','/writeLikes']
-app.use((req, res, next)=>{
+app.use((req, res, next)=>{///////////////////////////////////////
     const oldJson = res.json;
 
     res.json = function (data){
@@ -49,7 +49,7 @@ app.use((req, res, next)=>{
     next();
 });
 
-app.get("/videos", async(req, res) => {
+app.get("/videos", async(req, res) => {///////////////////////////////////////
     try{
         const result = await pool.query("SELECT * FROM videos");
         res.json(result.rows);
@@ -61,7 +61,7 @@ app.get("/videos", async(req, res) => {
 
 
 
-app.post('/saveUniqueData',async(req,res)=>{
+app.post('/saveUniqueData',async(req,res)=>{///////////////////////////////////////
     try{
         const {vidId, isitunique} = req.body;
         if(!vidId){
@@ -87,7 +87,7 @@ app.post('/saveUniqueData',async(req,res)=>{
     }
 })
 
-app.post('/saveVidDuration', async(req,res)=>{
+app.post('/saveVidDuration', async(req,res)=>{///////////////////////////////////////
     try{
         const {vidId, vidDurationData} = req.body;
 
@@ -117,7 +117,7 @@ app.post('/saveVidDuration', async(req,res)=>{
 });
 
 
-app.post('/importVideo',async(req,res)=>{
+app.post('/importVideo',async(req,res)=>{///////////////////////////////////////
     try{
         const {name, duration, sizeMB,category} = req.body;
         //console.log("Name: ",name , " Duration: ", duration , " Size: ", sizeMB , " Category: ", category)
@@ -145,7 +145,7 @@ app.post('/importVideo',async(req,res)=>{
     }
 });
 
-app.post('/deleteVideo',async(req,res)=>{
+app.post('/deleteVideo',async(req,res)=>{///////////////////////////////////////
     try{
         const {videoId} = req.body;
         if(!videoId) {

@@ -6,7 +6,6 @@ const failedRoutes = require('./routes/failedRoutes.js');
 const lockedVideosRoutes = require('./routes/lockedVideosRoutes.js');
 const videoForDownloadRoutes = require('./routes/videoForDownloadRoutes.js');
 const likesRouters = require('./routes/likesRoutes.js');
-const filterVideo = require('./routes/filterVideoRoutes.js');
 const log = require('./routes/logRoutes.js');
 
 const app = express();
@@ -15,13 +14,12 @@ app.use(express.json());
 
 app.use(requestLogger);
 
-//app.use('/api/videos',videoRoutes);
+app.use('/api/server',videoRoutes);
 
 app.use('/api/failed',failedRoutes);
 app.use('/api/lockedVideos',lockedVideosRoutes);
 app.use('/api/videoForDownload',videoForDownloadRoutes);
 app.use('/api/likes',likesRouters);
-app.use('/api/filterVideo',filterVideo);
 app.use('/api/log',log);
 
 module.exports = app;

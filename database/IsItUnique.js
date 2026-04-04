@@ -75,7 +75,7 @@ const saveUniqueData = async (id,isitunique)=>{
         }
         
         const data = await res.json();
-        console.log("Updated video: ",data.updatedVideo)
+        console.log("Updated video: ",data.data)
     }catch(err){
         await logWriter("IsItUniqueLogs",`Error saving uniqueData Id ${id},state: ${isitunique}`)
         console.error(`Error saving uniqueData Id ${id},state: ${isitunique}`)

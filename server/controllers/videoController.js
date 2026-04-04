@@ -3,10 +3,9 @@ const path = require("path");
 const fsPromises = require("fs").promises
 const config = require('../config.js')
 
+const VIDEOS_DIR = path.join(__dirname,"../videos");
+const THUMBNAILS_DIR = path.join(__dirname, "../thumbnails");
 
-const VIDEOS_DIR = path.join(__dirname,"./videos");
-const THUMBNAILS_DIR = path.join(__dirname, "./thumbnails");
-const AUTHNIFICATION = path.join(__dirname,"Authorize.js");
 
 exports.getVideos = async (req,res) => {
     const page = parseInt(req.query.page) || 1;
@@ -62,3 +61,100 @@ exports.getVideos = async (req,res) => {
         res.status(500).json({error: err.message});
     }
 };
+
+exports.getVideoList = async(req,res) => {
+    try{
+        const getVideoList = await videoService.getVideoList();
+        if(!getVideoList){
+            res.status(400).json({
+                message:'❌ SQL empty'
+            })
+        }else{
+            res.status(200).json({
+                message:'✅ Videos from DB'
+            })
+        }
+    }catch(err){
+        res.status(500).json({error: "Table videos error",err});
+    }
+}
+
+exports.filterVideo = async(req,res) => {
+    try{
+        const {id, state} = req.body;
+        if(!id || !state) {
+            return(res.status(400).json({message: "Missing id or invalid status"}));
+        };
+        const write = await videoService.filterVideo(req.body);
+        res.status(200).json({
+            message:'✅ Filtered successfully',
+            data: write
+        });
+    }catch(err){
+        res.status(500).json({error:"Error changing state ", err});
+    };
+};
+
+exports.deletedVideo = async(req,res) => {
+    try{
+        const {videoId} = req.body;
+        if(!videoId) {
+            return(res.status(400).json({message: "Missing video id  for deletion"}));
+        }
+        const deleteVideo = await videoService.deleteVideo(req.body);
+        res.status(200).json({
+            message:'✅ Deleted successfully',
+            data: deleteVideo
+        });
+    }catch(err){
+        res.status(500).json({error: 'Error wihle deleting video: ',err});
+    }
+}
+
+exports.importVideo = async(req,res) => {
+    try{
+        const {name, duration, sizeMB,category} = req.body;
+        if(!name) {
+            return res.status(400).json({message: "Missing video name"});
+        };
+        const importVideo = await videoService.importVideo(req.body);
+        res.status(200).json({
+            message:  '✅ Video imported successfully',
+            data: importVideo
+        });
+    }catch(err){
+        res.status(500).json({message: `Server cant import vid: ${err.message}`})
+    }
+};
+
+exports.saveVidDuration = async(req,res) => {
+    try{
+        const {vidId, vidDurationData} = req.body;
+        if(!vidId || !vidDurationData){
+            return res.status(400).json({message: "Missing video ID or duration"});
+        }
+        const write = await videoService.saveVidDuration(req.body);
+        res.status(200).json({
+            message:  '✅ Video duration saved successfully',
+            data: write
+        });
+    }catch(err){
+        res.status(500).json({message: 'Server error', error: e.message})
+    }
+};
+
+exports.saveUniqueData = async(req,res) =>{
+    try{
+        const {vidId, isitunique} = req.body;
+        if(!vidId){
+            return res.status(400).json({message: "Missing video ID"});
+        }
+        const write = await videoService.saveUniqueData(req.body);
+        res.status(200).json({
+            message: '✅ Video is unique',
+            data: write
+        });
+    }catch(err){
+        res.status(500).json({message: 'Server error', error: err.message});
+    };
+}

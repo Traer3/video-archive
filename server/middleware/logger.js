@@ -1,4 +1,4 @@
-const videoService = require('../services/videoService.js');
+const logService = require('../services/logService.js');
 
 const ignoreList = [
     '/addLog',
@@ -15,7 +15,7 @@ const requestLogger = (req,res,next) => {
     res.json = function (data){
         if(!ignoreList.includes(req.path)){
             const logMsg = `Path: ${req.path} | Status: ${res.statusCode}`;
-            videoService.saveLog("ExpressLogs",logMsg)
+            logService.addLog({type:"ExpressLogs", message: logMsg})
                 .catch(err => console.error("Middleware logging error: ",err));
         }
         return oldJson.call(this, data);
