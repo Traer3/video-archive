@@ -1,7 +1,5 @@
 const fsPromises = require("fs").promises
 const path = require("path");
-const {spawn} = require("child_process");
-const pool = require('../config/db.js');
 
 exports.readVideoFolders = async (videosDir) => {
     const videos = [];
@@ -28,17 +26,3 @@ exports.readVideoFolders = async (videosDir) => {
             return [];
         }; 
 };
-
-exports.runScript = (scriptPath, args) => {
-    return new Promise((resolve, reject)=>{
-        const proc = spawn('node',[scriptPath, ...args],{shell: true});
-        let output = '';
-        proc.stdout.on('data',data => output += data.toString());
-        proc.on('close',() => resolve(output));
-        proc.on('error', reject);
-    });
-};
-
-exports.saveLog = async (type, message) => {
-    await pool.query('INSERT INTO logs (log_type, log) VALUES ($1, $2)',[type, message]);
-}

@@ -8,7 +8,19 @@ app.use(cors());
 const config = require('./config')
 const pool = new Pool(config.TABLE_AUTHORIZATION);
 
-async function logWriter (type, message) {
+/*
+exports.authorize = async (req,res)=> {
+    try{
+        const output = await videoService.runScript(AUTHNIFICATION,['getUrl']);
+        const urlMatch = output.match(/https?:\/\/[^\s]+/);
+        res.json({url: urlMatch ? urlMatch[0] : null});
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+}
+*/
+
+async function logWriter (type, message) {///////////////////////////////////////
     try{
         await pool.query(
             `INSERT INTO logs (log_type, log)
@@ -156,7 +168,7 @@ app.post('/deleteVideo',async(req,res)=>{
 });
 
 
-app.get("/logs",async(req,res)=>{
+app.get("/logs",async(req,res)=>{///////////////////////////////////////
     try{
         const result = await pool.query("SELECT * FROM logs");
         res.json(result.rows);
@@ -166,7 +178,7 @@ app.get("/logs",async(req,res)=>{
     }
 });
 
-app.post('/addLog',async(req,res)=>{
+app.post('/addLog',async(req,res)=>{///////////////////////////////////////
     try{
         const {type, message} = req.body;
 
@@ -255,7 +267,7 @@ app.get("/lockedVideos",async(req,res)=>{///////////////////////////////////////
     }
 });
 
-app.post('/writeVideoForDownload',async(req,res)=>{
+app.post('/writeVideoForDownload',async(req,res)=>{///////////////////////////////////////
     try{
         const {videoName,videoUrl} = req.body;
         if(!videoName || !videoUrl){
@@ -276,7 +288,7 @@ app.post('/writeVideoForDownload',async(req,res)=>{
     }
 });
 
-app.post('/deleteVideoForDownload',async(req,res)=>{
+app.post('/deleteVideoForDownload',async(req,res)=>{///////////////////////////////////////
     try{
         await pool.query("TRUNCATE TABLE videofordownload RESTART IDENTITY");
         res.status(200).json({
@@ -289,7 +301,7 @@ app.post('/deleteVideoForDownload',async(req,res)=>{
     }
 });
 
-app.get("/VideoForDownload",async(req,res)=>{
+app.get("/VideoForDownload",async(req,res)=>{///////////////////////////////////////
     try{
         const result = await pool.query("SELECT * FROM videoForDownload");
         res.json(result.rows);
@@ -299,7 +311,7 @@ app.get("/VideoForDownload",async(req,res)=>{
     }
 });
 
-app.post('/writeLikes',async(req,res)=>{
+app.post('/writeLikes',async(req,res)=>{///////////////////////////////////////
     try{
         const {videoName,videoUrl} = req.body;
         if(!videoName || !videoUrl){
@@ -318,7 +330,7 @@ app.post('/writeLikes',async(req,res)=>{
     }
 });
 
-app.get("/likes",async(req,res)=>{
+app.get("/likes",async(req,res)=>{///////////////////////////////////////
     try{
         const result = await pool.query("SELECT * FROM likes");
         res.json(result.rows);
@@ -328,7 +340,7 @@ app.get("/likes",async(req,res)=>{
     }
 });
 
-app.post('/deleteLikes',async(req,res)=>{
+app.post('/deleteLikes',async(req,res)=>{///////////////////////////////////////
     try{
         await pool.query("TRUNCATE TABLE likes RESTART IDENTITY");
         res.status(200).json({
@@ -341,7 +353,7 @@ app.post('/deleteLikes',async(req,res)=>{
     }
 });
 
-app.post('/filterVideo',async(req,res)=>{
+app.post('/filterVideo',async(req,res)=>{///////////////////////////////////////
     try{
         const {id, state} = req.body;
         if(!id || !state) {

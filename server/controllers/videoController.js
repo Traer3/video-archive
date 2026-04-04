@@ -62,13 +62,3 @@ exports.getVideos = async (req,res) => {
         res.status(500).json({error: err.message});
     }
 };
-
-exports.authorize = async (req,res)=> {
-    try{
-        const output = await videoService.runScript(AUTHNIFICATION,['getUrl']);
-        const urlMatch = output.match(/https?:\/\/[^\s]+/);
-        res.json({url: urlMatch ? urlMatch[0] : null});
-    }catch(err){
-        res.status(500).json({error: err.message});
-    }
-}
