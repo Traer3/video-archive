@@ -1,13 +1,13 @@
 import { createContext, useContext} from "react";
 //const config = require('./database/config');
-const IP = "192.168.0.9"
+const IP = "192.168.0.8"
 export const DatabaseContext = createContext();
 
 export const DatabaseProvider = ({children}) =>{
     //const DB_URL = `${config.DB_URL}`;
     //const VIDEO_URL = `${config.VIDEO_URL}`;
     const DB_URL = `http://${IP}:3001`;
-    const VIDEO_URL = `http://${IP}:3004`;
+    const VIDEO_URL = `http://${IP}:3001`;
 
 
     return(

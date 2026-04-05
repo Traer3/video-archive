@@ -1,6 +1,6 @@
 const os = require('os')
 const SQL_PORT = 3001;
-const EXPRESS_PORT = 3004;
+const EXPRESS_PORT = 3001;
 const STATIC_IP = '192.168.0.8'
 
 const platform = process.platform;

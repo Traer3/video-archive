@@ -71,7 +71,8 @@ exports.getVideoList = async(req,res) => {
             })
         }else{
             res.status(200).json({
-                message:'✅ Videos from DB'
+                message:'✅ Videos from DB',
+                data: getVideoList
             })
         }
     }catch(err){
