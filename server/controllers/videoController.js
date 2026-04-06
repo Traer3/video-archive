@@ -13,7 +13,7 @@ exports.getVideos = async (req,res) => {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     try{
-        const allVideos = await videoService.readVideoFolders(VIDEOS_DIR);
+        const allVideos = await videoService.readFolders(VIDEOS_DIR);
         if(allVideos.length === 0){
                     return res.status(200).json({videos:[],total:0});
                 }
@@ -34,18 +34,21 @@ exports.getVideos = async (req,res) => {
                         
                 const paginatedFiles = sortedFiles.slice(startIndex, endIndex);
                 
-                const thumbnails = await fsPromises.readdir(THUMBNAILS_DIR);
+                const thumbnails = await videoService.readFolders(THUMBNAILS_DIR);
+                const thumbnailNames = thumbnails.map(thumbnail => thumbnail.name);
         
                 const videoList = paginatedFiles.map((v)=>{
+                    //const fullPath = thumbnails
                     const file = v.name;
                     const thumbnailName = file.replace(/\.mp4$/i, '.jpg');
-                    const hasThumbnail = thumbnails.includes(thumbnailName);
+                    const hasThumbnail = thumbnailNames.includes(thumbnailName);
                     return{
                         name: file,
-                        url: `${config.VIDEO_URL}/${encodeURIComponent(file)}`,
+                        url: `${config.VIDEO_URL}/api/server/${encodeURIComponent(file)}`,
                         thumbnail: hasThumbnail
-                            ?  `${config.VIDEO_URL}/thumbnails/${encodeURIComponent(thumbnailName)}`
+                            ?  `${config.VIDEO_URL}/api/server/thumbnails/${encodeURIComponent(thumbnailName)}`
                             : null,
+                        //fullPath: fullPath
                     };
                 });
             
@@ -61,6 +64,51 @@ exports.getVideos = async (req,res) => {
         res.status(500).json({error: err.message});
     }
 };
+
+exports.getVideo = async(req,res,next) => {
+    const {videoName} = req.params;
+    if(!videoName.match(/\.(mp4|mov|mkv|webm|avi)$/i)){
+        return next();
+    }
+
+    try{
+        const allVideos = await videoService.readFolders(VIDEOS_DIR);
+        const videoFile = allVideos.find(v => v.name === videoName);
+        if(videoFile){
+            res.sendFile(videoFile.fullPath,{
+                maxAge: "1d",
+                lastModified: true
+            });
+        }else{
+            res.status(404).send(`Video not found in any subfolder: ${videoName}`);
+        }
+    }catch(err){
+        res.status(500).send("Error searching video");
+    }
+};
+
+exports.getThumbnail = async(req,res,next) => {
+    const {thumbnailName} = req.params;
+    
+    if(!thumbnailName.match(/\.(jpg|png)$/i)){
+        return next();
+    };
+
+    try{
+        const allThumbnails = await videoService.readFolders(THUMBNAILS_DIR);
+        const thumbnailFile = allThumbnails.find(t => t.name === thumbnailName);
+        if(thumbnailFile){
+            res.sendFile(thumbnailFile.fullPath,{
+                maxAge: "1d",
+                lastModified: true
+            });
+        }else{
+            res.status(404).send(`Thumbnail not found in any subfolder: ${thumbnailName}`);
+        }
+    }catch(err){
+        res.status(500).send("Error searching video");
+    }
+}
 
 exports.getVideoList = async(req,res) => {
     try{

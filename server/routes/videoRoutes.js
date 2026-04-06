@@ -4,6 +4,8 @@ const videoController = require('../controllers/videoController.js');
 
 router.get('/videos',videoController.getVideos);
 router.get('/videoList',videoController.getVideoList);
+router.get('/:videoName',videoController.getVideo);
+router.get('/thumbnails/:thumbnailName',videoController.getThumbnail);
 //router.get('/authorize',videoController.authorize);
 
 router.post('/filterVideo',videoController.filterVideo);

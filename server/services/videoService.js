@@ -2,7 +2,7 @@ const fsPromises = require("fs").promises
 const path = require("path");
 const pool = require('../config/db.js');
 
-exports.readVideoFolders = async (videosDir) => {
+exports.readFolders = async (videosDir) => {
     const videos = [];
         try{
             const subFolders = await fsPromises.readdir(videosDir);
