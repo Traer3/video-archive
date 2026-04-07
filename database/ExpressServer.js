@@ -13,7 +13,7 @@ const VIDEO_ERASER = path.join(__dirname,"VideoEraser.js");
 
 const VIDEOS_DIR = path.join(__dirname, "videos");
 
-async function FolderReader() {
+async function FolderReader() {//////////////////////////////////////
     
     const videos = [];
     try{
@@ -80,7 +80,7 @@ app.use((req, res, next)=>{
     next();
 });
 
-app.get("/:videoName",async(req,res,next)=>{
+app.get("/:videoName",async(req,res,next)=>{//////////////////////////////////////
     const {videoName} = req.params;
     if(!videoName.match(/\.(mp4|mov|mkv|webm|avi)$/i)){
         return next();
@@ -200,7 +200,7 @@ app.get("/deleteToken",async(req,res)=>{
 })
 
 
-app.get("/videos",async (req, res)=>{
+app.get("/videos",async (req, res)=>{//////////////////////////////////////
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 7;
     const startIndex = (page - 1) * limit;
