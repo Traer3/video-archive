@@ -14,6 +14,7 @@ app.use(express.json());
 
 app.use(requestLogger);
 
+
 app.use('/api/server',videoRoutes);
 
 app.use('/api/failed',failedRoutes);
