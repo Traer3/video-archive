@@ -191,7 +191,7 @@ exports.saveVidDuration = async(req,res) => {
             data: write
         });
     }catch(err){
-        res.status(500).json({message: 'Server error', error: e.message})
+        res.status(500).json({message: 'Server error', error: err.message})
     }
 };
 
