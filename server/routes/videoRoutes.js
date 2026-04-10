@@ -1,13 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const videoController = require('../controllers/videoController.js');
+const { getVideoList, getVideos, getVideo, getThumbnail, filterVideo, deletedVideo, importVideo, saveVidDuration, saveUniqueData } = require('../controllers/videoController.js');
+
 const videoDownloaderService = require('../services/videoDownloaderService.js');
 
 
-router.get('/videos',videoController.getVideos);
-router.get('/videoList',videoController.getVideoList);
-router.get('/:videoName',videoController.getVideo);
-router.get('/thumbnails/:thumbnailName',videoController.getThumbnail);
+
+router.get('/videos',getVideos);
+router.get('/videoList',getVideoList);
+router.get('/:videoName',getVideo);
+router.get('/thumbnails/:thumbnailName',getThumbnail);
 //router.get('/authorize',videoController.authorize);
 
 router.get('/download-test',async (req,res)=>{
@@ -20,11 +22,11 @@ router.get('/download-test',async (req,res)=>{
 })
 
 
-router.post('/filterVideo',videoController.filterVideo);
-router.post('/deleteVideo',videoController.deletedVideo);
-router.post('/importVideo',videoController.importVideo);
-router.post('/saveVidDuration',videoController.saveVidDuration);
-router.post('/saveUniqueData',videoController.saveUniqueData);
+router.post('/filterVideo',filterVideo);
+router.post('/deleteVideo',deletedVideo);
+router.post('/importVideo',importVideo);
+router.post('/saveVidDuration',saveVidDuration);
+router.post('/saveUniqueData',saveUniqueData);
 
 
 module.exports = router;

@@ -1,7 +1,9 @@
-const videoService = require('../services/videoService.js');
+
 const path = require("path");
 const fsPromises = require("fs").promises
-const config = require('../config.js')
+const config = require('../config.js');
+const videoService = require('../services/videoService.js')
+const { readFolders } = require("../services/videoService.js");
 
 const VIDEOS_DIR = path.join(__dirname,"../videos");
 const THUMBNAILS_DIR = path.join(__dirname, "../thumbnails");
@@ -13,7 +15,7 @@ exports.getVideos = async (req,res) => {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     try{
-        const allVideos = await videoService.readFolders(VIDEOS_DIR);
+        const allVideos = await readFolders(VIDEOS_DIR);
         if(allVideos.length === 0){
                     return res.status(200).json({videos:[],total:0});
                 }
@@ -34,7 +36,7 @@ exports.getVideos = async (req,res) => {
                         
                 const paginatedFiles = sortedFiles.slice(startIndex, endIndex);
                 
-                const thumbnails = await videoService.readFolders(THUMBNAILS_DIR);
+                const thumbnails = await readFolders(THUMBNAILS_DIR);
                 const thumbnailNames = thumbnails.map(thumbnail => thumbnail.name);
         
                 const videoList = paginatedFiles.map((v)=>{
@@ -72,7 +74,7 @@ exports.getVideo = async(req,res,next) => {
     }
 
     try{
-        const allVideos = await videoService.readFolders(VIDEOS_DIR);
+        const allVideos = await readFolders(VIDEOS_DIR);
         const videoFile = allVideos.find(v => v.name === videoName);
         if(videoFile){
             res.sendFile(videoFile.fullPath,{
@@ -95,7 +97,7 @@ exports.getThumbnail = async(req,res,next) => {
     };
 
     try{
-        const allThumbnails = await videoService.readFolders(THUMBNAILS_DIR);
+        const allThumbnails = await readFolders(THUMBNAILS_DIR);
         const thumbnailFile = allThumbnails.find(t => t.name === thumbnailName);
         if(thumbnailFile){
             res.sendFile(thumbnailFile.fullPath,{
@@ -112,6 +114,7 @@ exports.getThumbnail = async(req,res,next) => {
 
 exports.getVideoList = async(req,res) => {
     try{
+
         const getVideoList = await videoService.getVideoList();
         if(!getVideoList){
             res.status(400).json({
