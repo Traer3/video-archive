@@ -69,9 +69,9 @@ exports.saveVidDuration = async(data) => {
     const values = [vidDurationData, vidId]
     const result = await pool.query(query,values);
     if(!result.rows[0]){
-        return res.status(404).json({message: "Video not found"})
+        return result.status(404).json({message: "Video not found"})
     }else{
-        return res.rows[0];
+        return result.rows[0];
     }
 };
 
@@ -82,8 +82,8 @@ exports.saveUniqueData = async(data) => {
     const values =  [isitunique, vidId];
     const result = await pool.query(query,values);
     if(!result.rows[0]){
-        return  res.status(404).json({message: "Video not found"})
+        return  result.status(404).json({message: "Video not found"})
     }else{
-        return res.rows[0];
+        return result.rows[0];
     };
 };
