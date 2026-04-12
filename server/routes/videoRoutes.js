@@ -5,6 +5,7 @@ const { getVideoList, getVideos, getVideo, getThumbnail, filterVideo, deletedVid
 const durationGeneratorService = require('../services/durationGeneratorService.js')
 const importVideoService = require('../services/videoImporterService.js');
 const { thumbnailGenerator } = require('../services/thumbnailGeneratorService.js');
+const { checkUniqueness } = require('../services/uniquenessService.js');
 
 
 router.get('/videos',getVideos);
@@ -12,6 +13,15 @@ router.get('/videoList',getVideoList);
 router.get('/:videoName',getVideo);
 router.get('/thumbnails/:thumbnailName',getThumbnail);
 //router.get('/authorize',videoController.authorize);
+
+router.get('/uniq-test',async (req,res)=>{
+    try{
+        checkUniqueness();
+        res.json({message: "uniq start in background."})
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
 
 router.get('/duration-test',async (req,res)=>{
     try{

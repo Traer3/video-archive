@@ -45,7 +45,7 @@ exports.videoImporter = async()=>{
                     sizeMB: sizeMB,
                     category: 'YouTube',
                 });
-                 await addLog({
+                await addLog({
                     type:"ImporterLogs", 
                     message: `✅ Successfully imported: ${finalName}`
                 });
