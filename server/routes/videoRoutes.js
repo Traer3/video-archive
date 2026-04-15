@@ -6,6 +6,7 @@ const durationGeneratorService = require('../services/durationGeneratorService.j
 const importVideoService = require('../services/videoImporterService.js');
 const { thumbnailGenerator } = require('../services/thumbnailGeneratorService.js');
 const { checkUniqueness } = require('../services/uniquenessService.js');
+const { videoEraser } = require('../services/videoEraserService.js');
 
 
 router.get('/videos',getVideos);
@@ -13,6 +14,16 @@ router.get('/videoList',getVideoList);
 router.get('/:videoName',getVideo);
 router.get('/thumbnails/:thumbnailName',getThumbnail);
 //router.get('/authorize',videoController.authorize);
+
+router.get('/eraser-test/:id',async (req,res)=>{
+    try{
+        await videoEraser(req.params.id)
+        res.json({message: "uniq start in background."})
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
+
 
 router.get('/uniq-test',async (req,res)=>{
     try{
