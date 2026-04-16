@@ -87,3 +87,13 @@ exports.saveUniqueData = async(data) => {
         return result.rows[0];
     };
 };
+
+exports.databaseOverwrite = async () => {
+    const query = 'TRUNCATE TABLE videos RESTART IDENTITY';
+    try{
+        await pool.query(query);
+        return {success: true, message: "Table videos RESTARTED "}
+    }catch(err){
+        console.error("SQL Error during truncate: ",err.message)
+    }
+};

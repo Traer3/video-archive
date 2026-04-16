@@ -8,6 +8,7 @@ const { thumbnailGenerator } = require('../services/thumbnailGeneratorService.js
 const { checkUniqueness } = require('../services/uniquenessService.js');
 
 const { deleteVideo, deleteThumbnail } = require('../controllers/videoEraserController.js');
+const { videoSorter } = require('../services/videoSorterService.js');
 
 
 router.get('/videos',getVideos);
@@ -19,6 +20,14 @@ router.get('/thumbnails/:thumbnailName',getThumbnail);
 router.get('/deleteVideo/:id',deleteVideo);
 router.get('/deleteThumbnail/:id',deleteThumbnail);
 
+router.get('/sortVideos',async(req,res)=>{
+    try{
+        videoSorter()
+        res.json({message: "sortVideos start in background."})
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+})
 
 router.get('/uniq-test',async (req,res)=>{
     try{

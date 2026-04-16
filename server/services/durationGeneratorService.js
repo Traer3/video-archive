@@ -12,7 +12,7 @@ exports.durationGenerator = async () => {
     if(!(await exists(VIDEOS_DIR))){
                 console.error("Missing video folder");
                 return;
-        };
+    };
     try{
         const DBvideos = await getVideoList();
         const folderVideos = await readFolders(VIDEOS_DIR);
