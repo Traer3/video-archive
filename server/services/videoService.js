@@ -42,7 +42,7 @@ exports.filterVideo = async(data) => {
     return result.rows[0];
 };
 
-exports.deleteVideo = async(data) => {
+exports.deleteID = async(data) => {
     const {videoId} = data;
     const query =
     `DELETE FROM videos WHERE id = $1 RETURNING *`;

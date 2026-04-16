@@ -147,13 +147,13 @@ exports.filterVideo = async(req,res) => {
     };
 };
 
-exports.deletedVideo = async(req,res) => {
+exports.deleteID = async(req,res) => {
     try{
         const {videoId} = req.body;
         if(!videoId) {
             return(res.status(400).json({message: "Missing video id  for deletion"}));
         }
-        const deleteVideo = await videoService.deleteVideo(req.body);
+        const deleteVideo = await videoService.deleteID(req.body);
         res.status(200).json({
             message:'✅ Deleted successfully',
             data: deleteVideo
