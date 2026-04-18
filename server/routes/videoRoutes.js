@@ -9,6 +9,7 @@ const { checkUniqueness } = require('../services/uniquenessService.js');
 
 const { deleteVideo, deleteThumbnail } = require('../controllers/videoEraserController.js');
 const { videoSorter } = require('../services/videoSorterService.js');
+const { consoleAuthorization } = require('../middleware/auth/authorize.js');
 
 
 router.get('/videos',getVideos);
@@ -19,6 +20,15 @@ router.get('/thumbnails/:thumbnailName',getThumbnail);
 
 router.get('/deleteVideo/:id',deleteVideo);
 router.get('/deleteThumbnail/:id',deleteThumbnail);
+
+router.get('/auth-test',async (req,res)=>{
+    try{
+        consoleAuthorization();
+        res.json({message: "auth start in background."})
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
 
 router.get('/sortVideos',async(req,res)=>{
     try{

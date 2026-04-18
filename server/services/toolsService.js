@@ -29,6 +29,15 @@ exports.writeInfo = async (filePath, data) => {
     }catch(err){
         return console.error(`❌Error writing: ${err.message}`)
     }
+};
+
+exports.readMyFile = async (filePath) => {
+    try{
+        return await fsPromises.readFile(filePath,'utf-8');
+    }catch(err){
+        console.error(`❌Error reading file ${filePath} `,err.message)
+        return null;
+    }
 }
 
 exports.exists = async (path) => {
@@ -36,7 +45,7 @@ exports.exists = async (path) => {
         await fsPromises.access(path);
         return true;
     }catch(err){
-        console.log(`Cant access file : ${path} ${err.message}`)
+        console.log(`❌ Cant access file : ${path}\n${err.message}`)
         return false;
     }
 };
@@ -47,6 +56,15 @@ exports.sleep = (ms) => {
             setTimeout(resolve, ms)
     );
 };
+
+exports.deleteFile = async (filePath) => {
+    try{
+        await fsPromises.rm(filePath, {recursive:true})
+        return true;
+    }catch(err){
+        console.log(`❌ Error deleting file : ${filePath}\n${err}`)
+    }
+}
 
 
 // runComand , getData , exists , writeInfo , FolderReader ,

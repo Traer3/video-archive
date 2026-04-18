@@ -9,6 +9,13 @@ dist/
 web-build/
 expo-env.d.ts
 
+#Server
+/server/videos/*
+/server/thumbnails/*
+
+/server/middleware/auth/*
+!server/middleware/auth/authorize.js
+
 #Content
 assets/videos/*
 !videos/.gitkeep

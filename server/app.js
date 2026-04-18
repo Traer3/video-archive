@@ -8,12 +8,12 @@ const videoForDownloadRoutes = require('./routes/videoForDownloadRoutes.js');
 const likesRouters = require('./routes/likesRoutes.js');
 const log = require('./routes/logRoutes.js');
 
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 app.use(requestLogger);
-
 
 app.use('/api/server',videoRoutes);
 
