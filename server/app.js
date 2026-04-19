@@ -7,6 +7,7 @@ const lockedVideosRoutes = require('./routes/lockedVideosRoutes.js');
 const videoForDownloadRoutes = require('./routes/videoForDownloadRoutes.js');
 const likesRouters = require('./routes/likesRoutes.js');
 const log = require('./routes/logRoutes.js');
+const authorize = require('./routes/authorizeRoutes.js')
 
 
 const app = express();
@@ -22,6 +23,8 @@ app.use('/api/lockedVideos',lockedVideosRoutes);
 app.use('/api/videoForDownload',videoForDownloadRoutes);
 app.use('/api/likes',likesRouters);
 app.use('/api/log',log);
+
+app.use('/api/auth',authorize);
 
 module.exports = app;
 
