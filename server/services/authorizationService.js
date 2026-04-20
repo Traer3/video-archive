@@ -32,7 +32,7 @@ exports.finishAuth = async (code) =>{
 exports.deleteToken = async () =>{
     try{
         await deleteFile(TOKEN_PATH)
-        console.log(`Successfuly deleted TOKEN`);
+        return console.log(`Successfuly deleted TOKEN`);
     }catch(err){
         console.log(`Error in deleteToken : ${err}`);
         return null;
@@ -41,29 +41,42 @@ exports.deleteToken = async () =>{
 
 exports.checkToken = async () =>{
     try{
-        await fsPromises.access(TOKEN_PATH, fsPromises.constants.F_OK)
-        return true;
+        const answer = await checkToken();
+        return answer;
     }catch(err){
         return false;
     };
 };
 
+async function checkToken() {
+    try{
+        await fsPromises.access(TOKEN_PATH, fsPromises.constants.F_OK)
+        return true;
+    }catch(err){
+        return false;
+    };
+}
+
 
 async function loadCredentials() {
+    const tokenHealth = await checkToken()
     try{
-        const content = await readMyFile(TOKEN_PATH);
-        const credentials = JSON.parse(content);
-        const client = new UserRefreshClient({
-            clientId: credentials.client_id,
-            clientSecret: credentials.client_secret,
-            refreshToken: credentials.refresh_token,
-        });
-    
-        try{
-            await client.refreshAccessToken();
-            return client;
-        }catch(err){
-            console.warn('⚠️ Token deprecated')
+        if(tokenHealth){
+            const content = await readMyFile(TOKEN_PATH);
+            const credentials = JSON.parse(content);
+            const client = new UserRefreshClient({
+                clientId: credentials.client_id,
+                clientSecret: credentials.client_secret,
+                refreshToken: credentials.refresh_token,
+            });
+            try{
+                await client.refreshAccessToken();
+                return client;
+            }catch(err){
+                console.warn('⚠️ Token deprecated')
+                return null;
+            }
+        }else{
             return null;
         }
     }catch(err){

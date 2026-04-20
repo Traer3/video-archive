@@ -3,10 +3,16 @@ const authorizationService = require('../services/authorizationService.js')
 exports.loadCredentials = async (req,res) =>{
     try{
         const loadCredentials = await authorizationService.loadCredentials();
-        res.status(200).json({
-            message:'✅ Current token works!',
-            data: loadCredentials
-        });
+        if(loadCredentials){
+            res.status(200).json({
+                message:'✅ Current token works!',
+                data: loadCredentials
+            });
+        }else{
+            res.status(400).json({
+                message:'Token missing'
+            })
+        }
     }catch(err){
         res.status(500).json({error: "❌ Failed to load credentials\n",err});
     };
@@ -23,16 +29,26 @@ exports.getAuthUrl = async (req,res) =>{
     }
 };
 exports.finishAuth = async (req,res) =>{
-    const answer = req.body
-    try{
-        const parsed = new URL(answer);
-        const codeParam = parsed.searchParams.get("code");
-        if(!codeParam){
-            console.log("Code parameter not found");
-            return;
-        }
-        const code = codeParam.trim()
+    const answer = req.params
+    console.log("answer: ",answer.url);
+    let parsed
 
+    try{
+        parsed = new URL(answer.url);
+        console.log("URL working!");
+    }catch(err){
+        res.status(500).json({error: `❌ Invalid url: \n ${answer.url}`});
+        return null;
+    }
+
+    const codeParam = parsed.searchParams.get("code");
+    if(!codeParam){
+        console.log("Code parameter not found");
+        res.status(500).json({error: `❌ Code parameter not found in url: \n ${parsed}`});
+        return null;
+    }
+    try{
+        const code = codeParam.trim()
         const finishAuth = await authorizationService.finishAuth(code);
         res.status(200).json({
             message:'📝 Require FULL URL!',
@@ -41,7 +57,7 @@ exports.finishAuth = async (req,res) =>{
 
     }catch(err){
         console.log("Error parsing URL",err);
-        res.status(500).json({error: "❌ Failed to get authorization url\n",err});
+        res.status(500).json({error: "❌ Failed to get authorization url \n ",err});
     };
 };
 

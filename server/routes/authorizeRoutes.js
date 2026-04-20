@@ -4,7 +4,7 @@ const { loadCredentials, getAuthUrl, finishAuth, deleteToken, checkToken } = req
 
 router.get('/loadCredentials',loadCredentials);
 router.get('/getAuthUrl',getAuthUrl);
-router.post('/finishAuth',finishAuth);
+router.get('/finishAuth/:url',finishAuth);
 
 // только это ⭣ использовать 
 router.get('/deleteToken',deleteToken); 
