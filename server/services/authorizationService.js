@@ -10,11 +10,13 @@ const CREDENTIALS_PATH = path.join(__dirname, '../middleware/auth/credentials.js
 
 
 exports.loadCredentials = async () => {
-    const existing = await loadCredentials();
-    if(existing){
+    const data = await loadCredentials();
+    if(data){
         console.log('✅ Current token works!');
-        return true;
-    };
+        return {status: true, client: data};
+    }else{
+        return {status: false, client: null};
+    }
 };
 
 exports.getAuthUrl = async () =>{
@@ -23,7 +25,6 @@ exports.getAuthUrl = async () =>{
 };
 
 exports.finishAuth = async (code) =>{
-    console.log("finishAuth CODE : ",code)
     return await finishAuth(code);
 };
 
@@ -111,7 +112,6 @@ async function getAuthUrl() {
 };
 
 async function finishAuth(code) {
-    console.log("Code : ",code)
     const content = await readMyFile(CREDENTIALS_PATH);
     const credentials = JSON.parse(content);
     const {client_secret, client_id, redirect_uris} = credentials.web;

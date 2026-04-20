@@ -2,15 +2,17 @@ const authorizationService = require('../services/authorizationService.js')
 
 exports.loadCredentials = async (req,res) =>{
     try{
-        const loadCredentials = await authorizationService.loadCredentials();
-        if(loadCredentials){
+        const result = await authorizationService.loadCredentials();
+        console.log("loadCredentials : ", result.status)
+        if(result.status){
             res.status(200).json({
                 message:'✅ Current token works!',
-                data: loadCredentials
+                data: result.status
             });
         }else{
             res.status(400).json({
-                message:'Token missing'
+                message:'Token missing',
+                data: result.status
             })
         }
     }catch(err){

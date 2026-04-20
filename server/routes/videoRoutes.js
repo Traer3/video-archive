@@ -10,6 +10,7 @@ const { checkUniqueness } = require('../services/uniquenessService.js');
 const { deleteVideo, deleteThumbnail } = require('../controllers/videoEraserController.js');
 const { videoSorter } = require('../services/videoSorterService.js');
 const { consoleAuthorization } = require('../middleware/auth/authorize.js');
+const { YTGetLinks } = require('../services/linksGeneratorService.js');
 
 
 router.get('/videos',getVideos);
@@ -23,7 +24,7 @@ router.get('/deleteThumbnail/:id',deleteThumbnail);
 
 router.get('/auth-test',async (req,res)=>{
     try{
-        consoleAuthorization();
+        await YTGetLinks();
         res.json({message: "auth start in background."})
     }catch(err){
         res.status(500).json({error: err.message});

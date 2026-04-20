@@ -5,7 +5,9 @@ exports.consoleAuthorization = async () => {
     console.log("📥 Authorization via console... ");
     const existing = await loadCredentials()
 
-    if(!existing){
+    if(existing.status){
+        return existing.client
+    }else{
         try{
             const authUrl = await getAuthUrl();
             console.log(` \nPlease visit: ${authUrl}\n `);
@@ -37,5 +39,5 @@ exports.consoleAuthorization = async () => {
             console.log(`Error in consoleAuthorization : ${err}`)
             return null;
         };
-    };
+    }
 };
