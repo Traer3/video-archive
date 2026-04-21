@@ -48,7 +48,7 @@ async function newNameChecker(YTVideos, DBvideos) {
                 const respond = await runCommand(comand1);
                 if(respond){
                     console.log(`[${i}/${checkedVideos.length}] processing video : ${video.name}\n`)
-                    videoForDownload.push({url: video.url, name: video.name})
+                    videoForDownload.push({name: video.name, url: video.url})
                 }
             }catch(err){
                 console.log(`❌ Error processing link: ${video.url}`);
@@ -108,7 +108,7 @@ async function getYouTubeVideos(auth) {
         const res = await service.playlistItems.list({
             playlistId: 'LL',
             part: ['snippet', 'contentDetails'],
-            maxResults: 50,
+            maxResults: 5,
             pageToken: nextPageToken || undefined,
             auth,
         });
@@ -123,7 +123,7 @@ async function getYouTubeVideos(auth) {
         nextPageToken = res.data.nextPageToken;
         console.log(`📥 Loaded: ${allVideos.length} so far...`);
 
-       if(allVideos.length >= 100) break; //ссылки для первых 100 видео 
+       if(allVideos.length >= 5) break; //ссылки для первых 100 видео 
 
     }while(nextPageToken);
     console.log(`✅ Received ${allVideos.length} videos from YT`)

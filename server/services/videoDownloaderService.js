@@ -12,15 +12,11 @@ exports.beginDownloadingVideos = async (dbLinks) => {
         console.error("Missing video folder");
         return;
     };
+    if(dbLinks.length === 0){
+        console.error("❌ No available links");
+        return;
+    }
     try{
-        // ЭТО ТЕСТО
-        // ПОЛУЧАЕМ ЧЕРЕЗ ВЫЗОВ
-        const dbLinks = [
-            {
-                name: "test2",
-                url: "https://www.tiktok.com/@ahtypo/video/7535968819605507359?is_from_webapp=1&sender_device=pc://www.tiktok.com/@ahtypo/video/7535968819605507359?is_from_webapp=1&sender_device=pcyoutu.be/iPhgfQLDruc?si=jXFLVEEKXjvV1LM3"
-            }
-        ];
         let links = dbLinks.map(video => video.url);
         links.reverse();
 
@@ -56,6 +52,7 @@ exports.beginDownloadingVideos = async (dbLinks) => {
             await VideoDownloader(links[i],i,targetFolder,links);
         }
         console.log("🔥 Completed");
+        return;
     }catch(err){
         console.error(`❌ Error in main loop: ${err.message}`);
     }

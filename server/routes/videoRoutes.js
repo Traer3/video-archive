@@ -9,8 +9,8 @@ const { checkUniqueness } = require('../services/uniquenessService.js');
 
 const { deleteVideo, deleteThumbnail } = require('../controllers/videoEraserController.js');
 const { videoSorter } = require('../services/videoSorterService.js');
-const { consoleAuthorization } = require('../middleware/auth/authorize.js');
 const { YTGetLinks } = require('../services/linksGeneratorService.js');
+const { VideoDownloader } = require('../VideoDownloader.js');
 
 
 router.get('/videos',getVideos);
@@ -21,6 +21,16 @@ router.get('/thumbnails/:thumbnailName',getThumbnail);
 
 router.get('/deleteVideo/:id',deleteVideo);
 router.get('/deleteThumbnail/:id',deleteThumbnail);
+
+
+router.get('/VideoDownloader',async (req,res)=>{
+    try{
+        await VideoDownloader()
+        res.json({message: "VideoDownloader start in background."})
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+});
 
 router.get('/auth-test',async (req,res)=>{
     try{
