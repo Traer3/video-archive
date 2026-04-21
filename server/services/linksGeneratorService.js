@@ -108,7 +108,7 @@ async function getYouTubeVideos(auth) {
         const res = await service.playlistItems.list({
             playlistId: 'LL',
             part: ['snippet', 'contentDetails'],
-            maxResults: 5,
+            maxResults: 50,
             pageToken: nextPageToken || undefined,
             auth,
         });
@@ -123,7 +123,7 @@ async function getYouTubeVideos(auth) {
         nextPageToken = res.data.nextPageToken;
         console.log(`📥 Loaded: ${allVideos.length} so far...`);
 
-       if(allVideos.length >= 5) break; //ссылки для первых 100 видео 
+       //if(allVideos.length >= 5) break; //ссылки для первых 100 видео 
 
     }while(nextPageToken);
     console.log(`✅ Received ${allVideos.length} videos from YT`)

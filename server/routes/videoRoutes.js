@@ -23,14 +23,6 @@ router.get('/deleteVideo/:id',deleteVideo);
 router.get('/deleteThumbnail/:id',deleteThumbnail);
 
 
-router.get('/VideoDownloader',async (req,res)=>{
-    try{
-        await VideoDownloader()
-        res.json({message: "VideoDownloader start in background."})
-    }catch(err){
-        res.status(500).json({error: err.message});
-    }
-});
 
 router.get('/auth-test',async (req,res)=>{
     try{
@@ -43,7 +35,7 @@ router.get('/auth-test',async (req,res)=>{
 
 router.get('/sortVideos',async(req,res)=>{
     try{
-        videoSorter()
+        await videoSorter()
         res.json({message: "sortVideos start in background."})
     }catch(err){
         res.status(500).json({error: err.message});

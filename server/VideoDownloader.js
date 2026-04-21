@@ -12,7 +12,7 @@ exports.VideoDownloader = async () =>{
             return;
         }
         const checkTime = await checkTiming(likedVideos);
-        if(true){
+        if(checkTime){
             const links = await YTGetLinks();
             await beginDownloadingVideos(links)
             return;
@@ -20,7 +20,7 @@ exports.VideoDownloader = async () =>{
             return;
         }
     }catch(err){
-
+        console.log(`❌ Error in VideoDownloader ${err}`);
     }
 };
 

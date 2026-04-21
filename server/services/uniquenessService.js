@@ -2,11 +2,11 @@ const { getLikes } = require("./likesService.js");
 const { addLog } = require("./logService");
 const { getVideoList, saveUniqueData } = require("./videoService.js");
 
-exports.checkUniqueness = async (YTLikes) => {
+exports.checkUniqueness = async () => {
     console.log("Checking unique videos");
     try{
         const DBvideos = await getVideoList();
-        const YTLikes = await getLikes(); // заменить на приходящие лайки из YouTube
+        const YTLikes = await getLikes(); 
         await IsItUnique(DBvideos, YTLikes);
         console.log("🏁 Finished with the checking")
     }catch(err){
@@ -16,15 +16,24 @@ exports.checkUniqueness = async (YTLikes) => {
 };
 
 async function IsItUnique(DBvideos,YTLikes) {
+    const cleanName = (str) => {
+        if(!str) return "";
+        return str
+            .trim()
+            .toLowerCase()
+            .replace(/[\uFF1A]/g, ':')
+            .replace(/\s+/g, ' ')
+    };
+
     try{
         const oldVideos = await ageChecker(DBvideos);
         const oldVideosForCheck = oldVideos.filter(vid => vid.isitunique === false);
         
         const likedNamesSet = new Set(
-            YTLikes.map(v => v.video_name)
+            YTLikes.map(v => cleanName(v.video_name))
         );
         const uniqueVideos = oldVideosForCheck.filter(
-            vid => !likedNamesSet.has(vid.name)
+            vid => !likedNamesSet.has(cleanName(vid.name))
         );
         
         for(const vid of uniqueVideos){
