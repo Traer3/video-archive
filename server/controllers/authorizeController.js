@@ -31,12 +31,13 @@ exports.getAuthUrl = async (req,res) =>{
     }
 };
 exports.finishAuth = async (req,res) =>{
-    const answer = req.params
-    console.log("answer: ",answer.url);
+    //const answer = req.params
+    const answer = req.query.code
+    console.log("answer: ",answer);
     let parsed
 
     try{
-        parsed = new URL(answer.url);
+        parsed = new URL(answer);
         console.log("URL working!");
     }catch(err){
         res.status(500).json({error: `❌ Invalid url: \n ${answer.url}`});

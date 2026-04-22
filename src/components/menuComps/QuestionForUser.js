@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
         position:'absolute',
         width: '80%',
         height: '15%',
-        top:450,
+        top:300,
         marginLeft:"10%",
         backgroundColor:'rgb(71, 103, 151)',
         //backgroundColor:'red',

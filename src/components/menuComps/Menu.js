@@ -12,26 +12,26 @@ export default function Menu ({areaState}) {
     const [question, setQuestion] = useState(false);
     const [answer, setAnswer] = useState(false);
     const [userInput, setUserInput] = useState("")
-    const [deleteToken, setDeleteToken] = useState(false);
    
 
     const [rerender, setRerender] = useState(0)
+
     useEffect(()=>{
         const listener = AppState.addEventListener("change",(state)=>{
             if(state === "active"){
                 setRerender(Date.now());
             }
         });
-        console.log(rerender)
         return() => listener.remove()
     },[])
+
 
     useEffect(()=>{
         const checkToken = async () => {
             try{
-                const responce = await fetch(`${VIDEO_URL}/tokenCheck`);
+                const responce = await fetch(`${VIDEO_URL}/api/auth/checkToken`);
                 const answer = await responce.json();
-                setAuthorized(answer)
+                setAuthorized(answer.data)
             }catch(err){
                 console.error("Server failed to check token")
             }
@@ -42,40 +42,33 @@ export default function Menu ({areaState}) {
 
     const onAuthorize =  async () => {
         setAnswer(true)
-
         try{
-            const responce = await fetch(`${VIDEO_URL}/authorize`);
-            const data = await responce.json();
-            //console.log(data)
-            if(data.url){
-                Autnification(data.url)
+            const responce = await fetch(`${VIDEO_URL}/api/auth/getAuthUrl`);
+            const answer = await responce.json();
+            console.log(answer.message)
+            if(answer.data){
+                Autnification(answer.data)
             }
         }catch(err){
             console.log("Cant get url from server: ", err)
-        }
-        
-        //setAutnification(true);
-        
+        };
     }
 
     const sendCode = async (code) => {
-        const res =  await fetch(`${VIDEO_URL}/authorize/callback`,{
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({code})
-        });
-        const data = await res.json();
+        const safeUrl = encodeURIComponent(code)
+        const res =  await fetch(`${VIDEO_URL}/api/auth/finishAuth?code=${safeUrl}`);
+        if(res.ok){
+            const data = await res.json();
+            console.log("Success: ", data.message);
+        }
         setAnswer(false)
-        console.log(data);
-        
     };
 
     const onDeleteToken = async () => {
-        const responce = await fetch(`${VIDEO_URL}/deleteToken`);
+        const responce = await fetch(`${VIDEO_URL}/api/auth/deleteToken`);
         const answer = await responce.json();
-        deleteToken(answer)
+        console.log(`${answer.message}`)
     }
-    
     
     const onLogout = () => {
         
@@ -111,23 +104,7 @@ export default function Menu ({areaState}) {
             return;
         }
 
-        try{
-            console.log("User INPUT: ",url)
-            const parsed = new URL(url);
-            const codeParam = parsed.searchParams.get("code");
-
-            if(!codeParam){
-                console.log("Code parameter not found");
-                return;
-            }
-
-            sendCode(codeParam);
-            console.log("Extracted code",codeParam);
-
-        }catch(err){
-            console.log("Error parsing URL",err)
-        }
-
+        sendCode(url);
     }
 
     const  Autnification = async (link) => {
@@ -156,8 +133,6 @@ export default function Menu ({areaState}) {
                                     <ToolButton buttonFunction={onExit} iconName={'checkButton'} CHeight={30} CWidth={30}/>
                                     <ToolButton buttonFunction={onRethink} iconName={'deleteButton'} CHeight={30} CWidth={30}/>
                                 </View>
-                                
-
                             </View>
                             :
                             <>{authorized ? 
@@ -182,7 +157,7 @@ const styles = StyleSheet.create({
         position:'absolute',
         width: '100%',
         height: '92%',
-        zIndex:1,
+        zIndex:3,
         borderWidth:0.1,
     },
     conteiner: {
@@ -191,6 +166,7 @@ const styles = StyleSheet.create({
         height: '8%',
         top:771,
         backgroundColor:'rgb(71, 103, 151)',
+        borderWidth:0.5,
     },
     containerAnser:{
     },
