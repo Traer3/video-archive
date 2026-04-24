@@ -10,7 +10,6 @@ export default function Menu({ areaState }) {
         areaState(false)
     }
 
-    //
     return (
         <Pressable style={styles.wrapper} onPress={onAreaPress}>
             <View style={styles.conteiner}>
@@ -18,7 +17,7 @@ export default function Menu({ areaState }) {
                 <QrCode setScanned={setScanned} scanned={scanned} />
             </View>
 
-            {scanned && <QrCode.Scanner setScanned={setScanned} />}
+            <QrCode.Scanner show={scanned} setScanned={setScanned} />
 
         </Pressable>
     )

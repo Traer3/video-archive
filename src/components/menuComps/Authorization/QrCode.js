@@ -6,7 +6,7 @@ import QuestionForUser from "../QuestionForUser";
 import { useDatabase } from "../../../../DatabaseContext";
 
 
-const Scanner = ({ scanned, setScanned, }) => {
+const Scanner = ({show, scanned, setScanned, }) => {
     const { VIDEO_URL } = useDatabase();
     const [answer, setAnswer] = useState(false);
     const [camera, setCamera] = useState(true);
@@ -50,7 +50,9 @@ const Scanner = ({ scanned, setScanned, }) => {
     };
 
     return (
-        <View style={styles.camera}>
+        <>
+        {show && 
+            <View style={styles.camera}>
             <QuestionForUser answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer} />
             {camera &&
                 <CameraView
@@ -62,6 +64,8 @@ const Scanner = ({ scanned, setScanned, }) => {
                 />
             }
         </View>
+        }
+        </>
     )
 }
 
