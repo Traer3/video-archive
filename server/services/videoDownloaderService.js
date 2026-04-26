@@ -1,7 +1,7 @@
 const path = require("path");
 const fsPromises = require("fs").promises
 
-const { writeFailed } = require("../services/failedService.js");
+//const { writeFailed } = require("../services/failedService.js");
 const { videoImporter } = require("./videoImporterService.js");
 const { addLog } = require("./logService.js");
 const { exists, runCommand, sleep, writeInfo } = require("./toolsService.js");
@@ -94,12 +94,14 @@ async function VideoDownloader(url,index,folderPath,links){
             }else{
                 console.log(`❌ error while processing ${url}`);
                 await addLog({type:"DownloaderLogs", message: `❌ Error: ${url} | ${err.message}`});
+                /*
                 await writeFailed({
                     scriptName:"VideoDownloader",
                     videoUrl: `${url}`,
                     developerMessage: `❌ Error while processing url:`,
                     compilerMessage: `${err.message}`
                 });
+                */
             };
         }
     };

@@ -1,5 +1,6 @@
 const { getLikes } = require("./likesService.js");
 const { addLog } = require("./logService");
+const { cleanName } = require("./toolsService.js");
 const { getVideoList, saveUniqueData } = require("./videoService.js");
 
 exports.checkUniqueness = async () => {
@@ -16,15 +17,6 @@ exports.checkUniqueness = async () => {
 };
 
 async function IsItUnique(DBvideos,YTLikes) {
-    const cleanName = (str) => {
-        if(!str) return "";
-        return str
-            .trim()
-            .toLowerCase()
-            .replace(/[\uFF1A]/g, ':')
-            .replace(/\s+/g, ' ')
-    };
-
     try{
         const oldVideos = await ageChecker(DBvideos);
         const oldVideosForCheck = oldVideos.filter(vid => vid.isitunique === false);
