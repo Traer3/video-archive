@@ -2,9 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const requestLogger = require("./middleware/logger.js");
 const videoRoutes = require('./routes/videoRoutes.js');
-const failedRoutes = require('./routes/failedRoutes.js');
+//const failedRoutes = require('./routes/failedRoutes.js');
+//const videoForDownloadRoutes = require('./routes/videoForDownloadRoutes.js');
 const lockedVideosRoutes = require('./routes/lockedVideosRoutes.js');
-const videoForDownloadRoutes = require('./routes/videoForDownloadRoutes.js');
 const likesRouters = require('./routes/likesRoutes.js');
 const log = require('./routes/logRoutes.js');
 const authorize = require('./routes/authorizeRoutes.js');
@@ -20,9 +20,9 @@ app.use(requestLogger);
 
 app.use('/api/server',videoRoutes);
 
-app.use('/api/failed',failedRoutes);
+//app.use('/api/failed',failedRoutes);
+//app.use('/api/videoForDownload',videoForDownloadRoutes);
 app.use('/api/lockedVideos',lockedVideosRoutes);
-app.use('/api/videoForDownload',videoForDownloadRoutes);
 app.use('/api/likes',likesRouters);
 app.use('/api/log',log);
 

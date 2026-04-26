@@ -4,24 +4,28 @@ const { writeLikes, deleteLikes } = require("./likesService");
 const { getVideoList } = require("./videoService");
 const { writeLockedVideos, getLockedVideos } = require('./lockedVideoService');
 const { runCommand } = require('./toolsService');
+const { writeLinks, getLinks } = require('./linksService');
 
 
 
 exports.YTGetLinks = async () => {
     console.log("Starting geting links...");
     const DBvideos = await getVideoList();
+    const Links = await getLinks();
     const auth = await consoleAuthorization();
     
     const currentYTVideos = await getYouTubeVideos(auth);
-    await sendLikes(currentYTVideos);
-   
-    const videoForDownload = await newNameChecker(currentYTVideos,  DBvideos);
+    if(!Links){
+        await sendLikes(currentYTVideos);
+    }
+    
+    const videoForDownload = await newNameChecker(currentYTVideos,  DBvideos, Links);
     console.log("🏁 Links written");
     console.log(videoForDownload);
     return videoForDownload;
 };
 
-async function newNameChecker(YTVideos, DBvideos) {
+async function newNameChecker(YTVideos, DBvideos ,Links) {
     if(!YTVideos) return;
     const videoForDownload = [];
     const NamesFromDB = new Set(DBvideos.map(video => video.name))
@@ -62,6 +66,14 @@ async function newNameChecker(YTVideos, DBvideos) {
                 }else if(errorMessage.includes("blocked it in your country")){
                     category = "Country restriction";
                 }
+
+                /*
+                await lockedLinks({
+                    id:id, // id получаем из Links , находя по именя 
+                    locked: true,
+                })
+                */
+                
                 await writeLockedVideos({
                     scriptName: "writeLockedVideos",
                     type: category,
@@ -75,26 +87,38 @@ async function newNameChecker(YTVideos, DBvideos) {
 };
 
 async function lockedLinks(newVids) {
-    const canDownload = []
+    if(!newVids ||  !newVids.length === 0) return [];
     try{
-        const lockedVideos =  await getLockedVideos();
-        if(lockedVideos.length === 0){
-            console.log("lockedVideos is empty")
+        const links = await getLinks();
+        if(links.length === 0){
+            console.log("Table links is empty")
             return newVids;
         };
-        const lockedNames = new Set(lockedVideos.map(video => video.video_name))
 
-        newVids.forEach(vid =>{
-            const isLocked = lockedNames.has(vid.name)
-            if(!isLocked){
-                canDownload.push(vid);
-            }else{
-                console.log(`Skiping! Allready in list:  ${vid.name}`)
+        const lockedVideos = new Set(
+            links
+                .filter(vid => vid.locked)
+                .map(vid => vid.name ? vid.name.trim() : "")
+        );
+
+        if(lockedVideos.size === 0){
+            console.log("No locked vidoes found in DB")
+            return newVids;
+        }
+
+        const canDownload = newVids.filter(vid => {
+            const cleanName = vid.name ? vid.name.trim() : "";
+            const isLocked = lockedLinks.has(cleanName);
+            
+            if(isLocked){
+                console.log(`Skiping! Allready locked: ${vid.name}`);
             }
+            return !isLocked;
         });
         return canDownload;
     }catch(err){
         console.error(`❌ Error while sorting lockedLinks `,err.message);
+        return [];
     }
 };
 
@@ -131,14 +155,21 @@ async function getYouTubeVideos(auth) {
 };
 
 async function sendLikes(YouTubeVideos) {
-    console.log("Deleting old links...");
-    await deleteLikes();
+    const skipVideoName = ['private video','deleted video'];
+    const reverseYTLinks = [...YouTubeVideos].reverse();
 
-    YouTubeVideos.map(async video => {
-       await writeLikes({
-            videoName: video.name,
-            videoUrl: video.url
+    for(const video of reverseYTLinks){
+        const cleanName = video.name ? video.name.trim().toLowerCase() : "";
+        if(skipVideoName.includes(cleanName)){
+            console.log(`⏭ Skipping private || deleted videos...`)
+            continue;
+        }
+        await writeLinks({
+            name: video.name,
+            category: 'YouTube',
+            locked:false,
+            isitunique:false
         })
-    });
+    };
     return console.log("✅ Links written");
 }
