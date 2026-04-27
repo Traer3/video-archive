@@ -1,7 +1,7 @@
 const fsPromises = require("fs").promises;
 const path = require('path');
-const {google} = require('googleapis');
-const {UserRefreshClient} = require('google-auth-library');
+const { google } = require('googleapis');
+const { UserRefreshClient } = require('google-auth-library');
 const { readMyFile, writeInfo, deleteFile } = require('./toolsService.js');
 
 const SCOPES = ['https://www.googleapis.com/auth/youtube.readonly'];
@@ -11,49 +11,49 @@ const CREDENTIALS_PATH = path.join(__dirname, '../middleware/auth/credentials.js
 
 exports.loadCredentials = async () => {
     const data = await loadCredentials();
-    if(data){
+    if (data) {
         console.log('✅ Current token works!');
-        return {status: true, client: data};
-    }else{
-        return {status: false, client: null};
+        return { status: true, client: data };
+    } else {
+        return { status: false, client: null };
     }
 };
 
-exports.getAuthUrl = async () =>{
+exports.getAuthUrl = async () => {
     const authUrl = await getAuthUrl();
     return authUrl;
 };
 
-exports.finishAuth = async (code) =>{
+exports.finishAuth = async (code) => {
     return await finishAuth(code);
 };
 
 //exports.saveToken = async (content,client) =>{return await saveToken(content,client);}
 
-exports.deleteToken = async () =>{
-    try{
+exports.deleteToken = async () => {
+    try {
         await deleteFile(TOKEN_PATH)
         return console.log(`Successfuly deleted TOKEN`);
-    }catch(err){
+    } catch (err) {
         console.log(`Error in deleteToken : ${err}`);
         return null;
     };
 };
 
-exports.checkToken = async () =>{
-    try{
+exports.checkToken = async () => {
+    try {
         const answer = await checkToken();
         return answer;
-    }catch(err){
+    } catch (err) {
         return false;
     };
 };
 
 async function checkToken() {
-    try{
+    try {
         await fsPromises.access(TOKEN_PATH, fsPromises.constants.F_OK)
         return true;
-    }catch(err){
+    } catch (err) {
         return false;
     };
 }
@@ -61,8 +61,8 @@ async function checkToken() {
 
 async function loadCredentials() {
     const tokenHealth = await checkToken()
-    try{
-        if(tokenHealth){
+    try {
+        if (tokenHealth) {
             const content = await readMyFile(TOKEN_PATH);
             const credentials = JSON.parse(content);
             const client = new UserRefreshClient({
@@ -70,17 +70,17 @@ async function loadCredentials() {
                 clientSecret: credentials.client_secret,
                 refreshToken: credentials.refresh_token,
             });
-            try{
+            try {
                 await client.refreshAccessToken();
                 return client;
-            }catch(err){
+            } catch (err) {
                 console.warn('⚠️ Token deprecated')
                 return null;
             }
-        }else{
+        } else {
             return null;
         }
-    }catch(err){
+    } catch (err) {
         console.log(`Error in loadCredentials : ${err}`)
         return null;
     };
@@ -88,24 +88,24 @@ async function loadCredentials() {
 
 
 async function getAuthUrl() {
-    try{
+    try {
         const content = await readMyFile(CREDENTIALS_PATH);
         const credentials = JSON.parse(content);
-        const {client_secret, client_id, redirect_uris} = credentials.web;
-            
+        const { client_secret, client_id, redirect_uris } = credentials.web;
+
         const redirectUri = redirect_uris[0];
-    
+
         const oAuth2Client = new google.auth.OAuth2(
-                client_id, client_secret, redirectUri
+            client_id, client_secret, redirectUri
         );
-    
+
         const authUrl = oAuth2Client.generateAuthUrl({
-                access_type: 'offline',
-                scope: SCOPES,
-                prompt: 'consent'
+            access_type: 'offline',
+            scope: SCOPES,
+            prompt: 'consent'
         });
         return authUrl;
-    }catch(err){
+    } catch (err) {
         console.log(`Error in getAuthUrl : ${err}`);
         return null;
     }
@@ -114,31 +114,31 @@ async function getAuthUrl() {
 async function finishAuth(code) {
     const content = await readMyFile(CREDENTIALS_PATH);
     const credentials = JSON.parse(content);
-    const {client_secret, client_id, redirect_uris} = credentials.web;
-        
+    const { client_secret, client_id, redirect_uris } = credentials.web;
+
     const redirectUri = redirect_uris[0];
 
     const oAuth2Client = new google.auth.OAuth2(
-            client_id, client_secret, redirectUri
+        client_id, client_secret, redirectUri
     );
-    try{
-        const {tokens} = await oAuth2Client.getToken(code);
+    try {
+        const { tokens } = await oAuth2Client.getToken(code);
         oAuth2Client.setCredentials(tokens);
-        
-        await saveToken(content,oAuth2Client);
+
+        await saveToken(content, oAuth2Client);
         return console.log('✅ Authorization completed, TOKEN saved!')
 
         //return oAuth2Client;
-    }catch(err){
+    } catch (err) {
         console.error(`❌ Error exchanging code for token: \n${err.message}`);
         return null;
         //process.exit(1);
     }
-    
+
 }
 
-async function saveToken(content,client) {
-    try{
+async function saveToken(content, client) {
+    try {
         const keys = JSON.parse(content);
         const key = keys.installed || keys.web;
         const payload = JSON.stringify({
@@ -147,9 +147,9 @@ async function saveToken(content,client) {
             client_secret: key.client_secret,
             refresh_token: client.credentials.refresh_token,
         });
-        await writeInfo(TOKEN_PATH,payload);
+        await writeInfo(TOKEN_PATH, payload);
         return true;
-    }catch(err){
+    } catch (err) {
         console.log(`Error in saveToken : ${err}`);
         return null;
     };

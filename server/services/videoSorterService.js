@@ -4,12 +4,12 @@ const path = require("path");
 const { readFolders, databaseOverwrite, importVideo } = require("./videoService.js");
 const { exists } = require("./toolsService");
 const { getLikes } = require("./likesService.js");
-const VIDEOS_DIR = path.join(__dirname,"../videos");
+const VIDEOS_DIR = path.join(__dirname, "../videos");
 
 exports.videoSorter = async () => {
     console.log("Sorting videos id DB");
     console.log("📂 Searching video from Folders");
-    if(!(await exists(VIDEOS_DIR))){
+    if (!(await exists(VIDEOS_DIR))) {
         console.error("Missing video folder");
         return;
     };
@@ -17,7 +17,7 @@ exports.videoSorter = async () => {
     const videoFiles = await readFolders(VIDEOS_DIR);
     const likedVideos = await getLikes();
 
-    const sortedList = await SortedList(videoFiles,likedVideos);
+    const sortedList = await SortedList(videoFiles, likedVideos);
     await DatabaseOverwrite(sortedList);
     console.log("✅ Videos sorted!")
 };
@@ -32,7 +32,7 @@ async function SortedList(videoFiles, likedList) {
             let formatedName = vid + ".mp4"
             return videoFile.name === formatedName
         })
-        if(finedVideo){
+        if (finedVideo) {
             existedVidoes.push(finedVideo)
         }
     });
@@ -43,15 +43,15 @@ async function SortedList(videoFiles, likedList) {
 async function DatabaseOverwrite(newList) {
     console.log("🔄 Rewriting old DB");
     const result = await databaseOverwrite();
-    if(result.success){result.message}
-    try{
-        for(const video of newList){
+    if (result.success) { result.message }
+    try {
+        for (const video of newList) {
             const filePath = video.fullPath;
             const stat = await fsPromises.stat(filePath);
-            if(stat.isFile()){
+            if (stat.isFile()) {
                 const originalName = path.parse(video.name).name;
                 const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
-            
+
                 await importVideo({
                     name: originalName,
                     duration: "",
@@ -60,7 +60,7 @@ async function DatabaseOverwrite(newList) {
                 });
             };
         }
-    }catch(err){
-        console.error("❌ Error during DatabaseOverwrite : ",err.message);
+    } catch (err) {
+        console.error("❌ Error during DatabaseOverwrite : ", err.message);
     }
 }

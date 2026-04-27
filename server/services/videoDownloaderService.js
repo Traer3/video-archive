@@ -1,147 +1,137 @@
 const path = require("path");
 const fsPromises = require("fs").promises
-
-//const { writeFailed } = require("../services/failedService.js");
 const { videoImporter } = require("./videoImporterService.js");
 const { addLog } = require("./logService.js");
 const { exists, runCommand, sleep, writeInfo } = require("./toolsService.js");
-const VIDEOS_DIR = path.join(__dirname,"../videos");
+const VIDEOS_DIR = path.join(__dirname, "../videos");
 
 exports.beginDownloadingVideos = async (dbLinks) => {
-    if(!(await exists(VIDEOS_DIR))){
+    if (!(await exists(VIDEOS_DIR))) {
         console.error("Missing video folder");
         return;
     };
-    if(dbLinks.length === 0){
+    if (dbLinks.length === 0) {
         console.error("❌ No available links");
         return;
     }
-    try{
+    try {
         let links = dbLinks.map(video => video.url);
         links.reverse();
 
         let targetFolder = null;
-        const  subFolders = await fsPromises.readdir(VIDEOS_DIR);
+        const subFolders = await fsPromises.readdir(VIDEOS_DIR);
         const findAvailableFolder = async () => {
-            for(const subFolder of subFolders){
-                if(await CheckFolderCapacity(VIDEOS_DIR,subFolder)){
-                    return path.join(VIDEOS_DIR,subFolder);
+            for (const subFolder of subFolders) {
+                if (await CheckFolderCapacity(VIDEOS_DIR, subFolder)) {
+                    return path.join(VIDEOS_DIR, subFolder);
                 }
             }
             return null;
         };
-        
+
         targetFolder = await findAvailableFolder();
-        if(!targetFolder){
+        if (!targetFolder) {
             console.error("❌ No available folder");
             return;
         }
 
-        for(let i = 0; i < links.length; i++){
+        for (let i = 0; i < links.length; i++) {
             let isOk = await CheckFolderCapacity(VIDEOS_DIR, path.basename(targetFolder));
-            if(!isOk){
+            if (!isOk) {
                 console.log("🔄 Current folder full, searching for a new one...");
                 targetFolder = await findAvailableFolder();
 
-                if(!targetFolder){
+                if (!targetFolder) {
                     console.error("All folders are FULL!");
-                    await addLog({type:"DownloaderLogs", message: '❌ Error: All folders are full'})
+                    await addLog({ type: "DownloaderLogs", message: '❌ Error: All folders are full' })
                     break;
                 }
             };
-            await VideoDownloader(links[i],i,targetFolder,links);
+            await VideoDownloader(links[i], i, targetFolder, links);
         }
         console.log("🔥 Completed");
         return;
-    }catch(err){
+    } catch (err) {
         console.error(`❌ Error in main loop: ${err.message}`);
     }
 };
 
-async function VideoDownloader(url,index,folderPath,links){
-    console.log(`Downdloading: [${index +1}]/${links.length}: ${url}`);
+async function VideoDownloader(url, index, folderPath, links) {
+    console.log(`Downdloading: [${index + 1}]/${links.length}: ${url}`);
 
     const command1 = `yt-dlp -o "${folderPath}/%(title)s.%(ext)s" --cookies youtubeCookies.txt --merge-output-format mp4 "${url}"`;
 
     let success = false;
     let attempts = 3;
 
-    while(attempts > 0 && !success){
-        try{
+    while (attempts > 0 && !success) {
+        try {
             await runCommand(command1);;
             console.log("✅ Downloaded");
-    
+
             console.log("📥 Importing downloaded video(s) to DB...");
             await videoImporter()
             console.log("✅ Imported successfully");
-            
-            await addLog({type:"DownloaderLogs", message: '✅ Successfully processed: ${url}'});
+
+            await addLog({ type: "DownloaderLogs", message: '✅ Successfully processed: ${url}' });
             success = true;
-        }catch(err){
+        } catch (err) {
             attempts--;
             console.log(`⚠️ Attempts left: ${attempts}. Error: ${err.message}`);
 
             const errorText = err.message + (err.stderr || "");
             const cookieErrorPattern = "Sign in to conf... Эту хуйню нужно опять задетектить блять ";
-            if(errorText.includes(cookieErrorPattern)){
+            if (errorText.includes(cookieErrorPattern)) {
                 console.log("Error pattern detected!");
                 await GenerateCookie();
             };
 
-            if(attempts > 0){
-                
+            if (attempts > 0) {
+
                 await sleep(5000);
-            }else{
+            } else {
                 console.log(`❌ error while processing ${url}`);
-                await addLog({type:"DownloaderLogs", message: `❌ Error: ${url} | ${err.message}`});
-                /*
-                await writeFailed({
-                    scriptName:"VideoDownloader",
-                    videoUrl: `${url}`,
-                    developerMessage: `❌ Error while processing url:`,
-                    compilerMessage: `${err.message}`
-                });
-                */
+                await addLog({ type: "DownloaderLogs", message: `❌ Error: ${url} | ${err.message}` });
             };
         }
     };
 };
 
-async function CheckFolderCapacity(mainFolderPath,subFolder) {
-    const subFolderPath = path.join(mainFolderPath,subFolder);
+async function CheckFolderCapacity(mainFolderPath, subFolder) {
+    const subFolderPath = path.join(mainFolderPath, subFolder);
     const stats = await fsPromises.stat(subFolderPath);
     let reserveCapacity;
 
-    if(subFolder === "videos1"){
+    if (subFolder === "videos1") {
         reserveCapacity = 50;
-    }else{
+    } else {
         reserveCapacity = 4;
     }
 
-    if(stats.isDirectory()){
+    if (stats.isDirectory()) {
         console.log(`Reading folder: ${subFolder}`)
         const files = await fsPromises.readdir(subFolderPath);
         const isFull = files.find(file => file === "isFull.txt")
-        if(!isFull){
+        if (!isFull) {
             console.log("Checking subFolder capacity");
             const command1 = `df -h ${subFolderPath} --output=source | tail -n 1 `;
             const getPartition = await runCommand(command1);
             const partitionName = getPartition.trim()
-            
+
             const command2 = `df -h --output=avail --block-size=G ${partitionName} | tail -n 1`;
             const getSize = await runCommand(command2);
             const memoryLeft = getSize.trim();
             console.log(`Memory left : ${memoryLeft} gb`)
 
             const getNumber = parseInt(memoryLeft);
-            if(getNumber <= reserveCapacity){
-                await writeInfo(path.join(subFolderPath,'isFull.txt'),memoryLeft)
+            if (getNumber <= reserveCapacity) {
+                await writeInfo(path.join(subFolderPath, 'isFull.txt'), memoryLeft)
                 return false;
-            }else{
+            } else {
                 console.log(`Download video in folder ${subFolder}`)
                 return true;
             }
-        }else{
+        } else {
             console.log(`Folder ${subFolder} is full`)
             return false;
         }

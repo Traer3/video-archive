@@ -74,6 +74,3 @@ exports.cleanName = (str) => {
         .replace(/[\uFF1A]/g, ':')
         .replace(/\s+/g, ' ')
 }
-
-
-// runComand , getData , exists , writeInfo , FolderReader ,

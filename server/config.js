@@ -5,11 +5,11 @@ const STATIC_IP = '192.168.0.8'
 
 const platform = process.platform;
 
-function getLocalIP () {
+function getLocalIP() {
     const interfaces = os.networkInterfaces();
-    for (const name of Object.keys(interfaces)){
-        for(const net of interfaces[name]){
-            if(net.family === 'IPv4' && !net.internal){
+    for (const name of Object.keys(interfaces)) {
+        for (const net of interfaces[name]) {
+            if (net.family === 'IPv4' && !net.internal) {
                 return net.address;
             }
         }
@@ -20,10 +20,10 @@ function getLocalIP () {
 const IP = (platform === 'win32') ? STATIC_IP : getLocalIP();
 
 
-if(platform !== 'win32'){
-    console.log("Linux detected. Adaptive IP:",IP);
-}else{
-    console.log("Windows detected. Static IP:",IP);
+if (platform !== 'win32') {
+    console.log("Linux detected. Adaptive IP:", IP);
+} else {
+    console.log("Windows detected. Static IP:", IP);
 }
 
 
@@ -32,7 +32,7 @@ module.exports = {
     ExpressServerPort: EXPRESS_PORT,
     DB_URL: `http://${IP}:${SQL_PORT}`,
     VIDEO_URL: `http://${IP}:${EXPRESS_PORT}`,
-    TABLE_AUTHORIZATION:{
+    TABLE_AUTHORIZATION: {
         user: "postgres",
         host: "localhost",
         database: "Vids",

@@ -1,89 +1,89 @@
 const authorizationService = require('../services/authorizationService.js')
 
-exports.loadCredentials = async (req,res) =>{
-    try{
+exports.loadCredentials = async (req, res) => {
+    try {
         const result = await authorizationService.loadCredentials();
         console.log("loadCredentials : ", result.status)
-        if(result.status){
+        if (result.status) {
             res.status(200).json({
-                message:'✅ Current token works!',
+                message: '✅ Current token works!',
                 data: result.status
             });
-        }else{
+        } else {
             res.status(400).json({
-                message:'Token missing',
+                message: 'Token missing',
                 data: result.status
             })
         }
-    }catch(err){
-        res.status(500).json({error: "❌ Failed to load credentials\n",err});
+    } catch (err) {
+        res.status(500).json({ error: "❌ Failed to load credentials\n", err });
     };
 };
-exports.getAuthUrl = async (req,res) =>{
-    try{
+exports.getAuthUrl = async (req, res) => {
+    try {
         const getAuthUrl = await authorizationService.getAuthUrl();
         res.status(200).json({
-            message:'✅ Fetching url for authorization!',
+            message: '✅ Fetching url for authorization!',
             data: getAuthUrl
         });
-    }catch(err){
-        res.status(500).json({error: "❌ Failed to get authorization url\n",err});
+    } catch (err) {
+        res.status(500).json({ error: "❌ Failed to get authorization url\n", err });
     }
 };
-exports.finishAuth = async (req,res) =>{
+exports.finishAuth = async (req, res) => {
     //const answer = req.params
     const answer = req.query.code
-    console.log("answer: ",answer);
+    console.log("answer: ", answer);
     let parsed
 
-    try{
+    try {
         parsed = new URL(answer);
         console.log("URL working!");
-    }catch(err){
-        res.status(500).json({error: `❌ Invalid url: \n ${answer.url}`});
+    } catch (err) {
+        res.status(500).json({ error: `❌ Invalid url: \n ${answer.url}` });
         return null;
     }
 
     const codeParam = parsed.searchParams.get("code");
-    if(!codeParam){
+    if (!codeParam) {
         console.log("Code parameter not found");
-        res.status(500).json({error: `❌ Code parameter not found in url: \n ${parsed}`});
+        res.status(500).json({ error: `❌ Code parameter not found in url: \n ${parsed}` });
         return null;
     }
-    try{
+    try {
         const code = codeParam.trim()
         const finishAuth = await authorizationService.finishAuth(code);
         res.status(200).json({
-            message:'📝 Require FULL URL!',
+            message: '📝 Require FULL URL!',
             data: finishAuth
         });
 
-    }catch(err){
-        console.log("Error parsing URL",err);
-        res.status(500).json({error: "❌ Failed to get authorization url \n ",err});
+    } catch (err) {
+        console.log("Error parsing URL", err);
+        res.status(500).json({ error: "❌ Failed to get authorization url \n ", err });
     };
 };
 
-exports.deleteToken = async(req,res) => {
-    try{
+exports.deleteToken = async (req, res) => {
+    try {
         const deleteToken = await authorizationService.deleteToken();
         res.status(200).json({
-            message:'🗑️ Deleting old token!',
+            message: '🗑️ Deleting old token!',
             data: deleteToken
         });
-    }catch(err){
-        res.status(500).json({error: "❌ Error while deleting old token\n",err});
+    } catch (err) {
+        res.status(500).json({ error: "❌ Error while deleting old token\n", err });
     };
 };
 
-exports.checkToken = async(req,res) => {
-    try{
+exports.checkToken = async (req, res) => {
+    try {
         const checkToken = await authorizationService.checkToken();
         res.status(200).json({
-            message:'🔄 Cheking tokin health...',
+            message: '🔄 Cheking tokin health...',
             data: checkToken
         });
-    }catch(err){
-        res.status(500).json({error: "❌ Error while Cheking tokin health\n",err});
+    } catch (err) {
+        res.status(500).json({ error: "❌ Error while Cheking tokin health\n", err });
     };
 };
