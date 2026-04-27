@@ -22,7 +22,7 @@ async function IsItUnique(DBvideos, YTLikes) {
         const oldVideosForCheck = oldVideos.filter(vid => vid.isitunique === false);
 
         const likedNamesSet = new Set(
-            YTLikes.map(v => cleanName(v.video_name))
+            YTLikes.map(v => cleanName(v.name))
         );
         const uniqueVideos = oldVideosForCheck.filter(
             vid => !likedNamesSet.has(cleanName(vid.name))

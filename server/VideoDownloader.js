@@ -1,17 +1,18 @@
-const { getLikes } = require("./services/likesService");
 const { YTGetLinks } = require("./services/linksGeneratorService");
+const { getLinks } = require("./services/linksService");
 const { beginDownloadingVideos } = require("./services/videoDownloaderService");
 
 
 exports.VideoDownloader = async () => {
     console.log("Downloading videos");
-    const likedVideos = await getLikes();
+    const likedVideos = await getLinks();
     try {
         if (likedVideos.length === 0) {
             await YTGetLinks();
             return;
         }
-        const checkTime = await checkTiming(likedVideos);
+        //const checkTime = await checkTiming(likedVideos);
+        const checkTime = true;
         if (checkTime) {
             const links = await YTGetLinks();
             await beginDownloadingVideos(links)
@@ -23,7 +24,9 @@ exports.VideoDownloader = async () => {
         console.log(`❌ Error in VideoDownloader ${err}`);
     }
 };
-
+//ИСПРАВИТЬ ТАЙМИНГ 
+// .created_at НЕТУ 
+/*
 async function checkTiming(likedVideos) {
     console.log("likedVideos: ", likedVideos[0].created_at)
     const lastCheck = new Date(likedVideos[0].created_at);
@@ -41,3 +44,4 @@ async function checkTiming(likedVideos) {
         return false;
     }
 }
+*/

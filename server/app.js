@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const requestLogger = require("./middleware/logger.js");
 const videoRoutes = require('./routes/videoRoutes.js');
-const lockedVideosRoutes = require('./routes/lockedVideosRoutes.js');
 const log = require('./routes/logRoutes.js');
 const authorize = require('./routes/authorizeRoutes.js');
 const { VideoDownloader } = require("./VideoDownloader.js");
@@ -16,10 +15,8 @@ app.use(express.json());
 app.use(requestLogger);
 
 app.use('/api/server', videoRoutes);
-
-//app.use('/api/failed',failedRoutes);
 //app.use('/api/videoForDownload',videoForDownloadRoutes);
-app.use('/api/lockedVideos', lockedVideosRoutes);
+
 app.use('/api/log', log);
 
 app.use('/api/auth', authorize);

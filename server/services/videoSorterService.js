@@ -3,7 +3,7 @@ const path = require("path");
 
 const { readFolders, databaseOverwrite, importVideo } = require("./videoService.js");
 const { exists } = require("./toolsService");
-const { getLikes } = require("./likesService.js");
+const { getLinks } = require("./linksService.js");
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 
 exports.videoSorter = async () => {
@@ -15,8 +15,7 @@ exports.videoSorter = async () => {
     };
 
     const videoFiles = await readFolders(VIDEOS_DIR);
-    const likedVideos = await getLikes();
-
+    const likedVideos = await getLinks();
     const sortedList = await SortedList(videoFiles, likedVideos);
     await DatabaseOverwrite(sortedList);
     console.log("✅ Videos sorted!")
@@ -24,7 +23,7 @@ exports.videoSorter = async () => {
 
 async function SortedList(videoFiles, likedList) {
     const existedVidoes = [];
-    const likedListName = likedList.map(video => video.video_name)
+    const likedListName = likedList.map(video => video.name)
     const resersLikedList = likedListName.reverse();
 
     resersLikedList.map(vid => {
