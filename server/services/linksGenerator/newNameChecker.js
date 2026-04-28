@@ -10,12 +10,10 @@ exports.newNameChecker = async (YTVideos, DBvideos, Links) => {
         const cleanYTLinks = await clearNames(YTVideos)
 
         const NamesFromDB = new Set(cleanDBnames.map(video => video.name))
-        const clearedLinks = new Set(cleanLinks.map(video => video.name))
-
 
         const newVids = cleanYTLinks.filter(video => {
             const name = video.name;
-            const isTrash = name === "Private video" || name === "Deleted video";
+            const isTrash = name === "private video" || name === "deleted video";
             if (isTrash) return false;
             const isAlreadyInDB = NamesFromDB.has(name);
             return !isAlreadyInDB
@@ -30,7 +28,6 @@ exports.newNameChecker = async (YTVideos, DBvideos, Links) => {
 };
 
 exports.clearNames = (videos) => {
-    //console.log("videos in clearNames :  ", videos)
     return clearNames(videos)
 }
 

@@ -3,7 +3,7 @@ const { getVideoList } = require("./videoService");
 const { cleanName } = require('./toolsService');
 const { writeLinks, getLinks } = require('./linksService');
 const { getYouTubeLinks } = require("./linksGenerator/getYouTubeLinks");
-const { newNameChecker } = require("./linksGenerator/newNameChecker");
+const { newNameChecker, clearNames } = require("./linksGenerator/newNameChecker");
 const { simulateDownload } = require("./linksGenerator/simulatingDownload");
 
 
@@ -18,13 +18,10 @@ exports.YTGetLinks = async () => {
         ? await getYouTubeLinks(auth.client)
         : [];
 
-    // это значит что тут не будет НОВЫХ лайков , только старые останутся 
-    // Нужно создать условие для добавления новых видосов в список 
-    if (Links.length === 0) {
-        await sendLikes(currentYTVideos);
-        return;
-    }
-
+    const freshLinks = await sendNewLinks(Links, currentYTVideos);
+    if(freshLinks || freshLinks.length > 0){
+        await sendLikes(freshLinks);
+    } 
 
     const newVideos = await newNameChecker(currentYTVideos, DBvideos, Links);
     if (!newVideos) {
@@ -39,6 +36,19 @@ exports.YTGetLinks = async () => {
         return videoForDownload;
     }
 };
+
+async function sendNewLinks(Links, YTVideos) {
+    if(!Links || Links.length === 0){
+        await sendLikes(YTVideos);
+        return;
+    }
+   
+    const cleanLinks = await clearNames(Links);
+    const cleanYTLinks = await clearNames(YTVideos);
+    const linkNames = new Set(cleanLinks.map(video => video.name))
+    const freshLinks = cleanYTLinks.filter(video => !linkNames.has(video.name));
+    return freshLinks;
+}
 
 async function sendLikes(YouTubeVideos) {
     const skipVideoName = ['private video', 'deleted video'];
