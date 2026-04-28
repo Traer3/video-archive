@@ -3,10 +3,15 @@ const { addLog } = require("../logService");
 const { runCommand } = require("../toolsService");
 const { clearNames } = require("./newNameChecker");
 
+
 exports.simulateDownload = async (newVideos, Links) => {
     const videoForDownload = [];
-    const clearedLinks = clearNames(Links)
-    const linksMap = new Map(clearedLinks.map(link => [link.name, link]))
+
+    const clearedLinks = await clearNames(Links)
+    const linksMap = clearedLinks.length > 0
+        ? new Map(clearedLinks.map(link => [link.name, link]))
+        : new Map();
+    
     console.log("🥽 Simulating a download")
     let i = 0;
     for (const video of newVideos) {
@@ -33,7 +38,7 @@ exports.simulateDownload = async (newVideos, Links) => {
             } else if (errorMessage.includes("blocked it in your country")) {
                 category = "Country restriction";
             }
-            //SimulatingDownload
+            
             await addLog({
                 type: "SimulatingDownload",
                 message: `🧱 Video ${video.name} : ${category} `

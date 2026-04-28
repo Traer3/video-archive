@@ -4,9 +4,8 @@ const { loadCredentials, getAuthUrl, finishAuth } = require("../../services/auth
 exports.consoleAuthorization = async () => {
     console.log("📥 Authorization via console... ");
     const existing = await loadCredentials()
-
     if (existing.status) {
-        return existing.client
+        return existing
     } else {
         try {
             const authUrl = await getAuthUrl();

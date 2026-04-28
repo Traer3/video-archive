@@ -1,7 +1,7 @@
 const { consoleAuthorization } = require("../middleware/auth/authorize");
 const { getVideoList } = require("./videoService");
 const { cleanName } = require('./toolsService');
-const { writeLinks, getLinks, lockedVideo } = require('./linksService');
+const { writeLinks, getLinks } = require('./linksService');
 const { getYouTubeLinks } = require("./linksGenerator/getYouTubeLinks");
 const { newNameChecker } = require("./linksGenerator/newNameChecker");
 const { simulateDownload } = require("./linksGenerator/simulatingDownload");
@@ -14,22 +14,30 @@ exports.YTGetLinks = async () => {
     const Links = await getLinks();
     const auth = await consoleAuthorization();
 
-    const currentYTVideos = await getYouTubeLinks(auth);
-    if (!Links) {
+    const currentYTVideos = auth.status
+        ? await getYouTubeLinks(auth.client)
+        : [];
+
+    // это значит что тут не будет НОВЫХ лайков , только старые останутся 
+    // Нужно создать условие для добавления новых видосов в список 
+    if (Links.length === 0) {
         await sendLikes(currentYTVideos);
         return;
     }
+
 
     const newVideos = await newNameChecker(currentYTVideos, DBvideos, Links);
     if (!newVideos) {
         return [];
     }
 
-    const videoForDownload = await simulateDownload(newVideos, Links)
-
-    console.log("🏁 Links written");
-    console.log(videoForDownload);
-    return videoForDownload;
+    let videoForDownload
+    if (newVideos.length !== 0) {
+        videoForDownload = await simulateDownload(newVideos, Links)
+        console.log("🏁 Links written");
+        console.log(videoForDownload);
+        return videoForDownload;
+    }
 };
 
 async function sendLikes(YouTubeVideos) {

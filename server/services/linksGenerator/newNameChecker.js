@@ -3,29 +3,35 @@ const { cleanName } = require("../toolsService");
 
 exports.newNameChecker = async (YTVideos, DBvideos, Links) => {
     if (!YTVideos) return;
-    const cleanDBnames = clearNames(DBvideos);
-    const cleanLinks = clearNames(Links);
-    const cleanYTLinks = clearNames(YTVideos)
+    console.log("newNameChecker WORKING !")
+    try {
+        const cleanDBnames = await clearNames(DBvideos);
+        const cleanLinks = await clearNames(Links);
+        const cleanYTLinks = await clearNames(YTVideos)
 
-    const NamesFromDB = new Set(cleanDBnames.map(video => video.name))
-    const clearedLinks = new Set(cleanLinks.map(video => video.name))
+        const NamesFromDB = new Set(cleanDBnames.map(video => video.name))
+        const clearedLinks = new Set(cleanLinks.map(video => video.name))
 
 
-    const newVids = cleanYTLinks.filter(video => {
-        const name = video.name;
-        const isTrash = name === "Private video" || name === "Deleted video";
-        if (isTrash) return false;
-        const isAlreadyInDB = NamesFromDB.has(name);
-        return !isAlreadyInDB
-    });
+        const newVids = cleanYTLinks.filter(video => {
+            const name = video.name;
+            const isTrash = name === "Private video" || name === "Deleted video";
+            if (isTrash) return false;
+            const isAlreadyInDB = NamesFromDB.has(name);
+            return !isAlreadyInDB
+        });
 
-    const checkedVideos = await lockedLinks(newVids, clearedLinks);
+        const checkedVideos = await lockedLinks(newVids, cleanLinks);
 
-    return checkedVideos;
+        return checkedVideos;
+    } catch (err) {
+        console.error(`Error in newNameChecker : ${err}`)
+    }
 };
 
 exports.clearNames = (videos) => {
-    clearNames(videos)
+    //console.log("videos in clearNames :  ", videos)
+    return clearNames(videos)
 }
 
 async function clearNames(videos) {
@@ -37,6 +43,7 @@ async function clearNames(videos) {
         }
         cleanedVideos.push(clearedVideo)
     }
+    return cleanedVideos;
 };
 
 
