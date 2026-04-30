@@ -3,13 +3,14 @@ const router = express.Router();
 const { getVideoList, getVideos, getVideo, getThumbnail, filterVideo, deleteID, importVideo, saveVidDuration, saveUniqueData } = require('../controllers/videoController.js');
 
 const durationGeneratorService = require('../services/durationGeneratorService.js')
-const importVideoService = require('../services/videoImporterService.js');
 const { thumbnailGenerator } = require('../services/thumbnailGeneratorService.js');
 const { checkUniqueness } = require('../services/uniquenessService.js');
 
 const { deleteVideo, deleteThumbnail } = require('../controllers/videoEraserController.js');
 const { videoSorter } = require('../services/videoSorterService.js');
-const { YTGetLinks } = require('../services/linksGeneratorService.js');
+
+const { videoImporter } = require('../services/videoImporter/videoImporterService.js');
+const { YTGetLinks } = require('../services/linksGenerator/linksGeneratorService.js');
 
 
 router.get('/videos', getVideos);
@@ -25,7 +26,7 @@ router.get('/deleteThumbnail/:id', deleteThumbnail);
 
 router.get('/auth-test', async (req, res) => {
     try {
-        await YTGetLinks();
+        await YTGetLinks()
         res.json({ message: "auth start in background." })
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -61,7 +62,7 @@ router.get('/duration-test', async (req, res) => {
 
 router.get('/import-test', async (req, res) => {
     try {
-        importVideoService.videoImporter()
+       await  videoImporter()
         res.json({ message: "duration start in background." })
     } catch (err) {
         res.status(500).json({ error: err.message });

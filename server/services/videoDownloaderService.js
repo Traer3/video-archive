@@ -1,8 +1,9 @@
 const path = require("path");
 const fsPromises = require("fs").promises
-const { videoImporter } = require("./videoImporterService.js");
+
 const { addLog } = require("./logService.js");
 const { exists, runCommand, sleep, writeInfo } = require("./toolsService.js");
+const { videoImporter } = require("./videoImporter/videoImporterService.js");
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 
 exports.beginDownloadingVideos = async (dbLinks) => {

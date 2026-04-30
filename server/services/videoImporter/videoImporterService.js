@@ -1,17 +1,22 @@
 const fsPromises = require("fs").promises
 const path = require('path');
 
-const { readFolders, getVideoList, importVideo } = require("./videoService.js");
-const { exists } = require("./toolsService.js");
-const { addLog } = require("./logService.js");
+const { readFolders, getVideoList, importVideo } = require("../videoService.js");
+const { exists, cleanName } = require("../toolsService.js");
+const { addLog } = require("../logService.js");
+const { getLinks } = require("../linksService.js");
+const { clearNames } = require("../linksGenerator/newNameChecker.js");
 
-const VIDEOS_DIR = path.join(__dirname, "../videos");
+const VIDEOS_DIR = path.join(__dirname, "../../videos");
 
 exports.videoImporter = async () => {
     if (!(await exists(VIDEOS_DIR))) {
         console.error("Missing video folder");
         return;
     };
+
+    videoImporter()
+    return;
 
     const files = await readFolders(VIDEOS_DIR);
     console.log(`Files amount: ${files.length}`);
@@ -101,4 +106,80 @@ async function generateUniqueName(existingVideos, baseName) {
         maxNumber = 1;
     }
     return maxNumber > 0 ? `${baseName} (${maxNumber + 1})` : baseName;
+};
+
+async function videoImporter() {
+    const DBvideos = await getVideoList();
+    const YTvideos = await getLinks();
+    const cleanDBvideos = await clearNames(DBvideos);
+    const cleanYTnames = await clearNames(YTvideos);
+    const namesFromDB = new Set(cleanDBvideos.map(video => video.name))
+    const namesFromYT = new Set(cleanYTnames.map(vid => vid.name));
+
+    const newVideos = cleanYTnames.filter(video => {
+        const alreadyExisted = namesFromDB.has(video.name)
+        if(alreadyExisted){
+            console.log(`Video : ${video.name} already existed`)
+        }
+        return !alreadyExisted;
+    });
+    
+    
+
+    const files = await readFolders(VIDEOS_DIR);
+
+    //videoName получаем когда будем проходится по списку cleanYTnames выискивая порядок 
+
+    await importingVideos(files,DBvideos,videoName);
+    
+};
+
+async function importingVideos(files,DBvideos,videoName) {
+    for (const file of files) {
+        const filePath = file.fullPath
+        try {
+            const stat = await fsPromises.stat(filePath);
+            if (stat.isFile() && isVideoFile(file.name)) {
+                const originalName = path.parse(file.name).name;
+                const cleanedName = cleanName(originalName)
+
+                const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
+                const duplicate = findDuplicate(cleanDBvideos, cleanedName, sizeMB);
+
+                if (duplicate) {
+                    console.log(`⏩ Scip duplicate: ${originalName} (${sizeMB} MB)`);
+                    skippedCount++;
+                    continue;
+                }
+
+                const finalName = await generateUniqueName(DBvideos, originalName);
+                const duration = "";
+                if(!namesFromYT.has(cleanedName)){
+                    await importVideo({
+                        name: finalName,
+                        duration: duration,
+                        sizeMB: sizeMB,
+                        category: 'personal',
+                    });
+                }else{
+                    await importVideo({
+                        name: finalName,
+                        duration: duration,
+                        sizeMB: sizeMB,
+                        category: 'YouTube',
+                    });
+                }
+
+                await addLog({
+                    type: "ImporterLogs",
+                    message: `✅ Successfully imported: ${finalName}`
+                });
+                existingVideos.push({ name: finalName, size_mb: sizeMB });
+                console.log(`✅ Added: ${finalName} (${sizeMB} MB)`);
+                importedCount++;
+            }
+        } catch (err) {
+            console.error(`ERROR cant reed file ${file.name}:`, err.message)
+        };
+    };
 }

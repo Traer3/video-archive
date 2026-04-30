@@ -1,12 +1,10 @@
-const { consoleAuthorization } = require("../middleware/auth/authorize");
-const { getVideoList } = require("./videoService");
-const { cleanName } = require('./toolsService');
-const { writeLinks, getLinks } = require('./linksService');
-const { getYouTubeLinks } = require("./linksGenerator/getYouTubeLinks");
-const { newNameChecker, clearNames } = require("./linksGenerator/newNameChecker");
-const { simulateDownload } = require("./linksGenerator/simulatingDownload");
-
-
+const { consoleAuthorization } = require("../../middleware/auth/authorize");
+const { getVideoList } = require("../videoService");
+const { cleanName } = require('../toolsService');
+const { writeLinks, getLinks } = require('../linksService');
+const { getYouTubeLinks } = require("./getYouTubeLinks");
+const { newNameChecker, clearNames } = require("./newNameChecker");
+const { simulateDownload } = require("./simulatingDownload");
 
 exports.YTGetLinks = async () => {
     console.log("Starting geting links...");

@@ -1,4 +1,5 @@
-const { YTGetLinks } = require("./services/linksGeneratorService");
+
+const { YTGetLinks } = require("./services/linksGenerator/linksGeneratorService");
 const { getLinks } = require("./services/linksService");
 const { beginDownloadingVideos } = require("./services/videoDownloaderService");
 
@@ -8,7 +9,7 @@ exports.VideoDownloader = async () => {
     const likedVideos = await getLinks();
     try {
         if (likedVideos.length === 0) {
-            await YTGetLinks();
+            await YTGetLinks()
             return;
         }
         //const checkTime = await checkTiming(likedVideos);
