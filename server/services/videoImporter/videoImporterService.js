@@ -119,30 +119,50 @@ async function videoImporter() {
     const newVideos = cleanYTnames.filter(video => {
         const alreadyExisted = namesFromDB.has(video.name)
         if(alreadyExisted){
-            console.log(`Video : ${video.name} already existed`)
+            //console.log(`Video : ${video.name} already existed`)
         }
         return !alreadyExisted;
     });
-    
-    
 
-    const files = await readFolders(VIDEOS_DIR);
+   
+    const nv = cleanYTnames.map(vid => {
+        const alreadyExisted = namesFromDB.has(vid.name)
+        if(!alreadyExisted){
+            return vid.name;
+        }
+    });
+    console.log("nv: ",nv)
+
+    //const files = await readFolders(VIDEOS_DIR);
 
     //videoName получаем когда будем проходится по списку cleanYTnames выискивая порядок 
+    const reverseYTnames = cleanYTnames.reverse()
+    
+    const sortedVideos = reverseYTnames.filter(vid=>{
+        const foundVideo = namesFromYT.has(vid.name);
+        if(foundVideo){
+            return foundVideo;
+        }
+    });
 
-    await importingVideos(files,DBvideos,videoName);
+    //await importingVideos(files,DBvideos,cleanDBvideos,namesFromYT,videoName);
+    console.log("sortedVideos : ", sortedVideos)
     
 };
 
-async function importingVideos(files,DBvideos,videoName) {
+async function importingVideos(files,DBvideos,cleanDBvideos,namesFromYT,videoName) {
     for (const file of files) {
         const filePath = file.fullPath
+        const fileName = path.parse(file.name).name;
+        const cleanedName = cleanName(fileName)
+        if(cleanedName !== videoName){
+            console.log("Cant find file in video folders");
+            return;
+        }
+        
         try {
             const stat = await fsPromises.stat(filePath);
             if (stat.isFile() && isVideoFile(file.name)) {
-                const originalName = path.parse(file.name).name;
-                const cleanedName = cleanName(originalName)
-
                 const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
                 const duplicate = findDuplicate(cleanDBvideos, cleanedName, sizeMB);
 
@@ -174,9 +194,9 @@ async function importingVideos(files,DBvideos,videoName) {
                     type: "ImporterLogs",
                     message: `✅ Successfully imported: ${finalName}`
                 });
-                existingVideos.push({ name: finalName, size_mb: sizeMB });
+                //existingVideos.push({ name: finalName, size_mb: sizeMB });
                 console.log(`✅ Added: ${finalName} (${sizeMB} MB)`);
-                importedCount++;
+                //importedCount++;
             }
         } catch (err) {
             console.error(`ERROR cant reed file ${file.name}:`, err.message)
