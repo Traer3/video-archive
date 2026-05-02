@@ -124,6 +124,8 @@ async function videoImporter() {
         return !alreadyExisted;
     });
 
+
+    
    
     const nv = cleanYTnames.map(vid => {
         const alreadyExisted = namesFromDB.has(vid.name)
