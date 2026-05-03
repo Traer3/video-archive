@@ -9,13 +9,22 @@ const { clearNames } = require("../linksGenerator/newNameChecker.js");
 
 const VIDEOS_DIR = path.join(__dirname, "../../videos");
 
-exports.videoImporter = async () => {
+exports.videoImporter = async (name) => {
     if (!(await exists(VIDEOS_DIR))) {
         console.error("Missing video folder");
         return;
     };
+    const DBvideos = await getVideoList();
+    const cleanDBvideos = await clearNames(DBvideos);
+    const namesFromDB = new Set(cleanDBvideos.map(video => video.name))
+    const testName = "【ブルアカ】7th PV"
+    const foundVideo = await findVideo(testName);
+    
+    if(foundVideo){
+        console.log("answer : ", foundVideo);
+        await checkDuplicate(namesFromDB, foundVideo)
+    }
 
-    videoImporter()
     return;
 
     const files = await readFolders(VIDEOS_DIR);
@@ -108,6 +117,33 @@ async function generateUniqueName(existingVideos, baseName) {
     return maxNumber > 0 ? `${baseName} (${maxNumber + 1})` : baseName;
 };
 
+async function findVideo(videoName) {
+    const normalName = await cleanName(videoName);
+    const files = await readFolders(VIDEOS_DIR);
+    for (const file of files) {
+        const fileName = file.name.replace(/\.mp4$/i, '');
+        const filePath = file.fullPath
+        const cleanedName = await cleanName(fileName);
+        if(cleanedName === normalName){
+            console.log("File in folder!");
+            const stat = await fsPromises.stat(filePath);
+            const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
+            return {
+                name: videoName,
+                duration: "",
+                sizeMB: sizeMB,
+                category: ''
+            }
+        };
+    };
+};
+
+async function checkDuplicate(DBvideos,video) {
+    
+}
+
+
+/*
 async function videoImporter() {
     const DBvideos = await getVideoList();
     const YTvideos = await getLinks();
@@ -151,17 +187,18 @@ async function videoImporter() {
     console.log("sortedVideos : ", sortedVideos)
     
 };
+*/
 
-async function importingVideos(files,DBvideos,cleanDBvideos,namesFromYT,videoName) {
+async function importingVideos(files, DBvideos, cleanDBvideos, namesFromYT, videoName) {
     for (const file of files) {
         const filePath = file.fullPath
         const fileName = path.parse(file.name).name;
         const cleanedName = cleanName(fileName)
-        if(cleanedName !== videoName){
+        if (cleanedName !== videoName) {
             console.log("Cant find file in video folders");
             return;
         }
-        
+
         try {
             const stat = await fsPromises.stat(filePath);
             if (stat.isFile() && isVideoFile(file.name)) {
@@ -176,14 +213,14 @@ async function importingVideos(files,DBvideos,cleanDBvideos,namesFromYT,videoNam
 
                 const finalName = await generateUniqueName(DBvideos, originalName);
                 const duration = "";
-                if(!namesFromYT.has(cleanedName)){
+                if (!namesFromYT.has(cleanedName)) {
                     await importVideo({
                         name: finalName,
                         duration: duration,
                         sizeMB: sizeMB,
                         category: 'personal',
                     });
-                }else{
+                } else {
                     await importVideo({
                         name: finalName,
                         duration: duration,
