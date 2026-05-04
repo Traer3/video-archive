@@ -1,11 +1,11 @@
-const fsPromises = require("fs").promises
 const path = require('path');
 
-const { readFolders, getVideoList, importVideo } = require("../videoService.js");
+const { getVideoList, importVideo } = require("../videoService.js");
 const { exists, cleanName } = require("../toolsService.js");
 const { addLog } = require("../logService.js");
 const { getLinks } = require("../linksService.js");
 const { clearNames } = require("../linksGenerator/newNameChecker.js");
+const { getVideoSize } = require("./getVideoSize.js");
 
 const VIDEOS_DIR = path.join(__dirname, "../../videos");
 
@@ -19,12 +19,15 @@ exports.videoImporter = async (name) => {
     const namesFromDB = new Map(cleanDBvideos.map(video => [video.name, video]))
 
     try {
-        const foundVideo = await findVideo(name);
+        const foundVideo = await getVideoSize(name);
 
         const answer = await checkDuplicate(namesFromDB, foundVideo);
-        if (answer) return;
+        if (answer) {
+            return answer;
+        };
         const categorizedVideo = await checkCategory(foundVideo)
         const uniqueVideo = await uniqueName(categorizedVideo)
+
         await importVideo({
             name: uniqueVideo.name,
             duration: uniqueVideo.duration,
@@ -43,42 +46,42 @@ exports.videoImporter = async (name) => {
     }
 };
 
-async function findVideo(videoName) {
-    const normalName = cleanName(videoName);
-    const files = await readFolders(VIDEOS_DIR);
-    for (const file of files) {
-        const fileName = file.name.replace(/\.mp4$/i, '');
-        const filePath = file.fullPath
-        const cleanedName = cleanName(fileName);
-        if (cleanedName === normalName) {
-            console.log("File in folder!");
-            const stat = await fsPromises.stat(filePath);
-            const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
-            return {
-                name: videoName,
-                duration: "",
-                sizeMB: sizeMB,
-                category: ''
-            }
-        } else {
-            console.log(`❌ Video ${videoName} , missing`)
-            return;
-        }
-    };
-};
+exports.getCategory = async (video) =>{
+    // будем получать видео , доставать категорию и ввносить новую 
+}
+
 
 async function checkDuplicate(DBvideos, video) {
     if (!video) {
         console.log(`No video provided in checkDuplicate ${video}`);
         return [];
-    }
+    };
     const normalName = cleanName(video.name);
     const foundVideo = DBvideos.get(normalName);
+
     if (!foundVideo) {
-        return false;
-    }
+        const categorizedVideo = await checkCategory(video);
+        await importVideo({
+            name: categorizedVideo.name,
+            duration: categorizedVideo.duration,
+            sizeMB: categorizedVideo.sizeMB,
+            category: categorizedVideo.category,
+        });
+        await addLog({
+            type: "ImporterLogs",
+            message: `✅ Successfully imported: ${categorizedVideo.name}`
+        });
+        console.log('Import end')
+
+        return categorizedVideo;
+    };
+
     if (foundVideo.size_mb === video.sizeMB) {
         console.log(`⚠ Video is duplicate: ${foundVideo.name} (${foundVideo.size_mb} MB)`);
+        await addLog({
+            type: "ImporterLogs",
+            message: `⚠ Video is duplicate: ${foundVideo.name}`
+        });
         return true;
     };
 }
