@@ -16,8 +16,7 @@ exports.beginDownloadingVideos = async (dbLinks) => {
         return;
     }
     try {
-        let links = dbLinks.map(video => video.url);
-        links.reverse();
+        let links = dbLinks.reverse();
 
         let targetFolder = null;
         const subFolders = await fsPromises.readdir(VIDEOS_DIR);
@@ -35,7 +34,7 @@ exports.beginDownloadingVideos = async (dbLinks) => {
             console.error("❌ No available folder");
             return;
         }
-
+        const linkslength = links.length;
         for (let i = 0; i < links.length; i++) {
             let isOk = await CheckFolderCapacity(VIDEOS_DIR, path.basename(targetFolder));
             if (!isOk) {
@@ -48,8 +47,9 @@ exports.beginDownloadingVideos = async (dbLinks) => {
                     break;
                 }
             };
-            await VideoDownloader(links[i], i, targetFolder, links);
+            await VideoDownloader(links[i], i, targetFolder, linkslength);
         }
+
         console.log("🔥 Completed");
         return;
     } catch (err) {
@@ -57,10 +57,11 @@ exports.beginDownloadingVideos = async (dbLinks) => {
     }
 };
 
-async function VideoDownloader(url, index, folderPath, links) {
-    console.log(`Downdloading: [${index + 1}]/${links.length}: ${url}`);
+// мне приходит vide с name и url 
+async function VideoDownloader(video, index, folderPath, linkslength) {
+    console.log(`Downdloading: [${index + 1}]/${linkslength}: ${video.url}`);
 
-    const command1 = `yt-dlp -o "${folderPath}/%(title)s.%(ext)s" --cookies youtubeCookies.txt --merge-output-format mp4 "${url}"`;
+    const command1 = `yt-dlp -o "${folderPath}/%(title)s.%(ext)s" --cookies youtubeCookies.txt --merge-output-format mp4 "${video.url}"`;
 
     let success = false;
     let attempts = 3;
@@ -71,10 +72,10 @@ async function VideoDownloader(url, index, folderPath, links) {
             console.log("✅ Downloaded");
 
             console.log("📥 Importing downloaded video(s) to DB...");
-            await videoImporter()
+            await videoImporter(video.name)
             console.log("✅ Imported successfully");
 
-            await addLog({ type: "DownloaderLogs", message: '✅ Successfully processed: ${url}' });
+            await addLog({ type: "DownloaderLogs", message: `✅ Successfully processed: ${video.url}` });
             success = true;
         } catch (err) {
             attempts--;
@@ -91,8 +92,8 @@ async function VideoDownloader(url, index, folderPath, links) {
 
                 await sleep(5000);
             } else {
-                console.log(`❌ error while processing ${url}`);
-                await addLog({ type: "DownloaderLogs", message: `❌ Error: ${url} | ${err.message}` });
+                console.log(`❌ error while processing ${video.url}`);
+                await addLog({ type: "DownloaderLogs", message: `❌ Error: ${video.url} | ${err.message}` });
             };
         }
     };

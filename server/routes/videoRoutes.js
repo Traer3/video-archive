@@ -11,6 +11,7 @@ const { videoSorter } = require('../services/videoSorterService.js');
 
 const { videoImporter } = require('../services/videoImporter/videoImporterService.js');
 const { YTGetLinks } = require('../services/linksGenerator/linksGeneratorService.js');
+const { beginDownloadingVideos } = require('../services/videoDownloaderService.js');
 
 
 router.get('/videos', getVideos);
@@ -23,6 +24,16 @@ router.get('/deleteVideo/:id', deleteVideo);
 router.get('/deleteThumbnail/:id', deleteThumbnail);
 
 
+
+router.get('/down-test', async (req, res) => {
+    try {
+
+        await beginDownloadingVideos()
+        res.json({ message: "auth start in background." })
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 router.get('/auth-test', async (req, res) => {
     try {
@@ -62,7 +73,8 @@ router.get('/duration-test', async (req, res) => {
 
 router.get('/import-test', async (req, res) => {
     try {
-       await  videoImporter()
+        const testName = ""
+        await videoImporter(testName)
         res.json({ message: "duration start in background." })
     } catch (err) {
         res.status(500).json({ error: err.message });
