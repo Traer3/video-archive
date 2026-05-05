@@ -4,7 +4,17 @@ exports.addLog = async (req, res) => {
     try {
         const { type, message } = req.body;
         const allowedLogs = [
-            "SQLLogs", "ExpressLogs", "DownloaderLogs", "ImporterLogs", "EraserLogs", "IsItUniqueLogs", "ThumbnailGeneratorLogs", "DurationFethcer", "CookieExtractor", "SimulatingDownload"
+            "SQLLogs", 
+            "ExpressLogs", 
+            "DownloaderLogs", 
+            "ImporterLogs", 
+            "EraserLogs", 
+            "IsItUniqueLogs", 
+            "ThumbnailGeneratorLogs", 
+            "DurationFethcer", 
+            "CookieExtractor", 
+            "SimulatingDownload",
+            "SorterService"
         ];
 
         if (!type || !allowedLogs.includes(type)) {

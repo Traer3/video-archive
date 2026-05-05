@@ -1,9 +1,10 @@
-const fsPromises = require("fs").promises
 const path = require("path");
 
-const { readFolders, databaseOverwrite, importVideo } = require("./videoService.js");
-const { exists } = require("./toolsService");
+const { readFolders, databaseOverwrite } = require("./videoService.js");
+const { exists, cleanName } = require("./toolsService");
 const { getLinks } = require("./linksService.js");
+const { videoImporter } = require("./videoImporter/videoImporterService.js");
+const { addLog } = require("./logService.js");
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 
 exports.videoSorter = async () => {
@@ -23,20 +24,32 @@ exports.videoSorter = async () => {
 
 async function SortedList(videoFiles, likedList) {
     const existedVidoes = [];
-    const likedListName = likedList.map(video => video.name)
-    const resersLikedList = likedListName.reverse();
+    const likedListName = [...likedList.map(video => video.name)].reverse()
+    const fileNames = new Set(videoFiles.map(video => {
+        const videoName = video.name.replace(/\.mp4$/i, '');
+        const cleanedName = cleanName(videoName)
+        return cleanedName;
+    }));
 
-    resersLikedList.map(vid => {
-        let finedVideo = videoFiles.find(videoFile => {
-            let formatedName = vid + ".mp4"
-            return videoFile.name === formatedName
-        })
-        if (finedVideo) {
-            existedVidoes.push(finedVideo)
+    likedListName.forEach(async vid => {
+        const videoName = cleanName(vid);
+        const foundVideo = fileNames.has(videoName);
+        if(foundVideo){
+            existedVidoes.push(vid);
+        }else{
+            // потом включить ) 
+            /*
+            await addLog({
+                type: "SorterService",
+                message: `⚠ Missing video : ${vid}`
+            })
+            */
+            
         }
-    });
+    })
+    const reverseExistedList = existedVidoes.reverse()
 
-    return existedVidoes;
+    return reverseExistedList;
 };
 
 async function DatabaseOverwrite(newList) {
@@ -44,20 +57,10 @@ async function DatabaseOverwrite(newList) {
     const result = await databaseOverwrite();
     if (result.success) { result.message }
     try {
-        for (const video of newList) {
-            const filePath = video.fullPath;
-            const stat = await fsPromises.stat(filePath);
-            if (stat.isFile()) {
-                const originalName = path.parse(video.name).name;
-                const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
-
-                await importVideo({
-                    name: originalName,
-                    duration: "",
-                    sizeMB: sizeMB,
-                    category: 'YouTube',
-                });
-            };
+        for (let i = 0; i < newList.length; i++) {
+            const videoName = newList[i];
+            console.log("videoName: ", videoName)
+            await videoImporter(videoName)
         }
     } catch (err) {
         console.error("❌ Error during DatabaseOverwrite : ", err.message);
