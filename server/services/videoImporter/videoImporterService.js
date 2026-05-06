@@ -33,6 +33,8 @@ exports.videoImporter = async (name) => {
             duration: uniqueVideo.duration,
             sizeMB: uniqueVideo.sizeMB,
             category: uniqueVideo.category,
+            isitunique: false,
+            filtered: false
         });
         await addLog({
             type: "ImporterLogs",
@@ -45,11 +47,6 @@ exports.videoImporter = async (name) => {
         return;
     }
 };
-
-exports.getCategory = async (video) =>{
-    // будем получать видео , доставать категорию и ввносить новую 
-}
-
 
 async function checkDuplicate(DBvideos, video) {
     if (!video) {
@@ -66,6 +63,8 @@ async function checkDuplicate(DBvideos, video) {
             duration: categorizedVideo.duration,
             sizeMB: categorizedVideo.sizeMB,
             category: categorizedVideo.category,
+            isitunique: false,
+            filtered: false
         });
         await addLog({
             type: "ImporterLogs",

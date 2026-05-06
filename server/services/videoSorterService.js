@@ -1,9 +1,8 @@
 const path = require("path");
 
-const { readFolders, databaseOverwrite } = require("./videoService.js");
+const { readFolders, databaseOverwrite, getVideoList, importVideo } = require("./videoService.js");
 const { exists, cleanName } = require("./toolsService");
 const { getLinks } = require("./linksService.js");
-const { videoImporter } = require("./videoImporter/videoImporterService.js");
 const { addLog } = require("./logService.js");
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 
@@ -14,11 +13,15 @@ exports.videoSorter = async () => {
         console.error("Missing video folder");
         return;
     };
+    const oldTable = await getVideoList();
+    
 
     const videoFiles = await readFolders(VIDEOS_DIR);
     const likedVideos = await getLinks();
     const sortedList = await SortedList(videoFiles, likedVideos);
-    await DatabaseOverwrite(sortedList);
+    const newList =  await writeOldData(oldTable, sortedList);
+    await DatabaseOverwrite(newList);
+
     console.log("✅ Videos sorted!")
 };
 
@@ -37,18 +40,15 @@ async function SortedList(videoFiles, likedList) {
         if(foundVideo){
             existedVidoes.push(vid);
         }else{
-            // потом включить ) 
             /*
             await addLog({
                 type: "SorterService",
                 message: `⚠ Missing video : ${vid}`
             })
             */
-            
         }
     })
     const reverseExistedList = existedVidoes.reverse()
-
     return reverseExistedList;
 };
 
@@ -56,13 +56,32 @@ async function DatabaseOverwrite(newList) {
     console.log("🔄 Rewriting old DB");
     const result = await databaseOverwrite();
     if (result.success) { result.message }
+
     try {
-        for (let i = 0; i < newList.length; i++) {
-            const videoName = newList[i];
-            console.log("videoName: ", videoName)
-            await videoImporter(videoName)
-        }
+        for(const video of newList){
+            await importVideo({
+                name: video.name,
+                duration: video.duration,
+                sizeMB: video.size_mb,
+                category: video.category,
+                isitunique: video.isitunique,
+                filtered: video.filtered
+            });
+        };
     } catch (err) {
         console.error("❌ Error during DatabaseOverwrite : ", err.message);
     }
+};
+
+async function writeOldData(oldTable, sortedList) {
+    const videos = []
+    const oldTableMap = new Map(oldTable.map(video => [video.name, video]))
+    for(const newVideo of sortedList){
+        const foundVideo = oldTableMap.get(newVideo);
+        if(foundVideo){
+            const {id, ...video} = foundVideo;
+            videos.push(video)
+        }
+    };
+    return videos
 }

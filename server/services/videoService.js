@@ -53,11 +53,11 @@ exports.deleteID = async (data) => {
 };
 
 exports.importVideo = async (data) => {
-    const { name, duration, sizeMB, category } = data;
+    const { name, duration, sizeMB, category, isitunique, filtered } = data;
     const query =
-        `INSERT INTO videos (name, duration, size_mb, category)
-    VALUES ($1, $2, $3, $4) RETURNING *`;
-    const values = [name, duration, sizeMB, category];
+        `INSERT INTO videos (name, duration, size_mb, category, isitunique, filtered)
+    VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+    const values = [name, duration, sizeMB, category, isitunique, filtered];
     const result = await pool.query(query, values);
     return result.rows[0];
 };
