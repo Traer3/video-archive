@@ -3,7 +3,7 @@ const Ffmpeg = require("fluent-ffmpeg");
 const path = require('path');
 
 const { readFolders } = require("./videoService.js");
-const { exists } = require("./toolsService.js");
+const { exists, addExtension } = require("./toolsService.js");
 const { addLog } = require("./logService.js");
 
 const VIDEOS_DIR = path.join(__dirname, "../videos");
@@ -68,7 +68,7 @@ async function processAllVideos(folderPath) {
         }
 
         const nameOnly = path.parse(file).name;
-        const thumbnailName = `${nameOnly}.jpg`;
+        const thumbnailName = addExtension(nameOnly,'.jpg')
 
 
         if (existingThumbnails.find(thumbnail => thumbnail.name === thumbnailName)) {

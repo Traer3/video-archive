@@ -2,7 +2,7 @@ const fsPromises = require("fs").promises
 const path = require('path');
 
 const { readFolders, getVideoList, deleteID } = require("./videoService.js");
-const { exists } = require("./toolsService.js");
+const { exists, addExtension } = require("./toolsService.js");
 const { addLog } = require("./logService.js");
 
 const VIDEOS_DIR = path.join(__dirname, "../videos");
@@ -45,7 +45,7 @@ exports.deleteThumbnail = async (thumbnailFiles, isVideoExited) => {
 
 async function deleteThumbnailFile(thumbnailFiles, videoName) {
     console.log(`Deleting thumbnail for ${videoName}`);
-    const thumbnailName = `${videoName}.jpg`;
+    const thumbnailName = addExtension(videoName,'.jpg');
     const findThumbnail = thumbnailFiles.find(thumbnail => thumbnail.name === thumbnailName);
     try {
         await fsPromises.rm(findThumbnail.fullPath)
@@ -61,7 +61,7 @@ async function deleteThumbnailFile(thumbnailFiles, videoName) {
 
 async function deleteVideoFile(videoFiles, isVideoExited) {
     console.log(`Searching for ${isVideoExited.name}`);
-    const videoName = `${isVideoExited.name}.mp4`;
+    const videoName = addExtension(isVideoExited,'.mp4');
     const findVideo = videoFiles.find(video => video.name === videoName);
     try {
         console.log("findVideo: ", findVideo);

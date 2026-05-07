@@ -1,7 +1,7 @@
 const path = require('path');
 const fsPromises = require("fs").promises
 
-const { cleanName } = require("../toolsService");
+const { cleanName, deleteExtension } = require("../toolsService");
 const { readFolders } = require("../videoService");
 
 const VIDEOS_DIR = path.join(__dirname, "../../videos");
@@ -12,7 +12,7 @@ exports.getVideoSize = async (videoName) =>{
     try{
         const normalName = cleanName(videoName);
         for (const file of files) {
-            const fileName = file.name.replace(/\.mp4$/i, '');
+            const fileName = deleteExtension(file.name);
             const filePath = file.fullPath
             const cleanedName = cleanName(fileName);
             if (cleanedName === normalName) {

@@ -4,6 +4,7 @@ const fsPromises = require("fs").promises
 const config = require('../config.js');
 const videoService = require('../services/videoService.js')
 const { readFolders } = require("../services/videoService.js");
+const { replaceExtension } = require("../services/toolsService.js");
 
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 const THUMBNAILS_DIR = path.join(__dirname, "../thumbnails");
@@ -40,9 +41,8 @@ exports.getVideos = async (req, res) => {
         const thumbnailNames = thumbnails.map(thumbnail => thumbnail.name);
 
         const videoList = paginatedFiles.map((v) => {
-            //const fullPath = thumbnails
             const file = v.name;
-            const thumbnailName = file.replace(/\.mp4$/i, '.jpg');
+            const thumbnailName = replaceExtension(file, '.jpg');
             const hasThumbnail = thumbnailNames.includes(thumbnailName);
             return {
                 name: file,
@@ -50,7 +50,6 @@ exports.getVideos = async (req, res) => {
                 thumbnail: hasThumbnail
                     ? `${config.VIDEO_URL}/api/server/thumbnails/${encodeURIComponent(thumbnailName)}`
                     : null,
-                //fullPath: fullPath
             };
         });
 

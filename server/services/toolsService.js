@@ -73,4 +73,21 @@ exports.cleanName = (str) => {
         .toLowerCase()
         .replace(/[\uFF1A]/g, ':')
         .replace(/\s+/g, ' ')
+};
+
+exports.deleteExtension = (str) =>{
+    if(!str) return "";
+    return str
+        .replace(/\.mp4$/i, '');
+};
+
+exports.replaceExtension = (str, newFormat) => {
+    if(!str) return "";
+    return str
+        .replace(/\.mp4$/i, `${newFormat}`)
+};
+
+exports.addExtension = (str, newExtension) => {
+    if(!str) return "";
+    return `${str}${newExtension}`
 }

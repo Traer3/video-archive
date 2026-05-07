@@ -1,7 +1,7 @@
 const path = require("path");
 
 const { readFolders, databaseOverwrite, getVideoList, importVideo } = require("./videoService.js");
-const { exists, cleanName } = require("./toolsService");
+const { exists, cleanName, deleteExtension } = require("./toolsService");
 const { getLinks } = require("./linksService.js");
 const { addLog } = require("./logService.js");
 const VIDEOS_DIR = path.join(__dirname, "../videos");
@@ -19,8 +19,8 @@ exports.videoSorter = async () => {
     const videoFiles = await readFolders(VIDEOS_DIR);
     const likedVideos = await getLinks();
     const sortedList = await SortedList(videoFiles, likedVideos);
-    const newList =  await writeOldData(oldTable, sortedList);
-    await DatabaseOverwrite(newList);
+    //const newList =  await writeOldData(oldTable, sortedList);
+    //await DatabaseOverwrite(newList);
 
     console.log("✅ Videos sorted!")
 };
@@ -29,7 +29,7 @@ async function SortedList(videoFiles, likedList) {
     const existedVidoes = [];
     const likedListName = [...likedList.map(video => video.name)].reverse()
     const fileNames = new Set(videoFiles.map(video => {
-        const videoName = video.name.replace(/\.mp4$/i, '');
+        const videoName = deleteExtension(video.name);
         const cleanedName = cleanName(videoName)
         return cleanedName;
     }));
