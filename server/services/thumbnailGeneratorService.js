@@ -51,6 +51,7 @@ async function generateThumbnail(videoPath, outputPath) {
 async function processAllVideos(folderPath) {
     const files = await readDirAsync(folderPath);
     const existingThumbnails = await readFolders(THUMBNAILS_DIR)
+    const thumbnailNames = new Set(existingThumbnails.map(thumbnail => thumbnail.name))
 
     for (const file of files) {
         const videoPath = path.join(folderPath, file);
@@ -70,11 +71,10 @@ async function processAllVideos(folderPath) {
         const nameOnly = path.parse(file).name;
         const thumbnailName = addExtension(nameOnly,'.jpg')
 
-
-        if (existingThumbnails.find(thumbnail => thumbnail.name === thumbnailName)) {
-            console.log(`Skipping duplicates: ${thumbnailName}`);
-            continue;
-        };
+        if(thumbnailNames.has(thumbnailName)){
+            //console.log(`Skipping duplicates: ${thumbnailName}`);
+            continue; 
+        }
 
         const outputPath = await findPath(thumbnailName);
 
