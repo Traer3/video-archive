@@ -4,6 +4,7 @@ const fsPromises = require("fs").promises
 const { addLog } = require("./logService.js");
 const { exists, runCommand, sleep, writeInfo } = require("./toolsService.js");
 const { videoImporter } = require("./videoImporter/videoImporterService.js");
+const { readFolders } = require("./videoService.js");
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 
 exports.beginDownloadingVideos = async (dbLinks) => {
@@ -11,10 +12,13 @@ exports.beginDownloadingVideos = async (dbLinks) => {
         console.error("Missing video folder");
         return;
     };
+
     if (dbLinks.length === 0) {
         console.error("❌ No available links");
         return;
     }
+
+    //const fullFolders =  await checkSubFolders();
     try {
         let links = dbLinks.reverse();
 
@@ -138,4 +142,22 @@ async function CheckFolderCapacity(mainFolderPath, subFolder) {
             return false;
         }
     }
+};
+
+/* потом доработать поиск полных папок 
+async function checkSubFolders() {
+    const files = await readFolders(VIDEOS_DIR);
+    const fullFolders = files.filter(file => file.name === "isFull.txt");
+    if (fullFolders.length > 0) {
+        const folderPaths = fullFolders.map(folder => folder.fullPath);
+        const subFolderNames = folderPaths.map(path => {
+            const match = path.match(/\/videos\/([^\/]+)/);
+            const result = match ? match[1] : null;
+            return result;
+        })
+        return subFolderNames;
+        //subFolderNames:  [ 'videos2', 'videos3' ]
+    }
+    return null;
 }
+*/
