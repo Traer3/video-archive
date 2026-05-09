@@ -24,3 +24,12 @@ exports.lockedVideo = async (data) => {
     const result = await pool.query(query, values);
     return result.rows[0];
 };
+
+exports.writeUpdate = async (data) => {
+    const {id, lastUpdated} = data;
+    const query = 
+        'UPDATE links SET last_updated = $1 WHERE id = $2 RETURNING *'
+    const values = [lastUpdated, id];
+    const result = await pool.query(query,values);
+    return result.rows[0];
+}
