@@ -4,21 +4,14 @@ const { getQRCode } = require('./generateQRCode');
 
 exports.consoleAuthorization = async () => {
     console.log("📥 Authorization via console... ");
-
-    const authUrl = await getAuthUrl();
-    console.log(` \nPlease visit: ${authUrl}\n `);
-    const QRcode =  await getQRCode(authUrl);
-    console.log(QRcode)
-    return;
-
     const existing = await loadCredentials()
     if (existing.status) {
         return existing
     } else {
         try {
             const authUrl = await getAuthUrl();
-            //console.log(` \nPlease visit: ${authUrl}\n `);
-            await getQRCode(authUrl);
+            console.log(` \nPlease visit: ${authUrl}\n `);
+            await getQRCode();
 
             const readL = readline.createInterface({
                 input: process.stdin,

@@ -21,7 +21,6 @@ app.use('/api/log', log);
 
 app.use('/api/auth', authorize);
 
-
 async function startCycle(cycleFunction, hours) {
     try {
         await cycleFunction();

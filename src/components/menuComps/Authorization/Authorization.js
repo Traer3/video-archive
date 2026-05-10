@@ -85,7 +85,6 @@ export default function Authorize() {
 
     const onExit = () => {
         onDeleteToken()
-        areaState(false)
         setAuthorized(false)
         setLogout(false)
     }

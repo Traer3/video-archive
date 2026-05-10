@@ -30,6 +30,14 @@ exports.getAuthUrl = async (req, res) => {
         res.status(500).json({ error: "❌ Failed to get authorization url\n", err });
     }
 };
+exports.QRCodeURL = async (req,res) => {
+    try {
+        const getAuthUrl = await authorizationService.getAuthUrl();
+        res.redirect(getAuthUrl);
+    } catch (err) {
+        res.status(500).json({ error: "❌ Failed to get authorization url\n", err });
+    }
+}
 exports.finishAuth = async (req, res) => {
     //const answer = req.params
     const answer = req.query.code
