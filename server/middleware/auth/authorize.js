@@ -1,15 +1,24 @@
 const readline = require('readline')
 const { loadCredentials, getAuthUrl, finishAuth } = require("../../services/authorizationService");
+const { getQRCode } = require('./generateQRCode');
 
 exports.consoleAuthorization = async () => {
     console.log("📥 Authorization via console... ");
+
+    const authUrl = await getAuthUrl();
+    console.log(` \nPlease visit: ${authUrl}\n `);
+    const QRcode =  await getQRCode(authUrl);
+    console.log(QRcode)
+    return;
+
     const existing = await loadCredentials()
     if (existing.status) {
         return existing
     } else {
         try {
             const authUrl = await getAuthUrl();
-            console.log(` \nPlease visit: ${authUrl}\n `);
+            //console.log(` \nPlease visit: ${authUrl}\n `);
+            await getQRCode(authUrl);
 
             const readL = readline.createInterface({
                 input: process.stdin,
