@@ -9,7 +9,7 @@ exports.VideoDownloader = async () => {
     const likedVideos = await getLinks();
     try {
         if (likedVideos.length === 0) {
-            await YTGetLinks()
+            await YTGetLinks();
             return;
         }
         const latestVideo = await updateTime(likedVideos);
@@ -23,7 +23,7 @@ exports.VideoDownloader = async () => {
             return;
         }
     } catch (err) {
-        console.log(`❌ Error in VideoDownloader ${err}`);
+        console.log(`❌ Error in VideoDownloader ${err.message}`);
     }
 };
 
@@ -32,13 +32,13 @@ async function updateTime(likedVideos) {
     const latestVideo = reverseYTLinks[0];
     const currentTime = new Date();
 
-    if(!latestVideo.last_updated){
+    if (!latestVideo.last_updated) {
         await writeUpdate({
             id: latestVideo.id,
             lastUpdated: currentTime
         });
-        return {...latestVideo, last_updated : currentTime};
-    }else{
+        return { ...latestVideo, last_updated: currentTime };
+    } else {
         return latestVideo;
     }
 }

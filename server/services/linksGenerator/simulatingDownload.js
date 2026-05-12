@@ -11,16 +11,18 @@ exports.simulateDownload = async (newVideos, Links) => {
     const linksMap = clearedLinks.length > 0
         ? new Map(clearedLinks.map(link => [link.name, link]))
         : new Map();
-    
+
     console.log("🥽 Simulating a download")
     let i = 0;
     for (const video of newVideos) {
         i++
+        //if (videoForDownload.length >= 5) break;
         try {
             console.log("Trying yt-dlp ....")
             const comand1 = `yt-dlp -s "${video.url}"`
 
             const respond = await runCommand(comand1);
+
             if (respond) {
                 console.log(`[${i}/${newVideos.length}] processing video : ${video.name}\n`)
                 videoForDownload.push({ name: video.name, url: video.url })
@@ -38,7 +40,7 @@ exports.simulateDownload = async (newVideos, Links) => {
             } else if (errorMessage.includes("blocked it in your country")) {
                 category = "Country restriction";
             }
-            
+
             await addLog({
                 type: "SimulatingDownload",
                 message: `🧱 Video ${video.name} : ${category} `

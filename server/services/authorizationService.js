@@ -126,13 +126,11 @@ async function finishAuth(code) {
         oAuth2Client.setCredentials(tokens);
 
         await saveToken(content, oAuth2Client);
-        return console.log('✅ Authorization completed, TOKEN saved!')
-
-        //return oAuth2Client;
+        console.log('✅ Authorization completed, TOKEN saved!')
+        return true;
     } catch (err) {
         console.error(`❌ Error exchanging code for token: \n${err.message}`);
         return null;
-        //process.exit(1);
     }
 
 }

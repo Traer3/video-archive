@@ -17,9 +17,9 @@ exports.YTGetLinks = async () => {
         : [];
 
     const freshLinks = await sendNewLinks(Links, currentYTVideos);
-    if(freshLinks || freshLinks.length > 0){
+    if (freshLinks || freshLinks.length > 0) {
         await sendLikes(freshLinks);
-    } 
+    }
 
     const newVideos = await newNameChecker(currentYTVideos, DBvideos, Links);
     if (!newVideos) {
@@ -36,11 +36,11 @@ exports.YTGetLinks = async () => {
 };
 
 async function sendNewLinks(Links, YTVideos) {
-    if(!Links || Links.length === 0){
+    if (!Links || Links.length === 0) {
         await sendLikes(YTVideos);
         return;
     }
-   
+
     const cleanLinks = await clearNames(Links);
     const cleanYTLinks = await clearNames(YTVideos);
     const linkNames = new Set(cleanLinks.map(video => video.name))

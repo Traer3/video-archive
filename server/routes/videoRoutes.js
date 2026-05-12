@@ -12,6 +12,7 @@ const { videoSorter } = require('../services/videoSorterService.js');
 const { videoImporter } = require('../services/videoImporter/videoImporterService.js');
 const { YTGetLinks } = require('../services/linksGenerator/linksGeneratorService.js');
 const { beginDownloadingVideos } = require('../services/videoDownloaderService.js');
+const { VideoDownloader } = require('../VideoDownloader.js');
 
 
 router.get('/videos', getVideos);
@@ -23,11 +24,8 @@ router.get('/thumbnails/:thumbnailName', getThumbnail);
 router.get('/deleteVideo/:id', deleteVideo);
 router.get('/deleteThumbnail/:id', deleteThumbnail);
 
-
-
 router.get('/down-test', async (req, res) => {
     try {
-
         await beginDownloadingVideos()
         res.json({ message: "auth start in background." })
     } catch (err) {

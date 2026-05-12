@@ -35,7 +35,11 @@ exports.consoleAuthorization = async () => {
                     };
                 });
             });
-            await finishAuth(code);
+            const answer = await finishAuth(code);
+            if(answer){
+                const existing = await loadCredentials()
+                return existing
+            }
         } catch (err) {
             console.log(`Error in consoleAuthorization : ${err}`)
             return null;
