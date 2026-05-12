@@ -15,7 +15,6 @@ app.use(express.json());
 app.use(requestLogger);
 
 app.use('/api/server', videoRoutes);
-//app.use('/api/videoForDownload',videoForDownloadRoutes);
 
 app.use('/api/log', log);
 
