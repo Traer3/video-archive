@@ -75,7 +75,7 @@ async function VideoDownloader(video, index, folderPath, linkslength) {
             await runCommand(command1);;
             console.log("✅ Downloaded");
 
-            console.log("📥 Importing downloaded video(s) to DB...");
+            console.log("📥 Importing downloaded video to DB...");
             await videoImporter(video.name)
             console.log("✅ Imported successfully");
 

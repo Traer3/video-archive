@@ -19,6 +19,7 @@ exports.videoImporter = async (name) => {
     const namesFromDB = new Map(cleanDBvideos.map(video => [video.name, video]))
 
     try {
+        
         const foundVideo = await getVideoSize(name);
 
         const answer = await checkDuplicate(namesFromDB, foundVideo);
@@ -27,6 +28,9 @@ exports.videoImporter = async (name) => {
         };
         const categorizedVideo = await checkCategory(foundVideo)
         const uniqueVideo = await uniqueName(categorizedVideo)
+        if(!uniqueVideo){
+            console.error("Error with uniqueVideo ", uniqueVideo)
+        }
 
         await importVideo({
             name: uniqueVideo.name,
