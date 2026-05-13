@@ -30,7 +30,6 @@ exports.YTGetLinks = async () => {
     if (newVideos.length !== 0) {
         videoForDownload = await simulateDownload(newVideos, Links)
         console.log("🏁 Links written");
-        console.log(videoForDownload);
         return videoForDownload;
     }
 };
@@ -54,7 +53,7 @@ async function sendLikes(YouTubeVideos) {
 
     for (const video of reverseYTLinks) {
         if (skipVideoName.includes(cleanName(video.name))) {
-            console.log(`⏭ Skipping private || deleted videos...`)
+            //console.log(`⏭ Skipping private || deleted videos...`)
             continue;
         }
         await writeLinks({

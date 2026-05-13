@@ -1,7 +1,6 @@
 const { google } = require('googleapis');
 
 exports.getYouTubeLinks = async (auth) => {
-    console.log("getYouTubeVideos: working")
     try {
         const service = google.youtube('v3');
         let nextPageToken = null;

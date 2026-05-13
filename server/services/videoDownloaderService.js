@@ -19,6 +19,7 @@ exports.beginDownloadingVideos = async (dbLinks) => {
     }
 
     //const fullFolders =  await checkSubFolders();
+    
     try {
         let links = dbLinks.reverse();
 
@@ -61,10 +62,8 @@ exports.beginDownloadingVideos = async (dbLinks) => {
     }
 };
 
-// мне приходит vide с name и url 
 async function VideoDownloader(video, index, folderPath, linkslength) {
     console.log(`Downdloading: [${index + 1}]/${linkslength}: ${video.url}`);
-
     const command1 = `yt-dlp -o "${folderPath}/%(title)s.%(ext)s" --cookies youtubeCookies.txt --merge-output-format mp4 "${video.url}"`;
 
     let success = false;
@@ -75,7 +74,7 @@ async function VideoDownloader(video, index, folderPath, linkslength) {
             await runCommand(command1);;
             console.log("✅ Downloaded");
 
-            console.log("📥 Importing downloaded video to DB...");
+            console.log(`📥 Importing video:  ${video.name}`);
             await videoImporter(video.name)
             console.log("✅ Imported successfully");
 
@@ -115,11 +114,11 @@ async function CheckFolderCapacity(mainFolderPath, subFolder) {
     }
 
     if (stats.isDirectory()) {
-        console.log(`Reading folder: ${subFolder}`)
+        //console.log(`Reading folder: ${subFolder}`)
         const files = await fsPromises.readdir(subFolderPath);
         const isFull = files.find(file => file === "isFull.txt")
         if (!isFull) {
-            console.log("Checking subFolder capacity");
+            //console.log("Checking subFolder capacity");
             const command1 = `df -h ${subFolderPath} --output=source | tail -n 1 `;
             const getPartition = await runCommand(command1);
             const partitionName = getPartition.trim()
@@ -134,7 +133,7 @@ async function CheckFolderCapacity(mainFolderPath, subFolder) {
                 await writeInfo(path.join(subFolderPath, 'isFull.txt'), memoryLeft)
                 return false;
             } else {
-                console.log(`Download video in folder ${subFolder}`)
+                //console.log(`Download video in folder ${subFolder}`)
                 return true;
             }
         } else {

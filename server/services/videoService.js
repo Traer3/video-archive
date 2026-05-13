@@ -11,7 +11,7 @@ exports.readFolders = async (videosDir) => {
             const stats = await fsPromises.stat(fullPath);
 
             if (stats.isDirectory()) {
-                console.log(`--- Reading folder: ${folderName} ---`);
+                //console.log(`--- Reading folder: ${folderName} ---`);
                 const videoFiles = await fsPromises.readdir(fullPath);
                 videoFiles.map(file => {
                     videos.push({

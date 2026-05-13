@@ -3,7 +3,6 @@ const { cleanName } = require("../toolsService");
 
 exports.newNameChecker = async (YTVideos, DBvideos, Links) => {
     if (!YTVideos) return;
-    console.log("newNameChecker WORKING !")
     try {
         const cleanDBnames = await clearNames(DBvideos);
         const cleanLinks = await clearNames(Links);
@@ -67,7 +66,7 @@ async function lockedLinks(newVids, cleanLinks) {
             const isLocked = lockedVideos.has(vid.name);
 
             if (isLocked) {
-                console.log(`Skiping! Allready locked: ${vid.name}`);
+                //console.log(`Skiping! Allready locked: ${vid.name}`);
             }
             return !isLocked;
         });

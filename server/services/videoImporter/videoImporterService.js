@@ -19,9 +19,7 @@ exports.videoImporter = async (name) => {
     const namesFromDB = new Map(cleanDBvideos.map(video => [video.name, video]))
 
     try {
-        
         const foundVideo = await getVideoSize(name);
-
         const answer = await checkDuplicate(namesFromDB, foundVideo);
         if (answer) {
             return answer;
@@ -44,7 +42,7 @@ exports.videoImporter = async (name) => {
             type: "ImporterLogs",
             message: `✅ Successfully imported: ${uniqueVideo.name}`
         });
-        console.log('Import end')
+        //console.log('Import end')
         return uniqueVideo;
     } catch (err) {
         console.error(`Error in exports.videoImporter:  ${err}`);
@@ -74,7 +72,7 @@ async function checkDuplicate(DBvideos, video) {
             type: "ImporterLogs",
             message: `✅ Successfully imported: ${categorizedVideo.name}`
         });
-        console.log('Import end')
+       //console.log('Import end')
 
         return categorizedVideo;
     };

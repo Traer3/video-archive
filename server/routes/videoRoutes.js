@@ -12,8 +12,6 @@ const { videoSorter } = require('../services/videoSorterService.js');
 const { videoImporter } = require('../services/videoImporter/videoImporterService.js');
 const { YTGetLinks } = require('../services/linksGenerator/linksGeneratorService.js');
 const { beginDownloadingVideos } = require('../services/videoDownloaderService.js');
-const { VideoDownloader } = require('../VideoDownloader.js');
-
 
 router.get('/videos', getVideos);
 router.get('/videoList', getVideoList);

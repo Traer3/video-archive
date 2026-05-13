@@ -18,7 +18,7 @@ exports.simulateDownload = async (newVideos, Links) => {
         i++
         //if (videoForDownload.length >= 5) break;
         try {
-            console.log("Trying yt-dlp ....")
+            //console.log("Trying yt-dlp ....")
             const comand1 = `yt-dlp -s "${video.url}"`
 
             const respond = await runCommand(comand1);

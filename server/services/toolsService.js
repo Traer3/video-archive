@@ -72,6 +72,8 @@ exports.cleanName = (str) => {
         .trim()
         .toLowerCase()
         .replace(/[\uFF1A]/g, ':')
+        .replace(/[\uFF5C]/g, '|')
+        .replace(/[\u2215\u29F8\u2044\u27CB\u27CD]/g, '/')
         .replace(/\s+/g, ' ')
 };
 
