@@ -6,7 +6,7 @@ const log = require('./routes/logRoutes.js');
 const authorize = require('./routes/authorizeRoutes.js');
 const { VideoDownloader } = require("./VideoDownloader.js");
 const { checkUniqueness } = require("./services/uniquenessService.js");
-
+const devTools = require('./routes/devToolsRoutes.js')
 
 const app = express();
 app.use(cors());
@@ -19,6 +19,8 @@ app.use('/api/server', videoRoutes);
 app.use('/api/log', log);
 
 app.use('/api/auth', authorize);
+
+app.use('/dev',devTools)
 
 async function startCycle(cycleFunction, hours) {
     try {

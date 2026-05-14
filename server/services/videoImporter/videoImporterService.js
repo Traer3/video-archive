@@ -10,6 +10,7 @@ const { getVideoSize } = require("./getVideoSize.js");
 const VIDEOS_DIR = path.join(__dirname, "../../videos");
 
 exports.videoImporter = async (name) => {
+    console.log("name : ",name)
     if (!(await exists(VIDEOS_DIR))) {
         console.error("Missing video folder");
         return;
@@ -30,6 +31,7 @@ exports.videoImporter = async (name) => {
             console.error("Error with uniqueVideo ", uniqueVideo)
         }
 
+        /*
         await importVideo({
             name: uniqueVideo.name,
             duration: uniqueVideo.duration,
@@ -42,7 +44,8 @@ exports.videoImporter = async (name) => {
             type: "ImporterLogs",
             message: `✅ Successfully imported: ${uniqueVideo.name}`
         });
-        //console.log('Import end')
+        */
+        console.log('Import end')
         return uniqueVideo;
     } catch (err) {
         console.error(`Error in exports.videoImporter:  ${err}`);

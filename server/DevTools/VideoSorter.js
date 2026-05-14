@@ -1,8 +1,8 @@
 const path = require("path");
 
-const { readFolders, databaseOverwrite, getVideoList, importVideo } = require("./videoService.js");
-const { exists, cleanName, deleteExtension } = require("./toolsService");
-const { getLinks } = require("./linksService.js");
+const { readFolders, databaseOverwrite, getVideoList, importVideo } = require("../services/videoService.js");
+const { exists, cleanName, deleteExtension } = require("../services/toolsService.js");
+const { getLinks } = require("../services/linksService.js");
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 
 exports.videoSorter = async () => {
@@ -17,11 +17,11 @@ exports.videoSorter = async () => {
 
     const videoFiles = await readFolders(VIDEOS_DIR);
     const likedVideos = await getLinks();
+    
     const sortedList = await SortedList(videoFiles, likedVideos);
     
     const newList =  await writeOldData(oldTable, sortedList);
     await DatabaseOverwrite(newList);
-
     console.log("✅ Videos sorted!")
 };
 

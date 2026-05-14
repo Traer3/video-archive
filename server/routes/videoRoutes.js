@@ -7,7 +7,7 @@ const { thumbnailGenerator } = require('../services/thumbnailGeneratorService.js
 const { checkUniqueness } = require('../services/uniquenessService.js');
 
 const { deleteVideo, deleteThumbnail } = require('../controllers/videoEraserController.js');
-const { videoSorter } = require('../services/videoSorterService.js');
+//const { videoSorter } = require('../services/videoSorterService.js');
 
 const { videoImporter } = require('../services/videoImporter/videoImporterService.js');
 const { YTGetLinks } = require('../services/linksGenerator/linksGeneratorService.js');
@@ -40,6 +40,7 @@ router.get('/auth-test', async (req, res) => {
     }
 });
 
+/*
 router.get('/sortVideos', async (req, res) => {
     try {
         await videoSorter()
@@ -48,6 +49,7 @@ router.get('/sortVideos', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 })
+*/
 
 router.get('/uniq-test', async (req, res) => {
     try {

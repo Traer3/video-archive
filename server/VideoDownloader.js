@@ -15,7 +15,7 @@ exports.VideoDownloader = async () => {
         const latestVideo = await updateTime(likedVideos);
         const checkTime = await checkTiming(latestVideo);
 
-        if (true) {
+        if (checkTime) {
             const links = await YTGetLinks();
             await beginDownloadingVideos(links)
             return;
