@@ -29,7 +29,7 @@ exports.durationGenerator = async () => {
             return;
         }
 
-        for (const vid of cleanDBNames) {
+        for (const vid of cleanDBNames) { // сделать для всех и для одного 
             if (vid.duration) {
                 console.log(`--> Already has duration: ${vid.name}`);
                 continue;

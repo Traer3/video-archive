@@ -24,7 +24,7 @@ exports.thumbnailGenerator = async () => {
             const stats = await fsPromises.stat(subFolderPath);
             if (stats.isDirectory()) {
                 console.log(`\n 📂 Entering directory: ${subFolder}`);
-                await processAllVideos(subFolderPath)
+                await processAllVideos(subFolderPath) //сделать для одного 
             }
         };
         console.log("\n🏁 All Folders processed!");
