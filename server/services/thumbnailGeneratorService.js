@@ -3,8 +3,9 @@ const Ffmpeg = require("fluent-ffmpeg");
 const path = require('path');
 
 const { readFolders } = require("./videoService.js");
-const { exists, addExtension } = require("./toolsService.js");
+const { exists, addExtension, deleteExtension, cleanName } = require("./toolsService.js");
 const { addLog } = require("./logService.js");
+const { clearNames } = require("./linksGenerator/newNameChecker.js");
 
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 const THUMBNAILS_DIR = path.join(__dirname, "../thumbnails");
@@ -33,6 +34,50 @@ exports.thumbnailGenerator = async () => {
     }
 };
 
+exports.generateThumbnail2 = async (name) => {
+    const fileName = cleanName(deleteExtension(name));
+    const thumbnailFiles = await readFolders(THUMBNAILS_DIR);
+    const thumbnailNames = new Set(thumbnailFiles.map(thumbnail => cleanName(thumbnail)));
+    const videoFiles = await readFolders(VIDEOS_DIR);
+    const videoFilesMap = new Map(videoFiles.map(video => [cleanName(video.name), video]))
+
+    const state = checkExistence(name, thumbnailNames);
+        if (state) {
+            console.log("Thumbnailalready exist");
+            return true;
+        }
+    const filePath = getPath(name, videoFilesMap);
+    const thumbnailFolder = findFolder()
+    if(filePath){
+        console.log(`🎬 Generating thumbnail for: ${file}`);
+        await generateThumbnail(filePath, outputPath);
+        console.log(`✅ Thumbnail generated : ${name}`);
+        await addLog({
+            type: "ThumbnailGeneratorLogs",
+            message: `✅ Thumbnail generated : ${name}`
+        })
+    }
+};
+
+async function checkExistence(name, thumbnailNames) {
+    const fileName = deleteExtension(name);
+    const thumbnailName = cleanName(fileName);
+    const foundThumbnail = thumbnailNames.has(thumbnailName);
+    if (foundThumbnail) {
+        return true;
+    };
+    return false;
+};
+async function getPath(name, videoFilesMap) {
+    const fileName = deleteExtension(name);
+    const videoName = cleanName(fileName);
+    const foundVideo = videoFilesMap.get(videoName);
+    if (foundVideo) {
+        return foundVideo.fullPath
+    }
+    return false;
+}
+
 async function generateThumbnail(videoPath, outputPath) {
     return new Promise((resolve, reject) => {
         Ffmpeg(videoPath)
@@ -42,7 +87,7 @@ async function generateThumbnail(videoPath, outputPath) {
                 count: 1,
                 timemarks: ['00:00:02.000'],
                 filename: outputPath.fullPath, //File name if file does not exist
-                folder: outputPath.subFolderPath,
+                folder: outputPath.subFolderPath, // куда сохранить 
                 size: '320x240',
             });
     });
@@ -69,11 +114,11 @@ async function processAllVideos(folderPath) {
         }
 
         const nameOnly = path.parse(file).name;
-        const thumbnailName = addExtension(nameOnly,'.jpg')
+        const thumbnailName = addExtension(nameOnly, '.jpg')
 
-        if(thumbnailNames.has(thumbnailName)){
+        if (thumbnailNames.has(thumbnailName)) {
             //console.log(`Skipping duplicates: ${thumbnailName}`);
-            continue; 
+            continue;
         }
 
         const outputPath = await findPath(thumbnailName);

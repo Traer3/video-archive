@@ -3,7 +3,7 @@ const router = express.Router();
 const { getVideoList, getVideos, getVideo, getThumbnail, filterVideo, deleteID, importVideo, saveVidDuration, saveUniqueData } = require('../controllers/videoController.js');
 
 const durationGeneratorService = require('../services/durationGeneratorService.js')
-const { thumbnailGenerator } = require('../services/thumbnailGeneratorService.js');
+const { thumbnailGenerator, generateThumbnail2 } = require('../services/thumbnailGeneratorService.js');
 const { checkUniqueness } = require('../services/uniquenessService.js');
 
 const { deleteVideo, deleteThumbnail } = require('../controllers/videoEraserController.js');
@@ -30,6 +30,16 @@ router.get('/down-test', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+router.get('/thum', async (req, res) => {
+    try {
+        await generateThumbnail2("")
+        res.json({ message: "auth start in background." })
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 router.get('/auth-test', async (req, res) => {
     try {
