@@ -37,7 +37,7 @@ exports.YTGetLinks = async () => {
 async function sendNewLinks(Links, YTVideos) {
     if (!Links || Links.length === 0) {
         await sendLikes(YTVideos);
-        return;
+        return [];
     }
 
     const cleanLinks = await clearNames(Links);

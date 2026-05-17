@@ -6,10 +6,14 @@ const { beginDownloadingVideos } = require("./services/videoDownloaderService");
 
 exports.VideoDownloader = async () => {
     console.log("Downloading videos");
-    const likedVideos = await getLinks();
     try {
-        if (likedVideos.length === 0) {
-            await YTGetLinks();
+        const likedVideos = await getLinks(); 
+        if (!likedVideos || likedVideos.length === 0) {
+            const links = await YTGetLinks();
+            console.log("links : ", links)
+            if(links && links.length > 0){
+                await beginDownloadingVideos(links);
+            };
             return;
         }
         const latestVideo = await updateTime(likedVideos);
@@ -18,12 +22,11 @@ exports.VideoDownloader = async () => {
         if (checkTime) {
             const links = await YTGetLinks();
             await beginDownloadingVideos(links)
-            return;
-        } else {
-            return;
         }
+        return;
     } catch (err) {
         console.log(`❌ Error in VideoDownloader ${err.message}`);
+        return null;
     }
 };
 
