@@ -3,11 +3,10 @@ const router = express.Router();
 const { getVideoList, getVideos, getVideo, getThumbnail, filterVideo, deleteID, importVideo, saveVidDuration, saveUniqueData } = require('../controllers/videoController.js');
 
 const durationGeneratorService = require('../services/durationGeneratorService.js')
-const { thumbnailGenerator, generateThumbnail2 } = require('../services/thumbnailGeneratorService.js');
+const { generateThumbnails } = require('../services/thumbnailGeneratorService.js');
 const { checkUniqueness } = require('../services/uniquenessService.js');
 
 const { deleteVideo, deleteThumbnail } = require('../controllers/videoEraserController.js');
-//const { videoSorter } = require('../services/videoSorterService.js');
 
 const { videoImporter } = require('../services/videoImporter/videoImporterService.js');
 const { YTGetLinks } = require('../services/linksGenerator/linksGeneratorService.js');
@@ -31,16 +30,6 @@ router.get('/down-test', async (req, res) => {
     }
 });
 
-router.get('/thum', async (req, res) => {
-    try {
-        await generateThumbnail2("")
-        res.json({ message: "auth start in background." })
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-
 router.get('/auth-test', async (req, res) => {
     try {
         await YTGetLinks()
@@ -49,17 +38,6 @@ router.get('/auth-test', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
-/*
-router.get('/sortVideos', async (req, res) => {
-    try {
-        await videoSorter()
-        res.json({ message: "sortVideos start in background." })
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-})
-*/
 
 router.get('/uniq-test', async (req, res) => {
     try {
@@ -91,7 +69,7 @@ router.get('/import-test', async (req, res) => {
 
 router.get('/thumbnail-test', async (req, res) => {
     try {
-        thumbnailGenerator()
+        await generateThumbnails()
         res.json({ message: "duration start in background." })
     } catch (err) {
         res.status(500).json({ error: err.message });
