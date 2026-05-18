@@ -77,7 +77,7 @@ async function VideoDownloader(video, index, folderPath, linkslength) {
 
             console.log(`📥 Importing video:  ${video.name}`);
             await videoImporter(video.name)
-            console.log("✅ Imported successfully");
+            //console.log("✅ Imported successfully");
             await generateThumbnail(video.name);
 
             await addLog({ type: "DownloaderLogs", message: `✅ Successfully processed: ${video.url}` });

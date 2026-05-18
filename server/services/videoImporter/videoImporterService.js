@@ -31,8 +31,7 @@ exports.videoImporter = async (name) => {
             console.error("Error with uniqueVideo ", uniqueVideo)
         }
 
-        /*
-        await importVideo({
+        const res = await importVideo({
             name: uniqueVideo.name,
             duration: uniqueVideo.duration,
             sizeMB: uniqueVideo.sizeMB,
@@ -40,13 +39,17 @@ exports.videoImporter = async (name) => {
             isitunique: false,
             filtered: false
         });
-        await addLog({
-            type: "ImporterLogs",
-            message: `✅ Successfully imported: ${uniqueVideo.name}`
-        });
-        */
-        console.log('Import end')
-        return uniqueVideo;
+
+        if(res){
+            await addLog({
+                type: "ImporterLogs",
+                message: `✅ Successfully imported: ${uniqueVideo.name}`
+            });
+            console.log("✅ Imported successfully");
+            return uniqueVideo;
+        };
+        return null;
+        
     } catch (err) {
         console.error(`Error in exports.videoImporter:  ${err}`);
         return;
