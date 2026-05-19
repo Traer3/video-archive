@@ -17,24 +17,44 @@ exports.videoSorter = async () => {
 
     const videoFiles = await readFolders(VIDEOS_DIR);
     const likedVideos = await getLinks();
+
+    const noCategory = await noCategorySorter(videoFiles, likedVideos);
+    const YTvideos = await YTVideos(videoFiles, likedVideos);
     
-    const sortedList = await SortedList(videoFiles, likedVideos);
-    
+    const sortedList = [...YTvideos, ...noCategory];
+
     const newList =  await writeOldData(oldTable, sortedList);
     await DatabaseOverwrite(newList);
     console.log("✅ Videos sorted!")
 };
 
-async function SortedList(videoFiles, likedList) {
-    const YTvideos = new Set();
+async function noCategorySorter(videoFiles,likedList) {
     const noCategoryVideos = []
+    const likedListSet = new Set(likedList.map(video => cleanName(video.name)));
+
+    for(const video of videoFiles){
+        const videoName = deleteExtension(video.name)
+        const cleanVideoName = cleanName(videoName);
+        if(cleanVideoName === 'isfull'){
+            continue;
+        }
+        const foundVideo = likedListSet.has(cleanVideoName);
+        if(!foundVideo){
+            noCategoryVideos.push(videoName);
+        }
+    };
+    return noCategoryVideos;
+}
+
+async function YTVideos(videoFiles, likedList) {
+    const YTvideos = new Set();
     const likedListName = [...likedList.map(video => video.name)].reverse()
     const fileNames = new Set(videoFiles.map(video => {
         const videoName = deleteExtension(video.name);
         const cleanedName = cleanName(videoName)
         return cleanedName;
     }));
-
+    
     likedListName.forEach(vid => {
         const videoName = cleanName(vid);
         const foundVideo = fileNames.has(videoName);
@@ -42,27 +62,9 @@ async function SortedList(videoFiles, likedList) {
             YTvideos.add(vid)
         };
     })
-    for(const video of fileNames){
-        if(video === 'isfull.txt'){
-            continue;
-        };
-        const foundVideo = YTvideos.has(video);
-        if(!foundVideo){
-            noCategoryVideos.push(video);
-        }
-    }
-
-    /*
-    //На будущее , noCategoryVideos будет иметь все видосы кроме тех которые уже отобраные 
-    //Создай ещё один массив с нужными видосами 
-    //ебани еще одну сортировку для этих видосов и вытащи те которые тебе нужны 
-    //А без категории добавляй потом 
-    */
-    
     const reverseExistedList = [...YTvideos].reverse()
-    const videos = [...reverseExistedList, ...noCategoryVideos]
     
-    return videos;
+    return reverseExistedList;
 };
 
 async function DatabaseOverwrite(newList) {
@@ -88,9 +90,11 @@ async function DatabaseOverwrite(newList) {
 
 async function writeOldData(oldTable, sortedList) {
     const videos = []
-    const oldTableMap = new Map(oldTable.map(video => [video.name, video]))
+    const oldTableMap = new Map(oldTable.map(video => [cleanName(video.name), video]))
     for(const newVideo of sortedList){
-        const foundVideo = oldTableMap.get(newVideo);
+        const cleanVideoName = cleanName(newVideo)
+        const foundVideo = oldTableMap.get(cleanVideoName);
+        
         if(foundVideo){
             const {id, ...video} = foundVideo;
             videos.push(video)

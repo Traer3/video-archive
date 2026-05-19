@@ -66,7 +66,8 @@ async function checkDuplicate(DBvideos, video) {
 
     if (!foundVideo) {
         const categorizedVideo = await checkCategory(video);
-        await importVideo({
+
+        const res =await importVideo({
             name: categorizedVideo.name,
             duration: categorizedVideo.duration,
             sizeMB: categorizedVideo.sizeMB,
@@ -74,12 +75,13 @@ async function checkDuplicate(DBvideos, video) {
             isitunique: false,
             filtered: false
         });
-        await addLog({
-            type: "ImporterLogs",
-            message: `✅ Successfully imported: ${categorizedVideo.name}`
-        });
-       //console.log('Import end')
-
+        if(res){
+            await addLog({
+                type: "ImporterLogs",
+                message: `✅ Successfully imported: ${categorizedVideo.name}`
+            });
+            console.log("✅ Imported successfully");
+        }
         return categorizedVideo;
     };
 

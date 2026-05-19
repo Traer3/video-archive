@@ -5,7 +5,6 @@ const { addLog } = require("./logService.js");
 const { exists, runCommand, sleep, writeInfo } = require("./toolsService.js");
 const { videoImporter } = require("./videoImporter/videoImporterService.js");
 const { readFolders } = require("./videoService.js");
-const { generateThumbnail } = require("./thumbnailGeneratorService.js");
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 
 exports.beginDownloadingVideos = async (dbLinks) => {
@@ -72,16 +71,17 @@ async function VideoDownloader(video, index, folderPath, linkslength) {
 
     while (attempts > 0 && !success) {
         try {
+////////////
             await runCommand(command1);;
             console.log("✅ Downloaded");
 
             console.log(`📥 Importing video:  ${video.name}`);
             await videoImporter(video.name)
             //console.log("✅ Imported successfully");
-            await generateThumbnail(video.name);
-
+            
             await addLog({ type: "DownloaderLogs", message: `✅ Successfully processed: ${video.url}` });
             success = true;
+////////////
         } catch (err) {
             attempts--;
             console.log(`⚠️ Attempts left: ${attempts}. Error: ${err.message}`);
