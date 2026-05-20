@@ -15,7 +15,6 @@ exports.getVideoSize = async (videoName) =>{
             const filePath = file.fullPath
             const cleanedName = cleanName(fileName);
             if (cleanedName === normalName) {
-                //console.log("File in folder!");
                 const stat = await fsPromises.stat(filePath);
                 const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
                 return{

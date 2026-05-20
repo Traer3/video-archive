@@ -7,7 +7,7 @@ const { newNameChecker, clearNames } = require("./newNameChecker");
 const { simulateDownload } = require("./simulatingDownload");
 
 exports.YTGetLinks = async () => {
-    console.log("Starting geting links...");
+    console.log(`\nReceiving links...`);
     const DBvideos = await getVideoList();
     const Links = await getLinks();
     const auth = await consoleAuthorization();
@@ -29,7 +29,7 @@ exports.YTGetLinks = async () => {
     let videoForDownload
     if (newVideos.length !== 0) {
         videoForDownload = await simulateDownload(newVideos, Links)
-        console.log("🏁 Links written");
+        console.log(`\n🏁 Links written`);
         return videoForDownload;
     }
 };
@@ -63,5 +63,5 @@ async function sendLikes(YouTubeVideos) {
             isitunique: false
         })
     };
-    return console.log("✅ Links written");
+    return console.log(`✅ Links written\n`);
 }

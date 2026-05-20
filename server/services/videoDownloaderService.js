@@ -27,7 +27,8 @@ exports.beginDownloadingVideos = async (dbLinks) => {
         const subFolders = await fsPromises.readdir(VIDEOS_DIR);
         const findAvailableFolder = async () => {
             for (const subFolder of subFolders) {
-                if (await CheckFolderCapacity(VIDEOS_DIR, subFolder)) {
+                const folder = await CheckFolderCapacity(VIDEOS_DIR, subFolder)
+                if (folder.state) {
                     return path.join(VIDEOS_DIR, subFolder);
                 }
             }
@@ -41,8 +42,11 @@ exports.beginDownloadingVideos = async (dbLinks) => {
         }
         const linkslength = links.length;
         for (let i = 0; i < links.length; i++) {
-            let isOk = await CheckFolderCapacity(VIDEOS_DIR, path.basename(targetFolder));
-            if (!isOk) {
+
+            const folder = await CheckFolderCapacity(VIDEOS_DIR, path.basename(targetFolder));
+            console.log(`\nMemory left : ${folder.memoryLeft} gb`)
+            
+            if (!folder.state) {
                 console.log("🔄 Current folder full, searching for a new one...");
                 targetFolder = await findAvailableFolder();
 
@@ -55,7 +59,7 @@ exports.beginDownloadingVideos = async (dbLinks) => {
             await VideoDownloader(links[i], i, targetFolder, linkslength);
         }
 
-        console.log("🔥 Completed");
+        console.log(`\n🔥 Completed`);
         return;
     } catch (err) {
         console.error(`❌ Error in main loop: ${err.message}`);
@@ -75,7 +79,7 @@ async function VideoDownloader(video, index, folderPath, linkslength) {
             if(res.answer){
                 console.log("✅ Downloaded");
                 console.log(`📥 Importing video:  ${video.name}`);
-                await videoImporter(video.name)
+                await videoImporter(video.name);
                 await addLog({ type: "DownloaderLogs", message: `✅ Successfully processed: ${video.url}` });
                 success = true;
             };
@@ -125,15 +129,16 @@ async function CheckFolderCapacity(mainFolderPath, subFolder) {
             const command2 = `df -h --output=avail --block-size=G ${partitionName} | tail -n 1`;
             const getSize = await runCommand(command2);
             const memoryLeft = getSize.stdout.trim();
-            console.log(`Memory left : ${memoryLeft} gb`)
+            
 
             const getNumber = parseInt(memoryLeft);
+
             if (getNumber <= reserveCapacity) {
                 await writeInfo(path.join(subFolderPath, 'isFull.txt'), memoryLeft)
-                return false;
+                return {state : false, memoryLeft: memoryLeft};
             } else {
                 //console.log(`Download video in folder ${subFolder}`)
-                return true;
+                return {state : true, memoryLeft: memoryLeft};
             }
         } else {
             console.log(`Folder ${subFolder} is full`)

@@ -10,7 +10,6 @@ const { getVideoSize } = require("./getVideoSize.js");
 const VIDEOS_DIR = path.join(__dirname, "../../videos");
 
 exports.videoImporter = async (name) => {
-    console.log("name : ",name)
     if (!(await exists(VIDEOS_DIR))) {
         console.error("Missing video folder");
         return;

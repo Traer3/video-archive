@@ -75,12 +75,23 @@ exports.deleteFile = async (filePath) => {
 exports.cleanName = (str) => {
     if (!str) return "";
     return str
+        .normalize('NFD')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, ' ')
         .trim()
+    /* ебал того рот этих пробелов 
         .toLowerCase()
         .replace(/[\uFF1A]/g, ':')
         .replace(/[\uFF5C]/g, '|')
         .replace(/[\u2215\u29F8\u2044\u27CB\u27CD]/g, '/')
+        .replace(/[\uFF1F]/g, '?')
+        .replace(/[【「]/g, '[')
+        .replace(/[】」]/g, ']')
+        .replace(/[\s\u00A0\u2000-\u200B\u202F\u205F\u3000]+/g, ' ')
         .replace(/\s+/g, ' ')
+        .trim()
+    */
 };
 
 exports.deleteExtension = (str) =>{

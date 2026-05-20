@@ -9,7 +9,17 @@ exports.newNameChecker = async (YTVideos, DBvideos, Links) => {
         const cleanYTLinks = await clearNames(YTVideos)
 
         const NamesFromDB = new Set(cleanDBnames.map(video => video.name))
-
+        const newVids = []
+        for(const video of YTVideos){
+            const cleanVideo = cleanName(video.name);
+            const isTrash = cleanVideo === "private video" || cleanVideo === "deleted video";
+            if (isTrash) return false;
+            const isAlreadyInDB = NamesFromDB.has(cleanVideo);
+            if(!isAlreadyInDB){
+                newVids.push(video);
+            }
+        }
+        /*
         const newVids = cleanYTLinks.filter(video => {
             const name = video.name;
             const isTrash = name === "private video" || name === "deleted video";
@@ -17,6 +27,7 @@ exports.newNameChecker = async (YTVideos, DBvideos, Links) => {
             const isAlreadyInDB = NamesFromDB.has(name);
             return !isAlreadyInDB
         });
+        */
 
         const checkedVideos = await lockedLinks(newVids, cleanLinks);
 
@@ -50,7 +61,7 @@ async function lockedLinks(newVids, cleanLinks) {
             console.log("Table links is empty")
             return newVids;
         };
-
+    
         const lockedVideos = new Set(
             cleanLinks
                 .filter(vid => vid.locked === true)
@@ -58,12 +69,13 @@ async function lockedLinks(newVids, cleanLinks) {
         );
 
         if (lockedVideos.size === 0) {
-            console.log("No locked vidoes found in DB")
+            //console.log("No locked vidoes found in DB")
             return newVids;
         }
-
+        
         const canDownload = newVids.filter(vid => {
-            const isLocked = lockedVideos.has(vid.name);
+            const cleanVid = cleanName(vid.name)
+            const isLocked = lockedVideos.has(cleanVid);
 
             if (isLocked) {
                 //console.log(`Skiping! Allready locked: ${vid.name}`);

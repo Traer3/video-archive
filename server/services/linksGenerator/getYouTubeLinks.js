@@ -27,7 +27,7 @@ exports.getYouTubeLinks = async (auth) => {
             //if(allVideos.length >= 5) break; //ссылки для первых 100 видео 
 
         } while (nextPageToken);
-        console.log(`✅ Received ${allVideos.length} videos from YT`)
+        //console.log(`✅ Received ${allVideos.length} videos from YT`)
         return allVideos;
     } catch (err) {
         console.error(`Error in getYouTubeVideos : ${err}`)

@@ -12,7 +12,7 @@ exports.simulateDownload = async (newVideos, Links) => {
         ? new Map(clearedLinks.map(link => [link.name, link]))
         : new Map();
 
-    console.log("🥽 Simulating a download")
+    console.log(`🥽 Simulating a download\n`)
     let i = 0;
     for (const video of newVideos) {
         i++
@@ -24,7 +24,7 @@ exports.simulateDownload = async (newVideos, Links) => {
             const respond = await runCommand(comand1);
 
             if (respond) {
-                console.log(`[${i}/${newVideos.length}] processing video : ${video.name}\n`)
+                console.log(`[${i}/${newVideos.length}] processing video : ${video.name}`)
                 videoForDownload.push({ name: video.name, url: video.url })
             }
         } catch (err) {

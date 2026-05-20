@@ -5,7 +5,6 @@ const { beginDownloadingVideos } = require("./services/videoDownloaderService");
 
 
 exports.VideoDownloader = async () => {
-    console.log("Downloading videos");
     try {
         const likedVideos = await getLinks(); 
         if (!likedVideos || likedVideos.length === 0) {
