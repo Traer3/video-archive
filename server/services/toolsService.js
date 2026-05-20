@@ -14,10 +14,16 @@ exports.runScript = (scriptPath, args) => {
 exports.runCommand = (command) => {
     return new Promise((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
+            const info = {
+                answer: true,
+                stdout: stdout,
+                stderr: stderr,
+                error: ''
+            }
             if (error) {
-                reject(error);
+                reject({...info, answer: false, error: error});
             } else {
-                resolve(stdout || stderr);
+                resolve({...info,stdout : stdout, stderr: stderr});
             }
         });
     });

@@ -71,17 +71,14 @@ async function VideoDownloader(video, index, folderPath, linkslength) {
 
     while (attempts > 0 && !success) {
         try {
-////////////
-            await runCommand(command1);;
-            console.log("✅ Downloaded");
-
-            console.log(`📥 Importing video:  ${video.name}`);
-            await videoImporter(video.name)
-            //console.log("✅ Imported successfully");
-            
-            await addLog({ type: "DownloaderLogs", message: `✅ Successfully processed: ${video.url}` });
-            success = true;
-////////////
+            const res = await runCommand(command1);
+            if(res.answer){
+                console.log("✅ Downloaded");
+                console.log(`📥 Importing video:  ${video.name}`);
+                await videoImporter(video.name)
+                await addLog({ type: "DownloaderLogs", message: `✅ Successfully processed: ${video.url}` });
+                success = true;
+            };
         } catch (err) {
             attempts--;
             console.log(`⚠️ Attempts left: ${attempts}. Error: ${err.message}`);
@@ -123,11 +120,11 @@ async function CheckFolderCapacity(mainFolderPath, subFolder) {
             //console.log("Checking subFolder capacity");
             const command1 = `df -h ${subFolderPath} --output=source | tail -n 1 `;
             const getPartition = await runCommand(command1);
-            const partitionName = getPartition.trim()
+            const partitionName = getPartition.stdout.trim()
 
             const command2 = `df -h --output=avail --block-size=G ${partitionName} | tail -n 1`;
             const getSize = await runCommand(command2);
-            const memoryLeft = getSize.trim();
+            const memoryLeft = getSize.stdout.trim();
             console.log(`Memory left : ${memoryLeft} gb`)
 
             const getNumber = parseInt(memoryLeft);
