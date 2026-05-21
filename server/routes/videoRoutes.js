@@ -11,6 +11,7 @@ const { deleteVideo, deleteThumbnail } = require('../controllers/videoEraserCont
 const { videoImporter } = require('../services/videoImporter/videoImporterService.js');
 const { YTGetLinks } = require('../services/linksGenerator/linksGeneratorService.js');
 const { beginDownloadingVideos } = require('../services/videoDownloaderService.js');
+const { updateYTdlp } = require('../services/autoUpdate/YTdlpService.js');
 
 router.get('/videos', getVideos);
 router.get('/videoList', getVideoList);
@@ -20,6 +21,16 @@ router.get('/thumbnails/:thumbnailName', getThumbnail);
 
 router.get('/deleteVideo/:id', deleteVideo);
 router.get('/deleteThumbnail/:id', deleteThumbnail);
+
+router.get('/yt', async (req, res) => {
+    try {
+        await updateYTdlp();
+        res.json({ message: "auth start in background." })
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 router.get('/down-test', async (req, res) => {
     try {

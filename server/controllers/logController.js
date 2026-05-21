@@ -14,7 +14,8 @@ exports.addLog = async (req, res) => {
             "DurationFethcer", 
             "CookieExtractor", 
             "SimulatingDownload",
-            "SorterService"
+            "SorterService",
+            "UpdateYTdlp"
         ];
 
         if (!type || !allowedLogs.includes(type)) {

@@ -2,12 +2,11 @@ const fsPromises = require("fs").promises;
 const path = require('path');
 const { google } = require('googleapis');
 const { UserRefreshClient } = require('google-auth-library');
-const { readMyFile, writeInfo, deleteFile } = require('./toolsService.js');
+const { readMyFile, writeInfo, deleteFile, exists } = require('./toolsService.js');
 
 const SCOPES = ['https://www.googleapis.com/auth/youtube.readonly'];
 const TOKEN_PATH = path.join(__dirname, '../middleware/auth/token.json');
 const CREDENTIALS_PATH = path.join(__dirname, '../middleware/auth/credentials.json');
-
 
 exports.loadCredentials = async () => {
     const data = await loadCredentials();
@@ -88,6 +87,9 @@ async function loadCredentials() {
 
 
 async function getAuthUrl() {
+    if (!(await exists(CREDENTIALS_PATH))) {
+        return false;
+    };
     try {
         const content = await readMyFile(CREDENTIALS_PATH);
         const credentials = JSON.parse(content);
@@ -104,6 +106,7 @@ async function getAuthUrl() {
             scope: SCOPES,
             prompt: 'consent'
         });
+        console.log("getAuthUrl authUrl :" , authUrl)
         return authUrl;
     } catch (err) {
         console.log(`Error in getAuthUrl : ${err}`);
@@ -112,6 +115,9 @@ async function getAuthUrl() {
 };
 
 async function finishAuth(code) {
+    if (!(await exists(CREDENTIALS_PATH))) {
+        return false;
+    };
     const content = await readMyFile(CREDENTIALS_PATH);
     const credentials = JSON.parse(content);
     const { client_secret, client_id, redirect_uris } = credentials.web;

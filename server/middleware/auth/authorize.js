@@ -10,6 +10,7 @@ exports.consoleAuthorization = async () => {
     } else {
         try {
             const authUrl = await getAuthUrl();
+            if(!authUrl) return null;
             console.log(` \nPlease visit: ${authUrl}\n `);
             await getQRCode();
 
