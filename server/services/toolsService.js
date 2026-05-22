@@ -109,4 +109,31 @@ exports.replaceExtension = (str, newFormat) => {
 exports.addExtension = (str, newExtension) => {
     if(!str) return "";
     return `${str}${newExtension}`
+};
+
+exports.check24Hours = (lastCheck, silent = false) => {
+    if(!lastCheck){
+        console.log("Need time in timestamptz");
+        return null;
+    }
+
+    const now = new Date();
+    const diffMs = now.getTime() - lastCheck.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+    
+    if(!silent){
+        console.log(`Current file lifespan:  ${diffHours.toFixed(1)}`)
+    }
+    
+    if (diffHours >= 24) {
+        if(!silent){
+            console.log(`🕘 More than 24 hours have passed,  it's time to check  `);
+        }
+        return true;
+    } else {
+        if(!silent){
+            console.log(`It's still early! It's only been ${diffHours.toFixed(1)} hours.`);
+        }
+        return false;
+    }
 }

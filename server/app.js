@@ -6,7 +6,8 @@ const log = require('./routes/logRoutes.js');
 const authorize = require('./routes/authorizeRoutes.js');
 const { VideoDownloader } = require("./VideoDownloader.js");
 const { checkUniqueness } = require("./services/uniquenessService.js");
-const devTools = require('./routes/devToolsRoutes.js')
+const devTools = require('./routes/devToolsRoutes.js');
+const { updateYTdlp } = require("./services/autoUpdate/YTdlpService.js");
 
 const app = express();
 app.use(cors());
@@ -36,6 +37,7 @@ async function startCycle(cycleFunction, hours) {
 //Включить
 //startCycle(checkUniqueness,24)
 //startCycle(VideoDownloader,6)
+//startCycle(updateYTdlp,24);
 
 module.exports = app;
 
