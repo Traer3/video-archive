@@ -1,5 +1,5 @@
 const { getLogs, addLog } = require("../logService")
-const { runCommand, check24Hours } = require("../toolsService")
+const { runCommand, check24Hours, checkHours } = require("../toolsService")
 
 const updateCommand = `yt-dlp -U`
 
@@ -17,8 +17,8 @@ exports.updateYTdlp = async () => {
         };
 
         const latestUpdateTime = await latestUpdate(YTlogs);
-        
-        const answer = check24Hours(latestUpdateTime)
+        checkHours
+        const answer = checkHours(24,latestUpdateTime)
         if(answer){
             await update();
             return true;
@@ -57,7 +57,7 @@ async function failedCheck(YTlogs) {
         return true;
     } else {
         const latestFailedUpdate = failedLogs[0].created_at;
-        const answer = check24Hours(latestFailedUpdate, true);
+        const answer = checkHours(24,latestFailedUpdate, true);
         return !answer;
     }
 };

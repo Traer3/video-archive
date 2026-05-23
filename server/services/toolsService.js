@@ -111,7 +111,7 @@ exports.addExtension = (str, newExtension) => {
     return `${str}${newExtension}`
 };
 
-exports.check24Hours = (lastCheck, silent = false) => {
+exports.checkHours = (hours, lastCheck, silent = false) => {
     if(!lastCheck){
         console.log("Need time in timestamptz");
         return null;
@@ -120,14 +120,14 @@ exports.check24Hours = (lastCheck, silent = false) => {
     const now = new Date();
     const diffMs = now.getTime() - lastCheck.getTime();
     const diffHours = diffMs / (1000 * 60 * 60);
-    
+
     if(!silent){
         console.log(`Current file lifespan:  ${diffHours.toFixed(1)}`)
     }
     
-    if (diffHours >= 24) {
+    if (diffHours >= hours) {
         if(!silent){
-            console.log(`🕘 More than 24 hours have passed,  it's time to check  `);
+            console.log(`🕘 More than ${hours} hours have passed,  it's time to check  `);
         }
         return true;
     } else {

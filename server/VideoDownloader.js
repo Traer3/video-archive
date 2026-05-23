@@ -1,8 +1,8 @@
 
 const { YTGetLinks } = require("./services/linksGenerator/linksGeneratorService");
 const { getLinks, writeUpdate } = require("./services/linksService");
+const { checkHours } = require("./services/toolsService");
 const { beginDownloadingVideos } = require("./services/videoDownloaderService");
-
 
 exports.VideoDownloader = async () => {
     try {
@@ -14,10 +14,16 @@ exports.VideoDownloader = async () => {
             };
             return;
         }
+        
         const latestVideo = await updateTime(likedVideos);
-        const checkTime = await checkTiming(latestVideo);
+        const latestVideoTime = latestVideo.last_updated;
+        const checkTime = checkHours(6, latestVideoTime)
 
         if (checkTime) {
+            await writeUpdate({
+                id: latestVideo.id,
+                lastUpdated: now
+            });
             const links = await YTGetLinks();
             await beginDownloadingVideos(links)
         }
@@ -44,23 +50,3 @@ async function updateTime(likedVideos) {
     }
 }
 
-async function checkTiming(latestVideo) {
-    const lastCheck = latestVideo.last_updated;
-    const now = new Date();
-
-    const diffMs = now.getTime() - lastCheck.getTime();
-
-    const diffHours = diffMs / (1000 * 60 * 60);
-    console.log(`Current file lifespan:  ${diffHours.toFixed(1)}`)
-    if (diffHours >= 6) {
-        console.log(`🕘 More than 6 hours have passed,  it's time to check  `);
-        await writeUpdate({
-            id: latestVideo.id,
-            lastUpdated: now
-        });
-        return true;
-    } else {
-        console.log(`It's still early! It's only been ${diffHours.toFixed(1)} hours.`);
-        return false;
-    }
-}
