@@ -14,7 +14,7 @@ exports.configTemplate = async (serverData, SQLAuthorization,location) => {
 
     module.exports = {
        SERVER_PORT: \`\${SERVER_PORT}\`,
-       SERVER_URL: 'http://\${STATIC_IP}:\${SERVER_PORT}',
+       SERVER_URL: \`http://\${STATIC_IP}:\${SERVER_PORT}\`,
        TABLE_AUTHORIZATION: {
             user: "${SQLAuthorization.user}",
             host: "${SQLAuthorization.host}",

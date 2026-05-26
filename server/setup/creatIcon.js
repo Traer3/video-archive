@@ -1,18 +1,11 @@
 const { runCommand, writeInfo } = require("../services/toolsService");
 
 
-exports.creatIcon = async () => {
-    //Нужно получать location из setup.js, а в нем есть desktopLocation и serverPath
-    const getLocation = `pwd`
-    const location = await runCommand(getLocation)
-    const cleanLocation = location.stdout.trim();
-
-    const desktopLocation = cleanLocation.replace(/^(\/home\/[^/]+).*/, '$1/Desktop')
-
+exports.creatIcon = async (location) => {
     const iconName = 'server.desktop'
-    const iconLocation = desktopLocation + "/" + iconName
+    const iconLocation = location.desktop + "/" + iconName
 
-    const res = await creatIcon(cleanLocation, iconLocation);
+    const res = await creatIcon(location, iconLocation);
     if (!res) {
         return res
     } else { console.log('✅ Icon created!'); }
@@ -24,15 +17,15 @@ exports.creatIcon = async () => {
     return answer;
 };
 
-async function creatIcon(cleanLocation, iconLocation) {
-    const serverPath = cleanLocation.replace("/setup","/")
+async function creatIcon(location, iconLocation) {
+    //const serverPath = cleanLocation.replace("/setup","/")
     const scriptData = `
     [Desktop Entry]
     Type=Application
     Terminal=true
     Name=Video Archive Server
     Icon=utilities-terminal
-    Exec=bash -i -c "cd ${serverPath} && node server.js; exec bash"
+    Exec=bash -i -c "cd ${location.server} && node server.js; exec bash"
     `
     const res = await writeInfo(iconLocation, scriptData)
     if (res === null) {

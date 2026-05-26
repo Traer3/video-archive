@@ -1,8 +1,18 @@
+const { runCommand } = require("../services/toolsService");
 
 
 
 exports.creatFolders = async (location) => {
-    
-    // /home/archive/server/videos/videos1
-    // /home/archive/server/thumbnails/thumbnails1
+    try{
+        await creatFolder(location.server,"videos");
+        await creatFolder(location.server,"thumbnails");
+        return true;
+    }catch(err){
+        return null;
+    }
+}
+
+async function creatFolder(location,folderName) {
+    const command = ` mkdir ${location}/${folderName} && mkdir ${location}/${folderName}/${folderName}1`
+    await runCommand(command);
 }

@@ -1,26 +1,63 @@
-const { runCommand } = require("../services/toolsService");
+const { runCommand, exists } = require("../services/toolsService");
 const { configTemplate } = require("./configTemplate");
 const { creatIcon } = require("./creatIcon");
 const { creatFolders } = require("./folderCreator");
 const { getIP, getPort } = require("./serverData");
 const { terminal } = require("./terminalTalk");
 
+
 async function Setup() {
     const location = await getLocation();
-    //похуй , потом использую 
-    //const icon = await creatIcon(); //требует desktopLocation и serverPath , потом передашь 
-    //console.log("creatIcon : ", icon);
-    const res = creatFolders(location)
-    console.log("folder res: ", res); 
-    return;
+    
+    const checkFilesExistens = await checkFiles(location)
+    if(checkFilesExistens) return null;
+
+    await creatFolders(location)
     
     const serverData = await getServerData();
     const SQLData = await SQLAuthorization();
 
-    //await configTemplate(serverData,SQLData,location)
+    await configTemplate(serverData,SQLData,location);
+    const icon = await creatIcon(location);
+    console.log(`You can edit config.js in \n${location.server}+/config.js`);
 
-    return;
+    await deleteSetup(location);
+
+    return icon;
 };
+
+async function checkFiles(location, silent = false) {
+    let configExistens = false;
+    let foldersExistens = false;
+    if(await exists(`${location.server}config.js`)){
+
+        if(!silent){
+            console.log("⚠ config.js already exist!")
+        }
+        configExistens = true;
+    }
+    if(await exists(`${location.server}videos`) && await exists(`${location.server}thumbnails`)){
+        if(!silent){
+            console.log("⚠ Folders thumbnails && videos already exist!")
+        }
+        
+        foldersExistens = true;
+    };
+
+    if(configExistens && foldersExistens){
+        return true;
+    }else{
+        return null;
+    }
+}
+
+async function deleteSetup(location) {
+    const checkFilesExistens = await checkFiles(location,true)
+    if(checkFilesExistens){
+        const command = `rm -R ${location.server}setup`
+        await runCommand(command);
+    }
+}
 
 async function getLocation() {
     const getLocation = `pwd`
