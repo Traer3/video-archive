@@ -2,6 +2,7 @@ const { runCommand, writeInfo } = require("../services/toolsService");
 
 
 exports.creatIcon = async () => {
+    //Нужно получать location из setup.js, а в нем есть desktopLocation и serverPath
     const getLocation = `pwd`
     const location = await runCommand(getLocation)
     const cleanLocation = location.stdout.trim();

@@ -1,5 +1,5 @@
 const { runCommand } = require("../services/toolsService");
-
+const os = require('os')
 
 exports.getPort = async () => {
     const getSQLPort = `grep -Hn "port =" /etc/postgresql/*/*/postgresql.conf`
@@ -14,4 +14,16 @@ exports.getPort = async () => {
         console.log("Cant find port")
         return false
     }
-}
+};
+
+exports.getIP = async () => {
+    const interfaces = os.networkInterfaces();
+        for (const name of Object.keys(interfaces)) {
+            for (const net of interfaces[name]) {
+                if (net.family === 'IPv4' && !net.internal) {
+                    return net.address;
+                }
+            }
+        }
+        return '127.0.0.1';
+};

@@ -1,19 +1,35 @@
+const { runCommand } = require("../services/toolsService");
+const { configTemplate } = require("./configTemplate");
 const { creatIcon } = require("./creatIcon");
-const { getIP } = require("./getIP");
-const { getPort } = require("./getPort");
+const { creatFolders } = require("./folderCreator");
+const { getIP, getPort } = require("./serverData");
 const { terminal } = require("./terminalTalk");
 
 async function Setup() {
+    const location = await getLocation();
     //похуй , потом использую 
-    //const icon = await creatIcon();
+    //const icon = await creatIcon(); //требует desktopLocation и serverPath , потом передашь 
     //console.log("creatIcon : ", icon);
-
+    const res = creatFolders(location)
+    console.log("folder res: ", res); 
+    return;
+    
     const serverData = await getServerData();
     const SQLData = await SQLAuthorization();
 
-    console.log("User data: \n", serverData,"\n", SQLData )
+    //await configTemplate(serverData,SQLData,location)
+
     return;
 };
+
+async function getLocation() {
+    const getLocation = `pwd`
+    const location = await runCommand(getLocation)
+    const cleanLocation = location.stdout.trim();
+    const desktopLocation = cleanLocation.replace(/^(\/home\/[^/]+).*/, '$1/Desktop');
+    const serverPath = cleanLocation.replace("/setup","/");
+    return {server: serverPath, desktop: desktopLocation}
+}
 
 async function getServerData() {
     const serverData = {
