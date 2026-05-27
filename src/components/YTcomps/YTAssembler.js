@@ -9,7 +9,7 @@ import { useDatabase } from "../../../DatabaseContext";
 import Animated from "react-native-reanimated";
 
 export default function YTAssembler ({dbVideos}) {
-    const {VIDEO_URL} = useDatabase();
+    const {SERVER_URL} = useDatabase();
     const [videos, setVideos] = useState([]);
 
     const [selectedVideo, setSelectedVideo] = useState(null);
@@ -26,7 +26,7 @@ export default function YTAssembler ({dbVideos}) {
     const fetchAllVideos = async (pageNum = 1,limit) => {
        // console.log(`🧩 Fetching page ${pageNum} (current state page: ${page})`)
        try{
-        const urlResponse = await fetch(`${VIDEO_URL}/api/server/videos?page=${pageNum}&limit=${limit}`);
+        const urlResponse = await fetch(`${SERVER_URL}/api/server/videos?page=${pageNum}&limit=${limit}`);
         const urlData = await urlResponse.json()
 
         hasNext.current = urlData.hasNext

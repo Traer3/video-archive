@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useDatabase } from "../../../../DatabaseContext";
 
 export const useSaveVideo = () =>{
-    const {DB_URL} = useDatabase();
+    const {SERVER_URL} = useDatabase();
     const savedIds = useRef(new Set());
     
     const saveVideoData = async (vidId, vidDuration) =>{
@@ -19,7 +19,7 @@ export const useSaveVideo = () =>{
                 return;
             }
 
-            const res = await fetch(`${DB_URL}/api/server/saveVidDuration`,{
+            const res = await fetch(`${SERVER_URL}/api/server/saveVidDuration`,{
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({

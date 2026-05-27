@@ -7,10 +7,10 @@ import { useDatabase } from "../../../DatabaseContext";
 //Может переделать 
 /*
 Я могу буквально импортировать YTAssembler 
-Во время удаления сверять имя и ссылку из VIDEO_URL с SQL и передавать на удаление 
+Во время удаления сверять имя и ссылку из SERVER_URL с SQL и передавать на удаление 
 */
 export default function FilteredVideos({setShowFiltered}) {
-    const {DB_URL, VIDEO_URL} = useDatabase();
+    const {SERVER_URL} = useDatabase();
     const [videos, setVideos] = useState(null);
     const [scrollAnimation, setScrollAnimation] = useState(true);
     const [deletionTrigger, setDeletionTrigger] = useState(0);
@@ -26,12 +26,12 @@ export default function FilteredVideos({setShowFiltered}) {
     useEffect(()=>{
         async function getAndMergeAllVideos() {
             try{
-                const DBVideos = await getDBData(DB_URL,"/videos","");
+                const DBVideos = await getDBData(SERVER_URL,"/videos","");
                 const filteredVideos = DBVideos.filter(video => video.filtered === true)
 
-                const totalRes = await getDBData(VIDEO_URL,"/videos","");
+                const totalRes = await getDBData(SERVER_URL,"/videos","");
                 
-                const urlsData = await getDBData(VIDEO_URL,"/videos?page=1&limit=",totalRes.total);
+                const urlsData = await getDBData(SERVER_URL,"/videos?page=1&limit=",totalRes.total);
 
                 const unNormolizeName = (name) => name + ".mp4";
 

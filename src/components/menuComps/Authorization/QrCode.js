@@ -7,7 +7,7 @@ import { useDatabase } from "../../../../DatabaseContext";
 
 
 const Scanner = ({show, scanned, setScanned, }) => {
-    const { VIDEO_URL } = useDatabase();
+    const { SERVER_URL } = useDatabase();
     const [answer, setAnswer] = useState(false);
     const [camera, setCamera] = useState(true);
     const [userInput, setUserInput] = useState("")
@@ -42,7 +42,7 @@ const Scanner = ({show, scanned, setScanned, }) => {
 
     const sendCode = async (code) => {
         const safeUrl = encodeURIComponent(code)
-        const res = await fetch(`${VIDEO_URL}/api/auth/finishAuth?code=${safeUrl}`);
+        const res = await fetch(`${SERVER_URL}/api/auth/finishAuth?code=${safeUrl}`);
         if (res.ok) {
             const data = await res.json();
             console.log("Success: ", data.message);

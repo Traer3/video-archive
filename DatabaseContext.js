@@ -8,10 +8,11 @@ export const DatabaseProvider = ({children}) =>{
     //const VIDEO_URL = `${config.VIDEO_URL}`;
     const DB_URL = `http://${IP}:3001`;
     const VIDEO_URL = `http://${IP}:3001`;
+    const SERVER_URL = `http://${IP}:3001`
 
 
     return(
-        <DatabaseContext.Provider value={{VIDEO_URL, DB_URL}}>
+        <DatabaseContext.Provider value={{SERVER_URL}}>
             {children}
         </DatabaseContext.Provider>
     );

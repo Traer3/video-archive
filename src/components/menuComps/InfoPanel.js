@@ -7,14 +7,14 @@ import { useDatabase } from "../../../DatabaseContext";
 "SQLLogs","ExpressLogs","DownloaderLogs","ImporterLogs","EraserLogs","IsItUniqueLogs","ThumbnailGeneratorLogs"
 */
 export default function InfoPanel () {
-    const {DB_URL} = useDatabase();
+    const {SERVER_URL} = useDatabase();
     const [dbLogs, setDBLogs] = useState(null);
     const [logs,setLogs] = useState(null)
 
     useEffect(()=>{
         const getDBData = async () => {
             try{
-                const res = await fetch(`${DB_URL}/logs`);
+                const res = await fetch(`${SERVER_URL}/logs`);
                 const DBLogs = await res.json();
                 setDBLogs(DBLogs);
 

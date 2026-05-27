@@ -5,7 +5,7 @@ import YTVidForm from "./YTVidForm"
 import { useDatabase } from "../../../../DatabaseContext";
 
 export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,isItUnique,setDeletionTrigger,deletionTrigger,url,eraseVideoFlag}){
-    const {DB_URL} = useDatabase();
+    const {SERVER_URL} = useDatabase();
     const translateX = useSharedValue(0);
     const offsetRefX = useRef(0);
     const translateY = useSharedValue(0);
@@ -48,7 +48,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
         translateX.value = withSpring(0);
         console.log("VideoFILTERED ", id);
         try{
-            const res = await fetch(`${DB_URL}/filterVideo`,{
+            const res = await fetch(`${SERVER_URL}/filterVideo`,{
                 method:'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({

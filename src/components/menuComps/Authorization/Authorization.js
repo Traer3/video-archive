@@ -8,7 +8,7 @@ import { useDatabase } from "../../../../DatabaseContext";
 
 
 export default function Authorize() {
-    const { VIDEO_URL } = useDatabase();
+    const { SERVER_URL } = useDatabase();
     const [authorized, setAuthorized] = useState(false);
     const [logout, setLogout] = useState(false);
     const [question, setQuestion] = useState(false);
@@ -29,7 +29,7 @@ export default function Authorize() {
     useEffect(() => {
         const checkToken = async () => {
             try {
-                const responce = await fetch(`${VIDEO_URL}/api/auth/checkToken`);
+                const responce = await fetch(`${SERVER_URL}/api/auth/checkToken`);
                 const answer = await responce.json();
                 setAuthorized(answer.data)
             } catch (err) {
@@ -43,7 +43,7 @@ export default function Authorize() {
     const onAuthorize = async () => {
         setAnswer(true)
         try {
-            const responce = await fetch(`${VIDEO_URL}/api/auth/getAuthUrl`);
+            const responce = await fetch(`${SERVER_URL}/api/auth/getAuthUrl`);
             const answer = await responce.json();
             console.log(answer.message)
             if (answer.data) {
@@ -56,7 +56,7 @@ export default function Authorize() {
 
     const sendCode = async (code) => {
         const safeUrl = encodeURIComponent(code)
-        const res = await fetch(`${VIDEO_URL}/api/auth/finishAuth?code=${safeUrl}`);
+        const res = await fetch(`${SERVER_URL}/api/auth/finishAuth?code=${safeUrl}`);
         if (res.ok) {
             const data = await res.json();
             console.log("Success: ", data.message);
@@ -65,7 +65,7 @@ export default function Authorize() {
     };
 
     const onDeleteToken = async () => {
-        const responce = await fetch(`${VIDEO_URL}/api/auth/deleteToken`);
+        const responce = await fetch(`${SERVER_URL}/api/auth/deleteToken`);
         const answer = await responce.json();
         console.log(`${answer.message}`)
     }

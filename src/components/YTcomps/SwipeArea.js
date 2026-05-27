@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 import { useDatabase } from "../../../DatabaseContext";
 
 export default function SwipeArea() {
-    const {DB_URL} = useDatabase();
+    const {SERVER_URL} = useDatabase();
 
     const [dbVideos,setDbVideos] = useState([]);   
     const [showVideos, setShowVideos] = useState(false);
     useEffect(()=>{
         const getDBData = async () => {
             try{
-                const res = await fetch(`${DB_URL}/api/server/videoList`);
+                const res = await fetch(`${SERVER_URL}/api/server/videoList`);
                 const arr = await res.json();
                 const formatted = arr.data.map(v => ({ // добавь data
                     id: v.id,
