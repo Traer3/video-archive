@@ -3,7 +3,7 @@ const router = express.Router();
 const { getVideoList, getVideos, getVideo, getThumbnail, filterVideo, deleteID, importVideo, saveVidDuration, saveUniqueData } = require('../controllers/videoController.js');
 
 const durationGeneratorService = require('../services/durationGeneratorService.js')
-const { generateThumbnails } = require('../services/thumbnailGeneratorService.js');
+const { generateThumbnails, generateThumbnail } = require('../services/thumbnailGeneratorService.js');
 const { checkUniqueness } = require('../services/uniquenessService.js');
 
 const { deleteVideo, deleteThumbnail } = require('../controllers/videoEraserController.js');
@@ -78,6 +78,7 @@ router.get('/import-test', async (req, res) => {
     }
 });
 
+
 router.get('/thumbnail-test', async (req, res) => {
     try {
         await generateThumbnails()
@@ -86,7 +87,6 @@ router.get('/thumbnail-test', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
 
 router.post('/filterVideo', filterVideo);
 router.post('/deleteID', deleteID);

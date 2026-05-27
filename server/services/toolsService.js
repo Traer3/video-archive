@@ -1,5 +1,6 @@
 const fsPromises = require("fs").promises
 const { spawn, exec } = require("child_process");
+const path = require('path');
 
 exports.runScript = (scriptPath, args) => {
     return new Promise((resolve, reject) => {
@@ -96,8 +97,16 @@ exports.cleanName = (str) => {
 
 exports.deleteExtension = (str) =>{
     if(!str) return "";
-    return str
-        .replace(/\.mp4$/i, '');
+    /*
+    const ext = path.extname(str);
+    return path.basename(str,ext);
+    */
+   const extensionPool = ['.mp4', '.jpg'];
+   const hasExtension = extensionPool.some(ext => str.toLowerCase().endsWith(ext))
+   if(hasExtension){
+    return str.replace(/(\.mp4|\.jpg)$/i, '');
+   };
+   return str;
 };
 
 exports.replaceExtension = (str, newFormat) => {

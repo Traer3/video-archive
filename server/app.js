@@ -8,6 +8,7 @@ const { VideoDownloader } = require("./VideoDownloader.js");
 const { checkUniqueness } = require("./services/uniquenessService.js");
 const devTools = require('./routes/devToolsRoutes.js');
 const { updateYTdlp } = require("./services/autoUpdate/YTdlpService.js");
+const { generateThumbnails } = require("./services/thumbnailGeneratorService.js");
 
 const app = express();
 app.use(cors());
@@ -35,9 +36,10 @@ async function startCycle(cycleFunction, hours) {
 };
 
 //Включить
-//startCycle(checkUniqueness,24)
-//startCycle(VideoDownloader,6)
+//startCycle(checkUniqueness,24);
+//startCycle(VideoDownloader,6);
 //startCycle(updateYTdlp,24);
+//startCycle(generateThumbnails,12);
 
 module.exports = app;
 

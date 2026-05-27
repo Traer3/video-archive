@@ -11,27 +11,28 @@ const THUMBNAILS_DIR = path.join(__dirname, "../thumbnails");
 
 exports.generateThumbnail = async (name) => {
     console.log("🔍 Checking main folders")
-        if (!(await exists(VIDEOS_DIR)) || !(await exists(THUMBNAILS_DIR))) {
-            console.error("Missing folder");
-            return null;
-        };
+    if (!(await exists(VIDEOS_DIR)) || !(await exists(THUMBNAILS_DIR))) {
+        console.error("Missing folder");
+        return null;
+    };
     const fileName = deleteExtension(name);
+
     const thumbnailFiles = await readFolders(THUMBNAILS_DIR);
-    const thumbnailNames = new Set(thumbnailFiles.map(thumbnail => cleanName(thumbnail)));
+    const thumbnailNames = new Set(thumbnailFiles.map(thumbnail => cleanName(deleteExtension(thumbnail.name))));
     const videoFiles = await readFolders(VIDEOS_DIR);
-    const videoFilesMap = new Map(videoFiles.map(video => [cleanName(video.name), video]))
+    const videoFilesMap = new Map(videoFiles.map(video => [cleanName(deleteExtension(video.name)), video]))
 
     try {
         const state = checkExistence(fileName, thumbnailNames);
-            if (state === true) {
-                console.log("Thumbnailalready exist");
-                return true;
-            }
-        const videoPath = await getPath(name, videoFilesMap);
+        if (state === true) {
+            console.log("Thumbnailalready exist");
+            return true;
+        }
+        const videoPath = await getPath(fileName, videoFilesMap);
         const thumbnailFolder = await findFolder();
 
         if (videoPath) {
-            console.log(`🎬 Generating thumbnail for: ${name}`);
+            console.log(`🎬 Generating thumbnail for: ${fileName}`);
             const answer = await generateThumbnail(videoPath, thumbnailFolder, fileName);
             console.log(`✅ Thumbnail generated : ${fileName}`);
             await addLog({
@@ -48,50 +49,52 @@ exports.generateThumbnail = async (name) => {
 
 exports.generateThumbnails = async () => {
     console.log("🔍 Checking main folders")
-        if (!(await exists(VIDEOS_DIR)) || !(await exists(THUMBNAILS_DIR))) {
-            console.error("Missing folder");
-            return null;
-        };
+    if (!(await exists(VIDEOS_DIR)) || !(await exists(THUMBNAILS_DIR))) {
+        console.error("Missing folder");
+        return null;
+    };
     const thumbnailFiles = await readFolders(THUMBNAILS_DIR);
-    const thumbnailNames = new Set(thumbnailFiles.map(thumbnail => cleanName(thumbnail)));
+    const thumbnailNames = new Set(thumbnailFiles.map(thumbnail => cleanName(deleteExtension(thumbnail.name))));
     const videoFiles = await readFolders(VIDEOS_DIR);
-    const videoFilesMap = new Map(videoFiles.map(video => [cleanName(video.name), video]))
+    const videoFilesMap = new Map(videoFiles.map(video => [cleanName(deleteExtension(video.name)), video]))
 
     for (const video of videoFiles) {
         try {
             const fileName = deleteExtension(video.name);
             const state = checkExistence(fileName, thumbnailNames);
-                if (state === true) continue;
+            if (state === true) {
+                continue;
+            }
             const videoPath = await getPath(video.name, videoFilesMap);
             const thumbnailFolder = await findFolder();
-                if (videoPath) {
-                    console.log(`🎬 Generating thumbnail for: ${fileName}`);
-                    const answer = await generateThumbnail(videoPath, thumbnailFolder, fileName);
-                    console.log(`✅ Thumbnail generated : ${fileName}`);
-                    await addLog({
-                        type: "ThumbnailGeneratorLogs",
-                        message: `✅ Thumbnail generated : ${fileName}`
-                    })
-                    return answer;
-                };
+            if (videoPath) {
+                console.log(`🎬 Generating thumbnail for: ${fileName}`);
+                await generateThumbnail(videoPath, thumbnailFolder, fileName);
+                console.log(`✅ Thumbnail generated : ${fileName}`);
+                await addLog({
+                    type: "ThumbnailGeneratorLogs",
+                    message: `✅ Thumbnail generated : ${fileName}`
+                })
+            };
         } catch (err) {
             console.error(`Error in generateThumbnails : ${err}`);
             return null;
         }
     }
-    console.log('🏁 All thumbnail generated!')
+    console.log('🏁 All thumbnail generated!');
+    return null;
 }
 
-async function checkExistence(name, thumbnailNames) {
-    const thumbnailName = cleanName(name);
+function checkExistence(name, thumbnailNames) {
+    const thumbnailName = cleanName(name)
     const foundThumbnail = thumbnailNames.has(thumbnailName);
     if (foundThumbnail) {
         return true;
     };
     return false;
 };
-async function getPath(name, videoFilesMap) {
-    const videoName = cleanName(name);
+function getPath(name, videoFilesMap) {
+    const videoName = cleanName(deleteExtension(name));
     const foundVideo = videoFilesMap.get(videoName);
     if (foundVideo) {
         return foundVideo.fullPath
