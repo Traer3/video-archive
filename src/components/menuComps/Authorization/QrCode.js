@@ -1,4 +1,4 @@
-import { View, StyleSheet, Alert, Linking } from "react-native";
+import { View, StyleSheet, Linking } from "react-native";
 import ToolButton from "../../buttons/ToolButton";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useState } from "react";
@@ -7,7 +7,7 @@ import { useDatabase } from "../../../../DatabaseContext";
 
 
 const Scanner = ({show, scanned, setScanned, }) => {
-    const { SERVER_URL } = useDatabase(); // TYT
+    const { SERVER_URL } = useDatabase();
     const [answer, setAnswer] = useState(false);
     const [camera, setCamera] = useState(true);
     const [userInput, setUserInput] = useState("")
@@ -42,7 +42,7 @@ const Scanner = ({show, scanned, setScanned, }) => {
 
     const sendCode = async (code) => {
         const safeUrl = encodeURIComponent(code)
-        const res = await fetch(`${SERVER_URL}/api/auth/finishAuth?code=${safeUrl}`); // TYT
+        const res = await fetch(`${SERVER_URL}/api/auth/finishAuth?code=${safeUrl}`);
         if (res.ok) {
             const data = await res.json();
             console.log("Success: ", data.message);
@@ -53,7 +53,15 @@ const Scanner = ({show, scanned, setScanned, }) => {
         <>
         {show && 
             <View style={styles.camera}>
-            <QuestionForUser answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer} />
+            <View style={{ //похуй , потом изменю
+                position: 'absolute',
+                width: '100%',
+                height: '8%',
+                top: 771,
+                left:40
+            }}>
+                <QuestionForUser answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer} />
+            </View>
             {camera &&
                 <CameraView
                     style={[StyleSheet.absoluteFill, styles.cameraSpace]}

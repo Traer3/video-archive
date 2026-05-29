@@ -7,7 +7,7 @@ import { useDatabase } from "../../../../DatabaseContext";
 
 
 export default function Authorize() {
-    const { SERVER_URL } = useDatabase();// TYT
+    const { SERVER_URL } = useDatabase();
     const [authorized, setAuthorized] = useState(false);
     const [logout, setLogout] = useState(false);
     const [question, setQuestion] = useState(false);
@@ -28,7 +28,7 @@ export default function Authorize() {
     useEffect(() => {
         const checkToken = async () => {
             try {
-                const responce = await fetch(`${SERVER_URL}/api/auth/checkToken`);// TYT
+                const responce = await fetch(`${SERVER_URL}/api/auth/checkToken`);
                 const answer = await responce.json();
                 setAuthorized(answer.data)
             } catch (err) {
@@ -42,7 +42,7 @@ export default function Authorize() {
     const onAuthorize = async () => {
         setAnswer(true)
         try {
-            const responce = await fetch(`${SERVER_URL}/api/auth/getAuthUrl`);// TYT
+            const responce = await fetch(`${SERVER_URL}/api/auth/getAuthUrl`);
             const answer = await responce.json();
             console.log(answer.message)
             if (answer.data) {
@@ -55,42 +55,44 @@ export default function Authorize() {
 
     const sendCode = async (code) => {
         const safeUrl = encodeURIComponent(code)
-        const res = await fetch(`${SERVER_URL}/api/auth/finishAuth?code=${safeUrl}`);// TYT
+        const res = await fetch(`${SERVER_URL}/api/auth/finishAuth?code=${safeUrl}`);
         if (res.ok) {
             const data = await res.json();
             console.log("Success: ", data.message);
+            setLogout(false)
+            setAuthorized(true)
         }
-        setAnswer(false)
+        setAnswer(false);
+        
     };
 
     const onDeleteToken = async () => {
-        const responce = await fetch(`${SERVER_URL}/api/auth/deleteToken`);// TYT
+        const responce = await fetch(`${SERVER_URL}/api/auth/deleteToken`);
         const answer = await responce.json();
         console.log(`${answer.message}`)
-        setAuthorized(false);
     }
 
     const onLogout = () => {
-
+        console.log("logout : ", logout)
         setLogout(!logout);
         setQuestion(true)
     }
 
 
     const onRethink = () => {
-        setQuestion(false);
+        setQuestion(!question);
         setAuthorized(true)
         setLogout(false)
     }
 
     const onExit = async () => {
-       await onDeleteToken()
         setAuthorized(false)
+        setQuestion(false)
         setLogout(false)
+        await onDeleteToken()
     }
 
     const userAnswer = () => {
-        console.log(userInput);
         const url = userInput.trim();
 
         if (!url.startsWith("http://localhost:8080/?")) {

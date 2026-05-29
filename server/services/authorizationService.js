@@ -106,7 +106,7 @@ async function getAuthUrl() {
             scope: SCOPES,
             prompt: 'consent'
         });
-        console.log("getAuthUrl authUrl :" , authUrl)
+        //console.log("getAuthUrl authUrl :" , authUrl)
         return authUrl;
     } catch (err) {
         console.log(`Error in getAuthUrl : ${err}`);

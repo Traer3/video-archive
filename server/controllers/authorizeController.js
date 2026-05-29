@@ -46,7 +46,7 @@ exports.finishAuth = async (req, res) => {
 
     try {
         parsed = new URL(answer);
-        console.log("URL working!");
+        //console.log("URL working!");
     } catch (err) {
         res.status(500).json({ error: `❌ Invalid url: \n ${answer.url}` });
         return null;
