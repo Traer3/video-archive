@@ -42,12 +42,13 @@ const styles = StyleSheet.create({
     answer:{
         position:'absolute',
         width: '80%',
-        height: '15%',
-        top:300,
-        marginLeft:"10%",
+        height: '200%',
+        top:-350,
+        
         backgroundColor:'rgb(71, 103, 151)',
         //backgroundColor:'red',
         borderColor:'rgb(43,75,123)',
+        //borderColor:'red',
         borderWidth:2,
         borderRadius: 2,
         alignItems:'center',

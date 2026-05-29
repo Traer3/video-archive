@@ -14,7 +14,7 @@ export default function InfoPanel () {
     useEffect(()=>{
         const getDBData = async () => {
             try{
-                const res = await fetch(`${SERVER_URL}/logs`);
+                const res = await fetch(`${SERVER_URL}/logs`); //TYT
                 const DBLogs = await res.json();
                 setDBLogs(DBLogs);
 

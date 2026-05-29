@@ -19,7 +19,7 @@ export const useSaveVideo = () =>{
                 return;
             }
 
-            const res = await fetch(`${SERVER_URL}/api/server/saveVidDuration`,{
+            const res = await fetch(`${SERVER_URL}/api/server/saveVidDuration`,{ //TYT
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({

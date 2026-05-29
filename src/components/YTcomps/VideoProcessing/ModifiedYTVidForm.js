@@ -48,7 +48,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
         translateX.value = withSpring(0);
         console.log("VideoFILTERED ", id);
         try{
-            const res = await fetch(`${SERVER_URL}/filterVideo`,{
+            const res = await fetch(`${SERVER_URL}/filterVideo`,{ //TYT
                 method:'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
@@ -75,7 +75,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
         console.log("VideoDeleted", id);
         /*
         try{
-            const res = await fetch("http://192.168.0.8:3004/deleteVideo",{
+            const res = await fetch("http://192.168.0.8:3004/deleteVideo",{ //TYT
                 method:'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({

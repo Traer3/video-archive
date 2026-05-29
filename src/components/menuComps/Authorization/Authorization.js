@@ -6,9 +6,8 @@ import { useEffect, useState } from "react"
 import { useDatabase } from "../../../../DatabaseContext";
 
 
-
 export default function Authorize() {
-    const { SERVER_URL } = useDatabase();
+    const { SERVER_URL } = useDatabase();// TYT
     const [authorized, setAuthorized] = useState(false);
     const [logout, setLogout] = useState(false);
     const [question, setQuestion] = useState(false);
@@ -29,7 +28,7 @@ export default function Authorize() {
     useEffect(() => {
         const checkToken = async () => {
             try {
-                const responce = await fetch(`${SERVER_URL}/api/auth/checkToken`);
+                const responce = await fetch(`${SERVER_URL}/api/auth/checkToken`);// TYT
                 const answer = await responce.json();
                 setAuthorized(answer.data)
             } catch (err) {
@@ -43,11 +42,11 @@ export default function Authorize() {
     const onAuthorize = async () => {
         setAnswer(true)
         try {
-            const responce = await fetch(`${SERVER_URL}/api/auth/getAuthUrl`);
+            const responce = await fetch(`${SERVER_URL}/api/auth/getAuthUrl`);// TYT
             const answer = await responce.json();
             console.log(answer.message)
             if (answer.data) {
-                Autnification(answer.data)
+                await Autnification(answer.data)
             }
         } catch (err) {
             console.log("Cant get url from server: ", err)
@@ -56,7 +55,7 @@ export default function Authorize() {
 
     const sendCode = async (code) => {
         const safeUrl = encodeURIComponent(code)
-        const res = await fetch(`${SERVER_URL}/api/auth/finishAuth?code=${safeUrl}`);
+        const res = await fetch(`${SERVER_URL}/api/auth/finishAuth?code=${safeUrl}`);// TYT
         if (res.ok) {
             const data = await res.json();
             console.log("Success: ", data.message);
@@ -65,9 +64,10 @@ export default function Authorize() {
     };
 
     const onDeleteToken = async () => {
-        const responce = await fetch(`${SERVER_URL}/api/auth/deleteToken`);
+        const responce = await fetch(`${SERVER_URL}/api/auth/deleteToken`);// TYT
         const answer = await responce.json();
         console.log(`${answer.message}`)
+        setAuthorized(false);
     }
 
     const onLogout = () => {
@@ -83,8 +83,8 @@ export default function Authorize() {
         setLogout(false)
     }
 
-    const onExit = () => {
-        onDeleteToken()
+    const onExit = async () => {
+       await onDeleteToken()
         setAuthorized(false)
         setLogout(false)
     }
@@ -110,8 +110,10 @@ export default function Authorize() {
     };
 
     return (
+        <>
+        <QuestionForUser key={rerender} answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer} />
         <View style={styles.container}>
-            <QuestionForUser key={rerender} answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer} />
+            
             <View style={styles.buttonPlacement}>
                 {question ?
                     <View style={{ alignItems: 'center', flexDirection: 'column' }}>
@@ -139,6 +141,7 @@ export default function Authorize() {
 
             </View>
         </View>
+        </>
     )
 };
 
@@ -148,7 +151,8 @@ const styles = StyleSheet.create({
         //borderWidth:1,
         justifyContent: 'center',
         alignContent: 'center',
-        marginLeft: 10
+        marginLeft: 10,
+        
     },
     buttonPlacement: {
         flex: 1,

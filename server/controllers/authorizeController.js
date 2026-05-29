@@ -62,7 +62,7 @@ exports.finishAuth = async (req, res) => {
         const code = codeParam.trim()
         const finishAuth = await authorizationService.finishAuth(code);
         res.status(200).json({
-            message: '📝 Require FULL URL!',
+            message: '✅  Authorization completed, TOKEN saved!',
             data: finishAuth
         });
 

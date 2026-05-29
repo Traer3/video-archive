@@ -11,7 +11,7 @@ export default function SwipeArea() {
     useEffect(()=>{
         const getDBData = async () => {
             try{
-                const res = await fetch(`${SERVER_URL}/api/server/videoList`);
+                const res = await fetch(`${SERVER_URL}/api/server/videoList`); //TYT
                 const arr = await res.json();
                 const formatted = arr.data.map(v => ({ // добавь data
                     id: v.id,
