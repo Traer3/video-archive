@@ -4,7 +4,7 @@ const fsPromises = require("fs").promises
 const config = require('../config.js');
 const videoService = require('../services/videoService.js')
 const { readFolders } = require("../services/videoService.js");
-const { replaceExtension } = require("../services/toolsService.js");
+const { replaceExtension, deleteExtension, cleanName } = require("../services/toolsService.js");
 
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 const THUMBNAILS_DIR = path.join(__dirname, "../thumbnails");
@@ -16,7 +16,16 @@ exports.getVideos = async (req, res) => {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     try {
-        const allVideos = await readFolders(VIDEOS_DIR);
+        const DBvideos = await videoService.getVideoList()
+        const videoFiles = await readFolders(VIDEOS_DIR);
+
+        const allVideos = sortedVideos(videoFiles, DBvideos)
+        console.log("allVideos : ",allVideos)
+
+        //Прочитать все файлы 
+        //Отсортировать их 
+        //Отправлять по кучке 
+
         if (allVideos.length === 0) {
             return res.status(200).json({ videos: [], total: 0 });
         }
@@ -64,6 +73,21 @@ exports.getVideos = async (req, res) => {
         console.error(err);
         res.status(500).json({ error: err.message });
     }
+};
+
+function sortedVideos(videoFiles, DBvideos) {
+    const Videos = [];
+    const dbVideosName = [...DBvideos.map(video => cleanName(video.name))].reverse()
+    const fileNames = new Map(videoFiles.map(vid => [cleanName(deleteExtension(vid.name)), vid]))
+    
+    for(const dbName of dbVideosName){
+        const foundVideo = fileNames.get(dbName)
+        if(foundVideo){
+            Videos.push(foundVideo);
+        }
+    }
+    
+    return Videos;
 };
 
 exports.getVideo = async (req, res, next) => {

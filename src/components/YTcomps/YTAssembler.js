@@ -9,6 +9,8 @@ import { useDatabase } from "../../../DatabaseContext";
 import Animated from "react-native-reanimated";
 
 export default function YTAssembler ({dbVideos}) {
+    //console.log("dbVideos : ", dbVideos)
+    //turn;
     const {SERVER_URL} = useDatabase();
     const [videos, setVideos] = useState([]);
 

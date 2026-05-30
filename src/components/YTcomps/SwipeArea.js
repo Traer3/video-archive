@@ -23,6 +23,8 @@ export default function SwipeArea() {
                     filtered: v.filtered
                 }));
                 const filtered = formatted.filter(vid => vid.filtered === false)
+                //const reverseExistedList = [...YTvideos].reverse()
+                //const reversVideoList = [...filtered].reverse()
                 setDbVideos(filtered);
     
                 console.log('DB videos loaded:',formatted.length);
