@@ -15,7 +15,7 @@ exports.YTGetLinks = async () => {
     const currentYTVideos = auth.status
         ? await getYouTubeLinks(auth.client)
         : [];
-
+    
     const freshLinks = await sendNewLinks(Links, currentYTVideos);
     if (freshLinks || freshLinks.length > 0) {
         await sendLikes(freshLinks);
