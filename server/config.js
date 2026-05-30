@@ -1,3 +1,21 @@
+
+const SERVER_PORT = 3001;
+const STATIC_IP = '192.168.0.8';
+
+module.exports = {
+   SERVER_PORT: `${SERVER_PORT}`,
+   SERVER_URL: `http://${STATIC_IP}:${SERVER_PORT}`,
+   TABLE_AUTHORIZATION: {
+        user: "postgres",
+        host: "localhost",
+        database: "Vids",
+        password: "Wedfvb01",
+        port: 5432,
+    }
+}
+
+ //OLD
+/*
 const os = require('os')
 const SQL_PORT = 3001;
 const EXPRESS_PORT = 3001;
@@ -40,3 +58,4 @@ module.exports = {
         port: 5432,
     }
 }
+*/

@@ -34,7 +34,11 @@ exports.addLog = async (req, res) => {
 exports.getLogs = async (req, res) => {
     try {
         const result = await logService.getLogs();
-        res.json(result.rows);
+        res.status(200).json({
+            message: '✅ Logs from DB',
+            data: result
+        })
+        //res.json(result.rows);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Table logs error", err })

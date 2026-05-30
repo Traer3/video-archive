@@ -23,7 +23,7 @@ exports.videoSorter = async () => {
     
     const sortedList = [...YTvideos, ...noCategory];
 
-    const newList =  await writeOldData(oldTable, sortedList);
+    const newList =  writeOldData(oldTable, sortedList);
     await DatabaseOverwrite(newList);
     console.log("✅ Videos sorted!")
 };
@@ -88,7 +88,7 @@ async function DatabaseOverwrite(newList) {
     }
 };
 
-async function writeOldData(oldTable, sortedList) {
+function writeOldData(oldTable, sortedList) {
     const videos = []
     const oldTableMap = new Map(oldTable.map(video => [cleanName(video.name), video]))
     for(const newVideo of sortedList){
@@ -102,3 +102,4 @@ async function writeOldData(oldTable, sortedList) {
     };
     return videos
 }
+

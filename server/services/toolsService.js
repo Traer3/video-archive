@@ -75,12 +75,16 @@ exports.deleteFile = async (filePath) => {
 
 exports.cleanName = (str) => {
     if (!str) return "";
-    return str
+    const newName = str
         .normalize('NFD')
         .toLowerCase()
         .replace(/[^a-z0-9\s]/g, '')
         .replace(/\s+/g, ' ')
         .trim()
+    if (!newName || newName === ''){
+        return str;
+    }
+    return newName;
     /* ебал того рот этих пробелов 
         .toLowerCase()
         .replace(/[\uFF1A]/g, ':')

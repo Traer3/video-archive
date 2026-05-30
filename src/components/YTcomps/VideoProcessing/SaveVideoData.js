@@ -18,8 +18,7 @@ export const useSaveVideo = () =>{
                 console.log(`⏭ Video ${vidId} already saved, skipping...`);
                 return;
             }
-
-            const res = await fetch(`${SERVER_URL}/api/server/saveVidDuration`,{ //TYT
+            const res = await fetch(`${SERVER_URL}/api/server/saveVidDuration`,{
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({

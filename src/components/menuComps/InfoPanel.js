@@ -4,7 +4,18 @@ import { useEffect, useState } from "react";
 import { useDatabase } from "../../../DatabaseContext";
 
 /* sort this
-"SQLLogs","ExpressLogs","DownloaderLogs","ImporterLogs","EraserLogs","IsItUniqueLogs","ThumbnailGeneratorLogs"
+            "SQLLogs", 
+            "ExpressLogs", больше не будет ) 
+            "DownloaderLogs", 
+            "ImporterLogs", 
+            "EraserLogs", 
+            "IsItUniqueLogs", 
+            "ThumbnailGeneratorLogs", 
+            "DurationFethcer", 
+            "CookieExtractor", 
+            "SimulatingDownload",
+            "SorterService",
+            "UpdateYTdlp"
 */
 export default function InfoPanel () {
     const {SERVER_URL} = useDatabase();
@@ -14,17 +25,21 @@ export default function InfoPanel () {
     useEffect(()=>{
         const getDBData = async () => {
             try{
-                const res = await fetch(`${SERVER_URL}/logs`); //TYT
+                const res = await fetch(`${SERVER_URL}/api/log/getLogs`); //TYT
                 const DBLogs = await res.json();
-                setDBLogs(DBLogs);
+                setDBLogs(DBLogs.data);
 
+                //id , log_type, log, created_at
+                //исправить 
                 let filteredType = [];
                 let id = 0;
-                const dbLogTypes = await DBLogs.map(logType => logType = logType.log_type)
+                
+                const dbLogTypes = await DBLogs.data.map(logType => logType.log_type)
+
                 const uniqueTypes = [...new Set(dbLogTypes)]
                 uniqueTypes.map(logType => filteredType.push({id:id++, log_type: logType,  log: []}))
                
-                await logFiller(DBLogs,filteredType);
+                await logFiller(DBLogs.data,filteredType);
 
                 setLogs(filteredType);
             }catch(err){

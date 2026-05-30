@@ -46,9 +46,9 @@ exports.getVideos = async (req, res) => {
             const hasThumbnail = thumbnailNames.includes(thumbnailName);
             return {
                 name: file,
-                url: `${config.VIDEO_URL}/api/server/${encodeURIComponent(file)}`,
+                url: `${config.SERVER_URL}/api/server/${encodeURIComponent(file)}`,
                 thumbnail: hasThumbnail
-                    ? `${config.VIDEO_URL}/api/server/thumbnails/${encodeURIComponent(thumbnailName)}`
+                    ? `${config.SERVER_URL}/api/server/thumbnails/${encodeURIComponent(thumbnailName)}`
                     : null,
             };
         });
