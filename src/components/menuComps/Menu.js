@@ -2,6 +2,7 @@ import { View, StyleSheet, Pressable, Text, TextInput, AppState } from "react-na
 import Authorize from "./Authorization/Authorization";
 import QrCode from "./Authorization/QrCode";
 import { useState } from "react";
+import ServerIP from "./ServerIP";
 
 export default function Menu({ areaState }) {
     const [scanned, setScanned] = useState(false);
@@ -15,6 +16,7 @@ export default function Menu({ areaState }) {
             <View style={styles.conteiner}>
                 <Authorize />
                 <QrCode setScanned={setScanned} scanned={scanned} />
+                <ServerIP />
             </View>
 
             <QrCode.Scanner show={scanned} setScanned={setScanned} />

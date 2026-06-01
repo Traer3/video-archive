@@ -63,7 +63,7 @@ export default function Authorize() {
             setAuthorized(true)
         }
         setAnswer(false);
-        
+
     };
 
     const onDeleteToken = async () => {
@@ -113,36 +113,36 @@ export default function Authorize() {
 
     return (
         <>
-        <QuestionForUser key={rerender} answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer} />
-        <View style={styles.container}>
-            
-            <View style={styles.buttonPlacement}>
-                {question ?
-                    <View style={{ alignItems: 'center', flexDirection: 'column' }}>
-                        <View >
-                            <Text style={{ fontSize: 18, fontWeight: '600' }}>
-                                do you want to exit ?
-                            </Text>
+            <QuestionForUser key={rerender} answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer} question={'Enter url here'} />
+            <View style={styles.container}>
+
+                <View style={styles.buttonPlacement}>
+                    {question ?
+                        <View style={{ alignItems: 'center', flexDirection: 'column' }}>
+                            <View >
+                                <Text style={{ fontSize: 18, fontWeight: '600' }}>
+                                    do you want to exit ?
+                                </Text>
+                            </View>
+
+                            <View style={{ flexDirection: 'row', gap: 30, padding: 2 }}>
+                                <ToolButton buttonFunction={onExit} iconName={'checkButton'} CHeight={30} CWidth={30} />
+                                <ToolButton buttonFunction={onRethink} iconName={'deleteButton'} CHeight={30} CWidth={30} />
+                            </View>
                         </View>
-
-                        <View style={{ flexDirection: 'row', gap: 30, padding: 2 }}>
-                            <ToolButton buttonFunction={onExit} iconName={'checkButton'} CHeight={30} CWidth={30} />
-                            <ToolButton buttonFunction={onRethink} iconName={'deleteButton'} CHeight={30} CWidth={30} />
-                        </View>
-                    </View>
-                    :
-                    <>
-                        {authorized ?
-                            (
-                                <ToolButton buttonFunction={onLogout} iconName={logout ? 'deleteButton' : 'checkButton'} />
-                            ) : (
-                                <ToolButton buttonFunction={onAuthorize} iconName={'more'} />
-                            )}</>
-                }
+                        :
+                        <>
+                            {authorized ?
+                                (
+                                    <ToolButton buttonFunction={onLogout} iconName={logout ? 'deleteButton' : 'checkButton'} />
+                                ) : (
+                                    <ToolButton buttonFunction={onAuthorize} iconName={'more'} />
+                                )}</>
+                    }
 
 
+                </View>
             </View>
-        </View>
         </>
     )
 };
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignContent: 'center',
         marginLeft: 10,
-        
+
     },
     buttonPlacement: {
         flex: 1,

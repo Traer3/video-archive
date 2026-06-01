@@ -4,7 +4,8 @@ import DeleteButton from "./buttonIcons/delete-button.png"
 import More from "./buttonIcons/more.png"
 import Def from "../../meme/arona.gif"
 import QrCode from "./buttonIcons/qrCode.png"
-
+import ServerIcon from '../../../assets/server-storage.png'
+import ServerIconGOOD from '../../../assets/serverGOOD.png' 
 
 const icons = {
     checkButton: CheckButton,
@@ -12,6 +13,8 @@ const icons = {
     more: More,
     def: Def,
     qrCode: QrCode,
+    serverIcon: ServerIcon,
+    serverIconGOOD: ServerIconGOOD
 }
 
 export default function ToolButton({ buttonFunction, iconName, CHeight, CWidth }) {

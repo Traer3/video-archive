@@ -6,7 +6,7 @@ import QuestionForUser from "../QuestionForUser";
 import { useDatabase } from "../../../../DatabaseContext";
 
 
-const Scanner = ({show, scanned, setScanned, }) => {
+const Scanner = ({ show, scanned, setScanned, }) => {
     const { SERVER_URL } = useDatabase();
     const [answer, setAnswer] = useState(false);
     const [camera, setCamera] = useState(true);
@@ -51,28 +51,28 @@ const Scanner = ({show, scanned, setScanned, }) => {
 
     return (
         <>
-        {show && 
-            <View style={styles.camera}>
-            <View style={{ //похуй , потом изменю
-                position: 'absolute',
-                width: '100%',
-                height: '8%',
-                top: 771,
-                left:40
-            }}>
-                <QuestionForUser answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer} />
-            </View>
-            {camera &&
-                <CameraView
-                    style={[StyleSheet.absoluteFill, styles.cameraSpace]}
-                    onBarcodeScanned={scanned ? undefined : hadleQrCodeScanned}
-                    barcodeScannerSettings={{
-                        barcodeTypes: ['qr'],
-                    }}
-                />
+            {show &&
+                <View style={styles.camera}>
+                    <View style={{ //похуй , потом изменю
+                        position: 'absolute',
+                        width: '100%',
+                        height: '8%',
+                        top: 771,
+                        left: 40
+                    }}>
+                        <QuestionForUser answer={answer} setUserInput={setUserInput} userInput={userInput} userAnswer={userAnswer} question={'Enter url here'} />
+                    </View>
+                    {camera &&
+                        <CameraView
+                            style={[StyleSheet.absoluteFill, styles.cameraSpace]}
+                            onBarcodeScanned={scanned ? undefined : hadleQrCodeScanned}
+                            barcodeScannerSettings={{
+                                barcodeTypes: ['qr'],
+                            }}
+                        />
+                    }
+                </View>
             }
-        </View>
-        }
         </>
     )
 }
@@ -87,7 +87,7 @@ export default function QrCode({ setScanned, scanned }) {
         requestPermission()
     }
     if (!permission) {
-        console.log("No permission");
+        //console.log("No permission");
     };
 
     return (

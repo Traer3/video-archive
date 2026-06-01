@@ -10,6 +10,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
     "child_process": "^1.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.4.0",
