@@ -79,6 +79,15 @@ router.get('/import-test', async (req, res) => {
     }
 });
 
+router.get('/generateThumbnail',async(req,res) => {
+    try {
+        const { videoName } = req.params;
+        const res = await generateThumbnail(videoName)
+        res.status(200).json({ message: "generating thumbnail.", data: res});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}) 
 
 router.get('/thumbnail-test', async (req, res) => {
     try {

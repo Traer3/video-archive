@@ -32,10 +32,10 @@ export default function YTAssembler ({dbVideos}) {
 
         const normolizeName = (name) => name.replace(/\.mp4$/i, '');
         const newFormPage = urlData.videos.map(u => {
-            const urlName = normolizeName(u.name);
-            if(!u.thumbnail || u.thumbnail=== ''){
-                console.log("thumbnail missing")
+            if(!u.thumbnail || u.thumbnail === ''){
+                u.thumbnail = null
             }
+            const urlName = normolizeName(u.name);
 
             const dbVid = dbVideos.find(db => db.name === urlName);
             return{
@@ -81,6 +81,9 @@ export default function YTAssembler ({dbVideos}) {
     };
 
     const updateVideo = (vids) =>{
+        if(!vids || vids.length === 0){
+            return null;
+        }
         setVideos(prev => {
             const existingIds = new Set(prev.map(p => p.id));
             const unique = vids.filter(v => !existingIds.has(v.id));

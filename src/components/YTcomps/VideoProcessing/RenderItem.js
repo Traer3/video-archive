@@ -6,8 +6,8 @@ import YTLoading from "./YTLoading";
 
 function RenderItem({ item, setScrollAnimation, setSelectedVideo, setDeletionTrigger, deletionTrigger, eraseVideoFlag }) {
     if (!item.id) return null;
-    if (!item.duration || !item.thumbnail) {
-        console.log("Loading duration || thumbnail")
+    if (!item.duration ) {
+        console.log("Loading duration")
         return <YTLoading />
     }
 
