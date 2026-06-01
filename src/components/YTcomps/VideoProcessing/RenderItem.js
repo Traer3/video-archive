@@ -79,6 +79,7 @@ import YTLoading from "./YTLoading";
             //console.log("buttonHeld", buttonHeld,'ms');
             
             if(buttonHeld > 139 && buttonHeld < 400){
+               console.log("itemUrl : ",itemUrl)
                setSelectedVideo(itemUrl)
             }
             pressStartTime.current = null;

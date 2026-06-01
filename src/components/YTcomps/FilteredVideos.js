@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, View,} from "react-native";
 import RenderItem from "./VideoProcessing/RenderItem";
 import VideoPlayer from "./VideoPlayer";
@@ -7,7 +7,7 @@ import { useDatabase } from "../../../DatabaseContext";
 //Может переделать 
 /*
 Я могу буквально импортировать YTAssembler 
-Во время удаления сверять имя и ссылку из SERVER_URL с SQL и передавать на удаление 
+Сделать для него тригер по выбору нужного RenderItem , сами видосы уже передаем
 */
 export default function FilteredVideos({setShowFiltered}) {
     const {SERVER_URL} = useDatabase();
@@ -26,12 +26,10 @@ export default function FilteredVideos({setShowFiltered}) {
     useEffect(()=>{
         async function getAndMergeAllVideos() {
             try{
-                const DBVideos = await getDBData(SERVER_URL,"/videos","");
-                const filteredVideos = DBVideos.filter(video => video.filtered === true)
+                const DBVideos = await getDBData(SERVER_URL,"/api/server/videoList","");
+                const filteredVideos = DBVideos.data.filter(video => video.filtered === true)
 
-                const totalRes = await getDBData(SERVER_URL,"/videos","");
-                
-                const urlsData = await getDBData(SERVER_URL,"/videos?page=1&limit=",totalRes.total);
+                const urlsData = await getDBData(SERVER_URL,"/api/server/videos?page=1&limit=",DBVideos.data.length);
 
                 const unNormolizeName = (name) => name + ".mp4";
 
@@ -40,6 +38,7 @@ export default function FilteredVideos({setShowFiltered}) {
                     const expressData = urlsData.videos.find(video => video.name === newName)
                     return{
                         ...vid,
+                        url: expressData ? expressData.url : vid.url,
                         thumbnail: expressData ? expressData.thumbnail : vid.thumbnail
                     }
                 })
@@ -60,6 +59,7 @@ export default function FilteredVideos({setShowFiltered}) {
                 setSelectedVideo={setSelectedVideo}
                 setDeletionTrigger={setDeletionTrigger}
                 deletionTrigger={deletionTrigger}
+                eraseVideoFlag={true}
             />
         ),[deletionTrigger])
 

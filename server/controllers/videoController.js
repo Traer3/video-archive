@@ -16,16 +16,14 @@ exports.getVideos = async (req, res) => {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     try {
+        
         const DBvideos = await videoService.getVideoList()
         const videoFiles = await readFolders(VIDEOS_DIR);
 
         const allVideos = sortedVideos(videoFiles, DBvideos)
-        console.log("allVideos : ",allVideos)
-
-        //Прочитать все файлы 
-        //Отсортировать их 
-        //Отправлять по кучке 
-
+        //console.log("allVideos : ",allVideos)
+        
+        //const allVideos = await readFolders(VIDEOS_DIR);
         if (allVideos.length === 0) {
             return res.status(200).json({ videos: [], total: 0 });
         }
@@ -90,6 +88,44 @@ function sortedVideos(videoFiles, DBvideos) {
     return Videos;
 };
 
+exports.getVideoList = async (req, res) => {
+    try {
+
+        const getVideoList = await videoService.getVideoList();
+        if (!getVideoList) {
+            res.status(400).json({
+                message: '❌ SQL empty'
+            })
+        } else {
+            res.status(200).json({
+                message: '✅ Videos from DB',
+                data: getVideoList
+            })
+        }
+    } catch (err) {
+        res.status(500).json({ error: "Table videos error", err });
+    }
+};
+
+exports.getYTVideos = async (req,res) => {
+    try {
+
+        const getYTVideos = await videoService.getYTVideos();
+        if (!getYTVideos) {
+            res.status(400).json({
+                message: '❌ SQL empty'
+            })
+        } else {
+            res.status(200).json({
+                message: '✅ Videos from DB',
+                data: getYTVideos
+            })
+        }
+    } catch (err) {
+        res.status(500).json({ error: "Table videos error", err });
+    }
+}
+
 exports.getVideo = async (req, res, next) => {
     const { videoName } = req.params;
     if (!videoName.match(/\.(mp4|mov|mkv|webm|avi)$/i)) {
@@ -135,24 +171,6 @@ exports.getThumbnail = async (req, res, next) => {
     }
 }
 
-exports.getVideoList = async (req, res) => {
-    try {
-
-        const getVideoList = await videoService.getVideoList();
-        if (!getVideoList) {
-            res.status(400).json({
-                message: '❌ SQL empty'
-            })
-        } else {
-            res.status(200).json({
-                message: '✅ Videos from DB',
-                data: getVideoList
-            })
-        }
-    } catch (err) {
-        res.status(500).json({ error: "Table videos error", err });
-    }
-}
 
 exports.filterVideo = async (req, res) => {
     try {

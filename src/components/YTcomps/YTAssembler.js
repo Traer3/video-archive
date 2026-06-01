@@ -1,16 +1,13 @@
 import { useCallback, useRef, useState } from "react";
-import {View, StyleSheet, FlatList, Text, Modal} from "react-native";
+import {View, FlatList, Text} from "react-native";
 import { DurationFetcher } from "./VideoProcessing/DurationFetcher";
 import RenderItem from "./VideoProcessing/RenderItem";
 import { useSaveVideo } from "./VideoProcessing/SaveVideoData";
 import ServerLoading from "../ServerLoading";
 import VideoPlayer from "./VideoPlayer";
 import { useDatabase } from "../../../DatabaseContext";
-import Animated from "react-native-reanimated";
 
 export default function YTAssembler ({dbVideos}) {
-    //console.log("dbVideos : ", dbVideos)
-    //turn;
     const {SERVER_URL} = useDatabase();
     const [videos, setVideos] = useState([]);
 
@@ -38,7 +35,6 @@ export default function YTAssembler ({dbVideos}) {
             const urlName = normolizeName(u.name);
 
             const dbVid = dbVideos.find(db => db.name === urlName);
-
             return{
                 id: dbVid ? dbVid.id : null,
                 name: u.name,
@@ -78,16 +74,16 @@ export default function YTAssembler ({dbVideos}) {
             }
         }catch(err){
             console.error("Error in loadMore: ",err)
-        }
-        
-            
+        }    
     };
 
     const updateVideo = (vids) =>{
         setVideos(prev => {
             const existingIds = new Set(prev.map(p => p.id));
             const unique = vids.filter(v => !existingIds.has(v.id));
-            return[...prev, ...unique];
+            const combined = [...prev, ...unique];
+            const sortedAll = combined.sort((a,b) => b.id - a.id)
+            return sortedAll;
         });
     }
   
@@ -105,7 +101,6 @@ export default function YTAssembler ({dbVideos}) {
         />
     ),[deletionTrigger])
     
-
     return(
         <View style={{flex:1}}>
             {videos.find(v => !v.duration) && (
@@ -140,22 +135,8 @@ export default function YTAssembler ({dbVideos}) {
                 windowSize={10}
                 ListFooterComponent={loading ? <Text style={{textAlign:'center',marginTop:"50%",fontWeight:'600',fontSize:20}}>loading...</Text> : null}
             />
-
             <VideoPlayer setSelectedVideo={setSelectedVideo} selectedVideo={selectedVideo}/>
-            
         </View>
     )
 };
 
-const styles = StyleSheet.create({
-    item:{
-        padding:15,
-        marginBottom: 10,
-        backgroundColor: "#eee",
-        borderRadius: 8,
-    },
-    text:{
-        fontSize:16,
-    },
-    
-});

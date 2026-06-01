@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getVideoList, getVideos, getVideo, getThumbnail, filterVideo, deleteID, importVideo, saveVidDuration, saveUniqueData } = require('../controllers/videoController.js');
+const { getVideoList, getVideos, getVideo, getThumbnail, filterVideo, deleteID, importVideo, saveVidDuration, saveUniqueData, getYTVideos } = require('../controllers/videoController.js');
 
 const durationGeneratorService = require('../services/durationGeneratorService.js')
 const { generateThumbnails, generateThumbnail } = require('../services/thumbnailGeneratorService.js');
@@ -15,6 +15,7 @@ const { updateYTdlp } = require('../services/autoUpdate/YTdlpService.js');
 
 router.get('/videos', getVideos);
 router.get('/videoList', getVideoList);
+router.get('/YTVideos',getYTVideos);
 
 router.get('/:videoName', getVideo);
 router.get('/thumbnails/:thumbnailName', getThumbnail);

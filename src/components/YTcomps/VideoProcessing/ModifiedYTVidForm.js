@@ -48,7 +48,7 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
         translateX.value = withSpring(0);
         console.log("VideoFILTERED ", id);
         try{
-            const res = await fetch(`${SERVER_URL}/filterVideo`,{ //TYT
+            const res = await fetch(`${SERVER_URL}/api/server/filterVideo`,{ //TYT
                 method:'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
@@ -73,9 +73,9 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
         const idsForDeletion = [id]
         translateX.value = withSpring(0);
         console.log("VideoDeleted", id);
-        /*
+        
         try{
-            const res = await fetch("http://192.168.0.8:3004/deleteVideo",{ //TYT
+            const res = await fetch(`${SERVER_URL}/api/server/deleteVideo`,{ //TYT
                 method:'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -87,9 +87,9 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
             }
             console.log(`Video deleted ${id}`)
         }catch(err){
-            console.log("Error deleting vide id:",id);
+            console.log(`Error deleting vide id: ${id} : ${err}`);
         }
-        */
+        
     };
 
         const hadleStart = (event)=>{

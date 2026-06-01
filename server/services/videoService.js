@@ -31,6 +31,11 @@ exports.readFolders = async (videosDir) => {
 exports.getVideoList = async () => {
     const result = await pool.query("SELECT * FROM videos ORDER BY id ASC");
     return result.rows
+};
+
+exports.getYTVideos = async () => {
+    const result = await pool.query("SELECT * FROM videos WHERE category = 'YouTube'");
+    return result.rows;
 }
 
 exports.filterVideo = async (data) => {

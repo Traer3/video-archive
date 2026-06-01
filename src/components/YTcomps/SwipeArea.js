@@ -11,25 +11,23 @@ export default function SwipeArea() {
     useEffect(()=>{
         const getDBData = async () => {
             try{
-                const res = await fetch(`${SERVER_URL}/api/server/videoList`);
+                const res = await fetch(`${SERVER_URL}/api/server/YTVideos`);
                 const arr = await res.json();
                 const formatted = arr.data.map(v => ({
                     id: v.id,
                     name: v.name,
-                    //tumbnail: v.thumbnail,
                     duration: v.duration,
                     category: v.category,
                     isitunique: v.isitunique,
                     filtered: v.filtered
                 }));
                 const filtered = formatted.filter(vid => vid.filtered === false)
-                //const reverseExistedList = [...YTvideos].reverse()
-                //const reversVideoList = [...filtered].reverse()
                 setDbVideos(filtered);
     
                 console.log('DB videos loaded:',formatted.length);
             }catch(err){
                 console.log("Error loading DB videos:", err);
+                return []
             }finally{
                 setShowVideos(true)
             }
