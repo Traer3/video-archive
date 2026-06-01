@@ -15,13 +15,13 @@ const { updateYTdlp } = require('../services/autoUpdate/YTdlpService.js');
 
 router.get('/videos', getVideos);
 router.get('/videoList', getVideoList);
-router.get('/YTVideos',getYTVideos);
+router.get('/YTVideos', getYTVideos);
 
 router.get('/:videoName', getVideo);
 router.get('/thumbnails/:thumbnailName', getThumbnail);
 
 router.delete('/deleteVideo/:id', deleteVideo);
-router.delete('/deleteThumbnail/:id', deleteThumbnail);
+router.delete('/deleteThumbnail/:name', deleteThumbnail); //эту хуйню 
 
 router.get('/yt', async (req, res) => {
     try {

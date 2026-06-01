@@ -4,22 +4,12 @@ import * as  Haptics from 'expo-haptics';
 import ModifiedYTVidForm from "./ModifiedYTVidForm";
 import YTLoading from "./YTLoading";
 
- function RenderItem ({item,setScrollAnimation,setSelectedVideo,setDeletionTrigger,deletionTrigger,eraseVideoFlag}){
-    if(!item.id) return null;
-    if(!item.duration || !item.thumbnail) {
+function RenderItem({ item, setScrollAnimation, setSelectedVideo, setDeletionTrigger, deletionTrigger, eraseVideoFlag }) {
+    if (!item.id) return null;
+    if (!item.duration || !item.thumbnail) {
         console.log("Loading duration || thumbnail")
-        return  <YTLoading />
+        return <YTLoading />
     }
-    /*
-    if(!item.duration || !item.thumbnail) {
-        const placeholder = Array.from({length: 7}, (_,i)=>(
-            <YTLoading key={i} delay={i * 150}/>
-        ))
-        return(
-            <>{placeholder}</>
-        );
-    }
-    */
 
     const pressStartTime = useRef(null);
 
@@ -28,7 +18,7 @@ import YTLoading from "./YTLoading";
     const direction = useRef(null);
     const THRESHOLD = 2
 
-    const hadlePressIn = (event) =>{
+    const hadlePressIn = (event) => {
         pressStartTime.current = Date.now();
 
         setScrollAnimation(false);
@@ -37,11 +27,11 @@ import YTLoading from "./YTLoading";
 
         startX.current = touch.pageX;
         startY.current = touch.pageY;
-        direction.current = null;     
+        direction.current = null;
     };
 
-    const hadleMove = (event)=>{
-        if(startX.current === null || startY.current === null) return;
+    const hadleMove = (event) => {
+        if (startX.current === null || startY.current === null) return;
 
         const e = event.nativeEvent;
         const touch = e.touches?.[0] ?? e;
@@ -49,15 +39,15 @@ import YTLoading from "./YTLoading";
         const directionX = touch.pageX - startX.current;
         const directionY = touch.pageY - startY.current;
 
-        if(!direction.current){
-            if(Math.abs(directionX)< THRESHOLD && Math.abs(directionY) < THRESHOLD) return;
+        if (!direction.current) {
+            if (Math.abs(directionX) < THRESHOLD && Math.abs(directionY) < THRESHOLD) return;
 
-            if(Math.abs(directionX) > Math.abs(directionY)){
+            if (Math.abs(directionX) > Math.abs(directionY)) {
                 direction.current = "x";
                 setScrollAnimation(false)
                 pressStartTime.current = null
                 //console.log("Movment by X");
-            }else{
+            } else {
                 direction.current = "y";
                 setScrollAnimation(true)
                 pressStartTime.current = null
@@ -73,44 +63,42 @@ import YTLoading from "./YTLoading";
 
         setScrollAnimation(true)
 
-        if(pressStartTime.current){
+        if (pressStartTime.current) {
             const releseTime = Date.now();
             const buttonHeld = releseTime - pressStartTime.current;
             //console.log("buttonHeld", buttonHeld,'ms');
-            
-            if(buttonHeld > 139 && buttonHeld < 400){
-               console.log("itemUrl : ",itemUrl)
-               setSelectedVideo(itemUrl)
+            if (buttonHeld > 139 && buttonHeld < 400) {
+                setSelectedVideo(itemUrl)
             }
             pressStartTime.current = null;
         }
     };
 
-    const hadleOnLoongPress = () =>{
+    const hadleOnLoongPress = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft)
         setDeletionTrigger(true)
     }
-    
-    return(
-        <Pressable 
-            onPressIn={(event)=> hadlePressIn(event,item.url)}
+
+    return (
+        <Pressable
+            onPressIn={(event) => hadlePressIn(event, item.url)}
             onTouchMove={hadleMove}
-            onPressOut={()=> handlePressOut(item.url)}
+            onPressOut={() => handlePressOut(item.url)}
             onLongPress={hadleOnLoongPress}
-            >
-                <ModifiedYTVidForm 
-                    thumbnail={item.thumbnail} 
-                    name={item.name} 
-                    date={item.date} 
-                    duration={item.duration} 
-                    isItUnique={item.isitunique} 
-                    id={item.id}
-                    url={item.url}
-    
-                    setDeletionTrigger={setDeletionTrigger}
-                    deletionTrigger={deletionTrigger}
-                    eraseVideoFlag={eraseVideoFlag}
-                />
+        >
+            <ModifiedYTVidForm
+                thumbnail={item.thumbnail}
+                name={item.name}
+                date={item.date}
+                duration={item.duration}
+                isItUnique={item.isitunique}
+                id={item.id}
+                url={item.url}
+
+                setDeletionTrigger={setDeletionTrigger}
+                deletionTrigger={deletionTrigger}
+                eraseVideoFlag={eraseVideoFlag}
+            />
         </Pressable>
     )
 }

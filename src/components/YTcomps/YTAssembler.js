@@ -33,6 +33,9 @@ export default function YTAssembler ({dbVideos}) {
         const normolizeName = (name) => name.replace(/\.mp4$/i, '');
         const newFormPage = urlData.videos.map(u => {
             const urlName = normolizeName(u.name);
+            if(!u.thumbnail || u.thumbnail=== ''){
+                console.log("thumbnail missing")
+            }
 
             const dbVid = dbVideos.find(db => db.name === urlName);
             return{

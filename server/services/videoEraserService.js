@@ -13,7 +13,6 @@ exports.deleteVideo = async (id) => {
         console.error("Missing videos or thumbnails folder");
         return;
     };
-
     const DBVideos = await getVideoList();
     const isVideoExited = DBVideos.find(video => video.id === id);
     if (!isVideoExited) {
@@ -33,18 +32,19 @@ async function VideoEraser(videoFiles, thumbnailFiles, isVideoExited) {
     await deleteID({ videoId: isVideoExited.id })
 };
 
-exports.deleteThumbnail = async (thumbnailFiles, isVideoExited) => { // Переделай хуйню , какие нахуй файлы в ссылку 
-    console.log(`id for deletion : ${isVideoExited.id}`);
-    await deleteThumbnailFile(thumbnailFiles, isVideoExited.name);
+exports.deleteThumbnail = async (thumbnailName) => { // Переделай хуйню , какие нахуй файлы в ссылку 
+    console.log(`Thumbnail name for deletion : ${thumbnailName}`);
+    const thumbnailFiles = await readFolders(THUMBNAILS_DIR);
+    await deleteThumbnailFile(thumbnailFiles, thumbnailName);
     await addLog({
         type: "EraserLogs",
-        message: `✅ Thumbnail deleted: ${isVideoExited.name}`
+        message: `✅ Thumbnail deleted: ${thumbnailName}`
     });
 };
 
 async function deleteThumbnailFile(thumbnailFiles, videoName) {
     console.log(`Deleting thumbnail for ${videoName}`);
-    const thumbnailName = addExtension(videoName,'.jpg');
+    const thumbnailName = addExtension(videoName, '.jpg');
     const findThumbnail = thumbnailFiles.find(thumbnail => thumbnail.name === thumbnailName);
     try {
         await fsPromises.rm(findThumbnail.fullPath)
@@ -60,7 +60,7 @@ async function deleteThumbnailFile(thumbnailFiles, videoName) {
 
 async function deleteVideoFile(videoFiles, isVideoExited) {
     console.log(`Searching for ${isVideoExited.name}`);
-    const videoName = addExtension(isVideoExited,'.mp4');
+    const videoName = addExtension(isVideoExited, '.mp4');
     const findVideo = videoFiles.find(video => video.name === videoName);
     try {
         console.log("findVideo: ", findVideo);

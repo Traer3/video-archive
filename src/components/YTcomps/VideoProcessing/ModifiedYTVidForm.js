@@ -1,182 +1,182 @@
-import { View, StyleSheet, Text, Pressable} from "react-native"
+import { View, StyleSheet, Text, Pressable } from "react-native"
 import { useEffect, useRef, useState } from "react"
 import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import YTVidForm from "./YTVidForm"
 import { useDatabase } from "../../../../DatabaseContext";
 
-export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,isItUnique,setDeletionTrigger,deletionTrigger,url,eraseVideoFlag}){
-    const {SERVER_URL} = useDatabase();
+export default function ModifiedYTVidForm({ thumbnail, name, date, id, duration, isItUnique, setDeletionTrigger, deletionTrigger, url, eraseVideoFlag }) {
+    const { SERVER_URL } = useDatabase();
     const translateX = useSharedValue(0);
     const offsetRefX = useRef(0);
     const translateY = useSharedValue(0);
     const offsetRefY = useRef(0);
-    
+
     const [hideVideo, setHideVideo] = useState(true)
 
-    const [disableDeletion,setDisableDeletion] = useState(false);
-   
+    const [disableDeletion, setDisableDeletion] = useState(false);
+
     const MIN_X_LIMIT = 0;
     const MAX_X_LIMIT = 101;
 
-    const animatedStyles = useAnimatedStyle(()=>({
-        transform: [{translateX: translateX.value}],
+    const animatedStyles = useAnimatedStyle(() => ({
+        transform: [{ translateX: translateX.value }],
     }));
-    const translateXValue = withSpring(100,{
+    const translateXValue = withSpring(100, {
         stiffness: 900,
-        damping:120,
-        mass:4,
-        overshootClamping:false,
-        energyThreshold:6e-9,
-        velocity:0,
+        damping: 120,
+        mass: 4,
+        overshootClamping: false,
+        energyThreshold: 6e-9,
+        velocity: 0,
         reduceMotion: ReduceMotion.System
     });
 
-    useEffect(()=>{
-        if(deletionTrigger){
+    useEffect(() => {
+        if (deletionTrigger) {
             setDisableDeletion(true)
             translateX.value = translateXValue;
 
-        }else{
+        } else {
             setDisableDeletion(false);
             translateX.value = withSpring(0);
         }
 
-    },[deletionTrigger]);
+    }, [deletionTrigger]);
 
-    const filteredVideo = async (id) =>{
-        if(!id) return;
+    const filteredVideo = async (id) => {
+        if (!id) return;
         translateX.value = withSpring(0);
         console.log("VideoFILTERED ", id);
-        try{
-            const res = await fetch(`${SERVER_URL}/api/server/filterVideo`,{ //TYT
-                method:'POST',
-                headers: {'Content-Type':'application/json'},
+        try {
+            const res = await fetch(`${SERVER_URL}/api/server/filterVideo`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    id:id,
+                    id: id,
                     state: true,
                 })
             });
 
             hideVideos();
 
-            if(!res.ok){
+            if (!res.ok) {
                 throw new Error(`Error changing filtered state for if: ${id}`);
             }
             console.log(`Video ${id} Filtered!`)
-        }catch(err){
-            console.log("Error changing state id:",id);
+        } catch (err) {
+            console.log("Error changing state id:", id);
         }
     }
 
     const deleteVideo = async (id) => {
-        if(!id) return;
+        if (!id) return;
         const idsForDeletion = [id]
         translateX.value = withSpring(0);
         console.log("VideoDeleted", id);
 
-        try{
-            const res = await fetch(`${SERVER_URL}/api/server/deleteVideo/${idsForDeletion}`,{
-                method:'DELETE',
-                headers: {'Content-Type': 'application/json'},
+        try {
+            const res = await fetch(`${SERVER_URL}/api/server/deleteThumbnail/${idsForDeletion}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
             });
-            if(!res.ok){
+            if (!res.ok) {
                 throw new Error(`Error deleting video id: ${id} , ${res.status}`);
             }
             console.log(`Video deleted ${id}`)
-        }catch(err){
+        } catch (err) {
             console.log(`Error deleting vide id: ${id} : ${err}`);
         }
-        
+
     };
 
-        const hadleStart = (event)=>{
-            translateX.value = 0;
-            const eventSource = event.nativeEvent || event;
-            let touchPoint;
-    
-            if(eventSource.touches && eventSource.touches.length > 0){
-                touchPoint = eventSource.touches[0];
-            }else{
-                touchPoint = eventSource;
-            }
-    
-            const clientX = touchPoint.pageX || touchPoint.clientX;
-            offsetRefX.current = clientX - translateX.value;
+    const hadleStart = (event) => {
+        translateX.value = 0;
+        const eventSource = event.nativeEvent || event;
+        let touchPoint;
 
-            const clientY = touchPoint.pageY || touchPoint.clientY;
-            offsetRefY.current = clientY - translateY.value;
+        if (eventSource.touches && eventSource.touches.length > 0) {
+            touchPoint = eventSource.touches[0];
+        } else {
+            touchPoint = eventSource;
         }
-    
-        const hadleMove = (event)=>{
-            const eventSource = event.nativeEvent || event;
-            let touchPoint;
-    
-            if(eventSource.touches && eventSource.touches.length > 0){
-                touchPoint = eventSource.touches[0];
-                translateX.value = withSpring(0);
-            }else{
-                touchPoint = eventSource;
-                translateX.value = translateXValue;
-            }
-    
-            const clientX = touchPoint.pageX || touchPoint.clientX;
-            const desiredX = clientX - offsetRefX.current;
-            
-            const clientY = touchPoint.pageY || touchPoint.clientY;
-            offsetRefY.current = clientY - translateY.value;
 
-            translateX.value = Math.max(MIN_X_LIMIT, Math.min(desiredX, MAX_X_LIMIT));
-            
-            if(translateX.value < 40){
-                translateX.value = withSpring(0);
-            }else{
-                translateX.value = translateXValue;
-            }
-        };
-    
-        const hadleEnd = () => {
+        const clientX = touchPoint.pageX || touchPoint.clientX;
+        offsetRefX.current = clientX - translateX.value;
+
+        const clientY = touchPoint.pageY || touchPoint.clientY;
+        offsetRefY.current = clientY - translateY.value;
+    }
+
+    const hadleMove = (event) => {
+        const eventSource = event.nativeEvent || event;
+        let touchPoint;
+
+        if (eventSource.touches && eventSource.touches.length > 0) {
+            touchPoint = eventSource.touches[0];
             translateX.value = withSpring(0);
-            if(translateX.value < 40){
-                translateX.value = withSpring(0);
-            }else{
-                translateX.value = translateXValue
-            }
-            
+        } else {
+            touchPoint = eventSource;
+            translateX.value = translateXValue;
         }
-    
+
+        const clientX = touchPoint.pageX || touchPoint.clientX;
+        const desiredX = clientX - offsetRefX.current;
+
+        const clientY = touchPoint.pageY || touchPoint.clientY;
+        offsetRefY.current = clientY - translateY.value;
+
+        translateX.value = Math.max(MIN_X_LIMIT, Math.min(desiredX, MAX_X_LIMIT));
+
+        if (translateX.value < 40) {
+            translateX.value = withSpring(0);
+        } else {
+            translateX.value = translateXValue;
+        }
+    };
+
+    const hadleEnd = () => {
+        translateX.value = withSpring(0);
+        if (translateX.value < 40) {
+            translateX.value = withSpring(0);
+        } else {
+            translateX.value = translateXValue
+        }
+
+    }
+
     const hideVideos = () => {
         setHideVideo(false)
 
     }
 
-    return(
-        <View style={{justifyContent:'center' }}>
-            {disableDeletion && 
-                    <Pressable 
+    return (
+        <View style={{ justifyContent: 'center' }}>
+            {disableDeletion &&
+                <Pressable
                     //полная хуйня , но меня ебет фиксить , новая мобила , новый размер ) 
-                        style={{
-                            position:'absolute',
-                            height:"100%",
-                            width:"230%",
-                            zIndex:10,
-                            marginLeft:110,
-                        }}
-                        onPress={()=>{setDeletionTrigger(false)}}
-                    />
-                }
+                    style={{
+                        position: 'absolute',
+                        height: "100%",
+                        width: "230%",
+                        zIndex: 10,
+                        marginLeft: 110,
+                    }}
+                    onPress={() => { setDeletionTrigger(false) }}
+                />
+            }
 
             {hideVideo && <View style={styles.deletionForm}>
-               <Pressable 
-                    style={{ height:"100%",width:'100%',}}
-                    onPress={()=> {eraseVideoFlag ? deleteVideo(id) : filteredVideo(id)}}
-               >
+                <Pressable
+                    style={{ height: "100%", width: '100%', }}
+                    onPress={() => { eraseVideoFlag ? deleteVideo(id) : filteredVideo(id) }}
+                >
                     <Text style={styles.deleteButton}>
                         {eraseVideoFlag ? "delete" : "filter"}
                     </Text>
-               </Pressable>
+                </Pressable>
             </View>}
-           
-            <Animated.View 
+
+            <Animated.View
                 style={[
                     styles.baseForm,
                     animatedStyles,
@@ -185,46 +185,46 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
                 onTouchMove={hadleMove}
                 onTouchEnd={hadleEnd}
             >
-                {hideVideo && <YTVidForm 
-                    thumbnail={thumbnail} 
-                    name={name} 
-                    date={date} 
-                    duration={duration} 
+                {hideVideo && <YTVidForm
+                    thumbnail={thumbnail}
+                    name={name}
+                    date={date}
+                    duration={duration}
                     id={id}
                     isItUnique={isItUnique}
                     url={url}
                 />}
 
-            </Animated.View >   
-        </View>     
+            </Animated.View >
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    baseForm:{
-        flex:1,
+    baseForm: {
+        flex: 1,
         //marginLeft:10
     },
-    deletionForm:{
-        position:'absolute',
-        width:"30%",
-        backgroundColor:'red',
-        height:76,
-        flex:1,
-        flexDirection:'row',
+    deletionForm: {
+        position: 'absolute',
+        width: "30%",
+        backgroundColor: 'red',
+        height: 76,
+        flex: 1,
+        flexDirection: 'row',
 
-        marginTop:8,
+        marginTop: 8,
         //marginLeft:10,
-        
+
     },
-    deleteButton:{
-        height:"100%",
-        width:'100%',
-        textAlign:'center',
-        textAlignVertical:'center',
-        fontWeight:'600',
-        fontSize:20,
-        color:'white'
+    deleteButton: {
+        height: "100%",
+        width: '100%',
+        textAlign: 'center',
+        textAlignVertical: 'center',
+        fontWeight: '600',
+        fontSize: 20,
+        color: 'white'
     }
-    
+
 })

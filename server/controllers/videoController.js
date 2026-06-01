@@ -16,14 +16,11 @@ exports.getVideos = async (req, res) => {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     try {
-        
         const DBvideos = await videoService.getVideoList()
         const videoFiles = await readFolders(VIDEOS_DIR);
 
         const allVideos = sortedVideos(videoFiles, DBvideos)
-        //console.log("allVideos : ",allVideos)
-        
-        //const allVideos = await readFolders(VIDEOS_DIR);
+
         if (allVideos.length === 0) {
             return res.status(200).json({ videos: [], total: 0 });
         }
@@ -77,20 +74,19 @@ function sortedVideos(videoFiles, DBvideos) {
     const Videos = [];
     const dbVideosName = [...DBvideos.map(video => cleanName(video.name))].reverse()
     const fileNames = new Map(videoFiles.map(vid => [cleanName(deleteExtension(vid.name)), vid]))
-    
-    for(const dbName of dbVideosName){
+
+    for (const dbName of dbVideosName) {
         const foundVideo = fileNames.get(dbName)
-        if(foundVideo){
+        if (foundVideo) {
             Videos.push(foundVideo);
         }
     }
-    
+
     return Videos;
 };
 
 exports.getVideoList = async (req, res) => {
     try {
-
         const getVideoList = await videoService.getVideoList();
         if (!getVideoList) {
             res.status(400).json({
@@ -107,9 +103,8 @@ exports.getVideoList = async (req, res) => {
     }
 };
 
-exports.getYTVideos = async (req,res) => {
+exports.getYTVideos = async (req, res) => {
     try {
-
         const getYTVideos = await videoService.getYTVideos();
         if (!getYTVideos) {
             res.status(400).json({

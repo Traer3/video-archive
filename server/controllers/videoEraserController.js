@@ -17,17 +17,16 @@ exports.deleteVideo = async (req, res) => {
 
 exports.deleteThumbnail = async (req, res) => {
     try {
-        console.log("Хуйня не работает , переделай videoEraserController.js и videoEraserService.js ");
-        return;
-        const {id,name} = req.params;
-        if (!id) {
+        const { name } = req.params;
+        console.log("deleteThumbnail: name : ",name)
+        if (!name) {
             return (res.status(400).json({ message: '❌ No video provided for deletion' }));
         }
-        console.log("Deleting thum : ",videoId)
-        const deleteThumbnail = videoEraserService.deleteThumbnail(id,name);
+        console.log("Deleting thum : ", name)
+        const deleteThumbnail = videoEraserService.deleteThumbnail(name);
         res.status(200).json({ message: '✅ Thumbnail deleted successfully', data: deleteThumbnail });
     } catch (err) {
-        res.status(500).json({ error: `Error deleting thumbnail id: ${req.params.id} : ${err}` })
+        res.status(500).json({ error: `Error deleting thumbnail : ${req.params} : ${err}` })
     };
 };
 
