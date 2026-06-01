@@ -20,7 +20,6 @@ exports.deleteVideo = async (id) => {
         console.log(`Video id ${id} missing in DB `)
         return;
     }
-
     const videoFiles = await readFolders(VIDEOS_DIR);
     const thumbnailFiles = await readFolders(THUMBNAILS_DIR);
 
@@ -34,7 +33,7 @@ async function VideoEraser(videoFiles, thumbnailFiles, isVideoExited) {
     await deleteID({ videoId: isVideoExited.id })
 };
 
-exports.deleteThumbnail = async (thumbnailFiles, isVideoExited) => {
+exports.deleteThumbnail = async (thumbnailFiles, isVideoExited) => { // Переделай хуйню , какие нахуй файлы в ссылку 
     console.log(`id for deletion : ${isVideoExited.id}`);
     await deleteThumbnailFile(thumbnailFiles, isVideoExited.name);
     await addLog({

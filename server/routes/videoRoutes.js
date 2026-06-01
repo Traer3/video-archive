@@ -20,8 +20,8 @@ router.get('/YTVideos',getYTVideos);
 router.get('/:videoName', getVideo);
 router.get('/thumbnails/:thumbnailName', getThumbnail);
 
-router.get('/deleteVideo/:id', deleteVideo);
-router.get('/deleteThumbnail/:id', deleteThumbnail);
+router.delete('/deleteVideo/:id', deleteVideo);
+router.delete('/deleteThumbnail/:id', deleteThumbnail);
 
 router.get('/yt', async (req, res) => {
     try {

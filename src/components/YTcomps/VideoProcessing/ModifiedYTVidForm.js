@@ -73,14 +73,11 @@ export default function ModifiedYTVidForm({thumbnail, name, date ,id, duration,i
         const idsForDeletion = [id]
         translateX.value = withSpring(0);
         console.log("VideoDeleted", id);
-        
+
         try{
-            const res = await fetch(`${SERVER_URL}/api/server/deleteVideo`,{ //TYT
-                method:'POST',
+            const res = await fetch(`${SERVER_URL}/api/server/deleteVideo/${idsForDeletion}`,{
+                method:'DELETE',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    videos:idsForDeletion,
-                }),
             });
             if(!res.ok){
                 throw new Error(`Error deleting video id: ${id} , ${res.status}`);
