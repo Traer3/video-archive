@@ -10,8 +10,10 @@ web-build/
 expo-env.d.ts
 
 #Server
+/server/config.js
 /server/videos/*
 /server/thumbnails/*
+
 
 /server/middleware/auth/*
 !server/middleware/auth/authorize.js
