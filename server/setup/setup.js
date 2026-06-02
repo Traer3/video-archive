@@ -21,7 +21,7 @@ async function Setup() {
     //const icon = await creatIcon(location);
 
     const answer = await deleteSetup(location);
-
+    console.log("=> Dont forget to run \n npm install \nin server folder")
     return answer;
 };
 
