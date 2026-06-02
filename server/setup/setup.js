@@ -18,12 +18,12 @@ async function Setup() {
     const SQLData = await SQLAuthorization();
 
     await configTemplate(serverData,SQLData,location);
-    const icon = await creatIcon(location);
+    //const icon = await creatIcon(location);
     console.log(`You can edit config.js in \n${location.server}+/config.js`);
 
     await deleteSetup(location);
 
-    return icon;
+    return true;
 };
 
 async function checkFiles(location, silent = false) {
