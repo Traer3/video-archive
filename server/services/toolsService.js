@@ -47,13 +47,19 @@ exports.readMyFile = async (filePath) => {
     }
 }
 
-exports.exists = async (path) => {
+exports.exists = async (path,silent = true) => {
     try {
         await fsPromises.access(path);
         return true;
     } catch (err) {
-        console.log(`❌ Cant access file : ${path}\n${err.message}`)
-        return false;
+        if(err.code === 'ENOENT'){
+            if(!silent){
+                console.log(`❌ Cant access file : ${path}\n${err.message}`)
+            }
+            return false;
+        }
+        console.log("Error checking existens of: ", path);
+        throw err;
     }
 };
 

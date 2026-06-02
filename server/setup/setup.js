@@ -1,6 +1,6 @@
 const { runCommand, exists } = require("../services/toolsService");
 const { configTemplate } = require("./configTemplate");
-const { creatIcon } = require("./creatIcon");
+//const { creatIcon } = require("./creatIcon");
 const { creatFolders } = require("./folderCreator");
 const { getIP, getPort } = require("./serverData");
 const { terminal } = require("./terminalTalk");
@@ -19,24 +19,23 @@ async function Setup() {
 
     await configTemplate(serverData,SQLData,location);
     //const icon = await creatIcon(location);
-    console.log(`You can edit config.js in \n${location.server}+/config.js`);
 
-    await deleteSetup(location);
+    const answer = await deleteSetup(location);
 
-    return true;
+    return answer;
 };
 
 async function checkFiles(location, silent = false) {
     let configExistens = false;
     let foldersExistens = false;
-    if(await exists(`${location.server}config.js`)){
+    if(await exists(`${location.server}/config.js`)){
 
         if(!silent){
             console.log("⚠ config.js already exist!")
         }
         configExistens = true;
     }
-    if(await exists(`${location.server}videos`) && await exists(`${location.server}thumbnails`)){
+    if(await exists(`${location.server}/videos`) && await exists(`${location.server}/thumbnails`)){
         if(!silent){
             console.log("⚠ Folders thumbnails && videos already exist!")
         }
@@ -54,18 +53,22 @@ async function checkFiles(location, silent = false) {
 async function deleteSetup(location) {
     const checkFilesExistens = await checkFiles(location,true)
     if(checkFilesExistens){
-        const command = `rm -R ${location.server}setup`
-        await runCommand(command);
+        const command = `rm -R ${location.server}/setup`
+        //console.log("deleteSetup : ",command)
+        const res = await runCommand(command);
+        return res.answer;
     }
 }
 
+
 async function getLocation() {
-    const getLocation = `pwd`
-    const location = await runCommand(getLocation)
-    const cleanLocation = location.stdout.trim();
-    const desktopLocation = cleanLocation.replace(/^(\/home\/[^/]+).*/, '$1/Desktop');
-    const serverPath = cleanLocation.replace("/setup","/");
-    return {server: serverPath, desktop: desktopLocation}
+    const stepBackwards = `cd ../ && pwd`
+    const getLocation = await runCommand(stepBackwards)
+    const cleanLocation = getLocation.stdout.trim();
+    return {server: cleanLocation}
+    //const desktopLocation = cleanLocation.replace(/^(\/home\/[^/]+).*/, '$1/Desktop'); //на серверной части нету Desktop ,
+    //const serverPath = cleanLocation.replace("/setup","/");
+    //return {server: serverPath, desktop: desktopLocation}
 }
 
 async function getServerData() {

@@ -9,8 +9,9 @@ dist/
 web-build/
 expo-env.d.ts
 
+server/config.js
 #Server
-/server/config.js
+
 /server/videos/*
 /server/thumbnails/*
 
