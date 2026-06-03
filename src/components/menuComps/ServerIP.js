@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ToolButton from '../buttons/ToolButton';
 import { StyleSheet, View } from 'react-native';
 import QuestionForUser from './QuestionForUser';
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useDatabase } from '../../../DatabaseContext';
 
 export default function ServerIP() {
     const [toggleQuestion, setToggleQuestion] = useState(false);
@@ -11,6 +11,7 @@ export default function ServerIP() {
     const [serverPORT, setServerPORT] = useState('3001');
     const [serverAnswer, setServerAwnser] = useState(false);
 
+    const {updateServerConfig} = useDatabase()
     const toggleInput = () => {
         setServerAwnser(false)
         setToggleQuestion(true)
@@ -25,17 +26,7 @@ export default function ServerIP() {
     }
 
     const saveToPhone = async (ip, port) => {
-        const dataTemplate = {
-            ip: ip || '192.168.0.8',
-            port: port || '3001',
-        }
-        try {
-            const jsonValue = JSON.stringify(dataTemplate)
-            await AsyncStorage.setItem('@serverData', jsonValue);
-            console.log("Data saved! : ", dataTemplate)
-        } catch (err) {
-            console.error("Error saving data: ", err);
-        }
+        await updateServerConfig(ip,port)
     }
 
     return (
