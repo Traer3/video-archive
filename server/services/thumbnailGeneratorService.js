@@ -114,16 +114,34 @@ async function findFolder() {
 async function generateThumbnail(videoPath, thumbnailFolder, fileName) {
     const thumbnailName = addExtension(fileName, '.jpg');
     return new Promise((resolve, reject) => {
-        Ffmpeg(videoPath)
-            .on('end', () => resolve(thumbnailFolder))
-            .on('error', (err) => reject(err))
-            .screenshot({
-                count: 1,
-                timemarks: ['00:00:02.000'],
-                filename: thumbnailName,
-                folder: thumbnailFolder,
-                size: '320x240',
-            });
+        const makeScreenshot = (timeMark) => {
+            let ffmpegProcess = Ffmpeg(videoPath);
+            ffmpegProcess
+                .on('end', () => {
+                    resolve(thumbnailFolder);
+                })
+                .on('error', async (err) => {
+                    const errorStr = String(err);
+                    if ((errorStr.includes('code 234') || errorStr.includes('Output file is empty')) && timeMark === '00:00:02.000') {
+                        try {
+                            makeScreenshot('00:00:00.100');
+                        } catch (retryErr) {
+                            reject(retryErr);
+                        }
+                        return;
+                    }
+                    console.error(`FFmpeg error: ${errorStr}`);
+                    reject(err);
+                })
+                .screenshot({
+                    count: 1,
+                    timemarks: [timeMark],
+                    filename: thumbnailName,
+                    folder: thumbnailFolder,
+                    size: '320x240',
+                });
+        }
+        makeScreenshot('00:00:02.000')
     });
 }
 
