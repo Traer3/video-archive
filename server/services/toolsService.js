@@ -82,9 +82,10 @@ exports.deleteFile = async (filePath) => {
 exports.cleanName = (str) => {
     if (!str) return "";
     const newName = str
-        .normalize('NFD')
+        //.normalize('NFD')
         .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, '')
+        //.replace(/[^a-z0-9\s]/g, '')
+        .replace(/[^ \p{L}\p{N}]/gu, '')
         .replace(/\s+/g, ' ')
         .trim()
     if (!newName || newName === ''){
