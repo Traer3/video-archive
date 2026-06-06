@@ -1,4 +1,5 @@
 const { cleanName, deleteExtension } = require("../services/toolsService");
+const { getVideoSize } = require("../services/videoImporter/getVideoSize");
 const { readFolders } = require("../services/videoService")
 const path = require('path');
 
@@ -7,10 +8,12 @@ const VIDEOS_DIR = path.join(__dirname, "../videos");
 exports.GetDuplicate = async () => {
     const videoFiles = await readFolders(VIDEOS_DIR);
     const duplicates =  getSameName(videoFiles);
-    console.log("duplicates: ",duplicates)
+    //console.log("duplicates: ",duplicates)
     const allOccurrences = getAllOccurrences(videoFiles,duplicates)
-    console.log("allOccurrences: ",allOccurrences)
-    //checkDuplicate();
+    //console.log("allOccurrences: ",allOccurrences)
+    const getSize = await videoSize(allOccurrences)
+    //console.log("getSize : ",getSize)
+    checkDuplicate(getSize);
 };
 
 function getSameName(videoFiles) {
@@ -32,34 +35,40 @@ function getSameName(videoFiles) {
 };
 
 async function checkDuplicate(duplicates) {
-    const dup = [{
-        name: 'Test1',
-        size: 25
-    },{
-        name: 'Test1',
-        size: 30
-    }]
 
     const sameName = new Map()
-    for(const vid of dup) {
+    for(const vid of duplicates) {
         if(sameName.has(vid.name)){
-            sameName.get(vid.name).push(vid.size);
+            sameName.get(vid.name).push(vid.sizeMB);
         }else{
-            sameName.set(vid.name,[vid.size]);
+            sameName.set(vid.name,[vid.sizeMB]);
         }
     }
     console.log("sameName : ",sameName) 
 };
 
-async function getAllOccurrences(videoFiles,duplicates) {
+function getAllOccurrences(videoFiles,duplicates) {
     const allOccurrences = []
-    const videoNames = new Map(duplicates.map(video => [cleanName(deleteExtension(video.name)),video]))
+    const duplicateNames = new Map(duplicates.map(video => [cleanName(deleteExtension(video.name)),video]))
+
     for(video of videoFiles){
         const cleanVideoName = cleanName(deleteExtension(video.name))
-        const found = videoNames.get(cleanVideoName);
+        const found = duplicateNames.get(cleanVideoName);
         if(found){
-            allOccurrences.push(found);
+            allOccurrences.push(video);
         }
     }
     return allOccurrences;
+}
+
+async function videoSize (allOccurrences){
+    const videosInfo = []
+    for(const video of allOccurrences){
+        const videoName = deleteExtension(video.name)
+        const videoInfo = await getVideoSize(videoName)
+        if(videoInfo){
+            videosInfo.push({...videoInfo,fullPath:video.fullPath})
+        }
+    };
+    return videosInfo
 }
