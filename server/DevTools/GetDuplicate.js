@@ -1,7 +1,8 @@
-const { cleanName, deleteExtension } = require("../services/toolsService");
+const { cleanName, deleteExtension, runCommand } = require("../services/toolsService");
 const { getVideoSize } = require("../services/videoImporter/getVideoSize");
 const { readFolders } = require("../services/videoService")
 const path = require('path');
+const fsPromises = require("fs").promises
 
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 
@@ -13,8 +14,25 @@ exports.GetDuplicate = async () => {
     //console.log("allOccurrences: ",allOccurrences)
     const getSize = await videoSize(allOccurrences)
     //console.log("getSize : ",getSize)
-    checkDuplicate(getSize);
+    const videoToMove = checkDuplicate(getSize);
+    await moveVideos(videoToMove);
+
 };
+
+//Не только перенес ,  но и удалил копии 
+async function moveVideos(videosPath) {
+    if(!videosPath || videosPath.length < 0) return;
+    const serverLocation = await runCommand(`pwd`)
+    //const duplicatesFolder = `${serverLocation.stdout.trim()}/duplicates`
+    console.log("videosPath: ",videosPath)
+    for(const video of videosPath){
+        const videoPath = video.fullPath.trim()
+        const duplicatesFolder = `${serverLocation.stdout.trim()}/duplicates/${video.name}`
+        console.log("duplicatesFolder : ",duplicatesFolder)
+        await fsPromises.rename(videoPath, duplicatesFolder);
+    };
+    console.log(`Duplicates moved to ${duplicatesFolder}`)
+}
 
 function getSameName(videoFiles) {
     const checkedVideos = new Map();
@@ -34,17 +52,24 @@ function getSameName(videoFiles) {
     return duplicates;
 };
 
-async function checkDuplicate(duplicates) {
-
-    const sameName = new Map()
+function checkDuplicate(duplicates) {
+    const sameName = new Map();
+    const dups = []
     for(const vid of duplicates) {
-        if(sameName.has(vid.name)){
-            sameName.get(vid.name).push(vid.sizeMB);
-        }else{
+        const foundVideo = sameName.get(vid.name)
+        if(!foundVideo || foundVideo === undefined){
             sameName.set(vid.name,[vid.sizeMB]);
+            continue;
+        }
+        //console.log("foundVideo : ",foundVideo);
+        //console.log("vid.sizeMB : ",vid.sizeMB);
+        
+        if(foundVideo[0] === vid.sizeMB){
+            dups.push({name: vid.name,fullPath: vid.fullPath})
+            console.log("duplicate  : ",vid.fullPath)
         }
     }
-    console.log("sameName : ",sameName) 
+    return dups;
 };
 
 function getAllOccurrences(videoFiles,duplicates) {
