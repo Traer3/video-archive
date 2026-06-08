@@ -6,7 +6,7 @@ exports.creatFolders = async (location) => {
     try{
         await creatFolder(location.server,"videos");
         await creatFolder(location.server,"thumbnails");
-        await runCommand(`mkdir ${location.server}/${'duplicates'}`)
+        //await runCommand(`mkdir ${location.server}/${'duplicates'}`)
         return true;
     }catch(err){
         return null;
