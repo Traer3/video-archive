@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.get('/sortVideos',videoSorter);
 router.get('/importAll',importAll);
-router.get('/getDuplicates',GetDuplicate);
+//router.get('/getDuplicates',GetDuplicate);
 
 module.exports = router;

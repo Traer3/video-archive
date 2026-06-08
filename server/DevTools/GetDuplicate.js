@@ -6,33 +6,19 @@ const fsPromises = require("fs").promises
 
 const VIDEOS_DIR = path.join(__dirname, "../videos");
 
+//Хуйня не работает , потом доделай 
 exports.GetDuplicate = async () => {
     const videoFiles = await readFolders(VIDEOS_DIR);
     const duplicates =  getSameName(videoFiles);
-    //console.log("duplicates: ",duplicates)
+        //console.log("getSameName-> duplicates: ",duplicates)
     const allOccurrences = getAllOccurrences(videoFiles,duplicates)
-    //console.log("allOccurrences: ",allOccurrences)
+        //console.log("allOccurrences: ",allOccurrences)
     const getSize = await videoSize(allOccurrences)
-    //console.log("getSize : ",getSize)
+        //console.log("getSize : ",getSize)
     const videoToMove = checkDuplicate(getSize);
-    await moveVideos(videoToMove);
+    //await moveVideos(videoToMove);
 
 };
-
-//Не только перенес ,  но и удалил копии 
-async function moveVideos(videosPath) {
-    if(!videosPath || videosPath.length < 0) return;
-    const serverLocation = await runCommand(`pwd`)
-    //const duplicatesFolder = `${serverLocation.stdout.trim()}/duplicates`
-    console.log("videosPath: ",videosPath)
-    for(const video of videosPath){
-        const videoPath = video.fullPath.trim()
-        const duplicatesFolder = `${serverLocation.stdout.trim()}/duplicates/${video.name}`
-        console.log("duplicatesFolder : ",duplicatesFolder)
-        await fsPromises.rename(videoPath, duplicatesFolder);
-    };
-    console.log(`Duplicates moved to ${duplicatesFolder}`)
-}
 
 function getSameName(videoFiles) {
     const checkedVideos = new Map();
@@ -50,26 +36,6 @@ function getSameName(videoFiles) {
         }
     };
     return duplicates;
-};
-
-function checkDuplicate(duplicates) {
-    const sameName = new Map();
-    const dups = []
-    for(const vid of duplicates) {
-        const foundVideo = sameName.get(vid.name)
-        if(!foundVideo || foundVideo === undefined){
-            sameName.set(vid.name,[vid.sizeMB]);
-            continue;
-        }
-        //console.log("foundVideo : ",foundVideo);
-        //console.log("vid.sizeMB : ",vid.sizeMB);
-        
-        if(foundVideo[0] === vid.sizeMB){
-            dups.push({name: vid.name,fullPath: vid.fullPath})
-            console.log("duplicate  : ",vid.fullPath)
-        }
-    }
-    return dups;
 };
 
 function getAllOccurrences(videoFiles,duplicates) {
@@ -96,4 +62,51 @@ async function videoSize (allOccurrences){
         }
     };
     return videosInfo
+};
+
+function checkDuplicate(duplicates) {
+    const sameName = new Map();
+    const dups = []
+    for(const vid of duplicates) {
+        const foundVideo = sameName.get(vid.name)
+        if(!foundVideo || foundVideo === undefined){
+            sameName.set(vid.name,[vid.sizeMB]);
+            continue;
+        }
+        console.log("foundVideo[0] : ",foundVideo[0]);
+        console.log("vid.sizeMB : ",vid.sizeMB);
+        if(foundVideo[0] === vid.sizeMB){
+            dups.push({name: vid.name,fullPath: vid.fullPath})
+            console.log("duplicate  : ",vid.fullPath)
+        }
+    }
+    return dups;
+};
+
+
+//Не только перенес ,  но и удалил копии 
+async function moveVideos(videosPath) {
+    if(!videosPath || videosPath.length < 0) return;
+    const serverLocation = await runCommand(`pwd`)
+    console.log("moveVideos -> videosPath: ",videosPath)
+    for(const video of videosPath){
+        const videoPath = video.fullPath.trim()
+        if(serverLocation.answer){
+            const duplicatesFolder = `${serverLocation.stdout.trim()}/duplicates/${video.name}`
+            console.log("duplicatesFolder : ",duplicatesFolder)
+        try{
+            //await fsPromises.rename(videoPath, duplicatesFolder);
+        }catch(err){
+            console.error('Error in moveVideos : ',err)
+        }
+        }
+        
+    };
 }
+
+
+
+
+
+
+
