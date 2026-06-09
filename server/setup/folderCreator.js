@@ -1,7 +1,5 @@
 const { runCommand } = require("../services/toolsService");
 
-
-
 exports.creatFolders = async (location) => {
     try{
         await creatFolder(location.server,"videos");

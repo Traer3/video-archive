@@ -62,6 +62,7 @@ async function checkDuplicate(DBvideos, video) {
     };
     const normalName = cleanName(video.name);
     const foundVideo = DBvideos.get(normalName);
+    console.log("foundVideo: ",foundVideo) //найти размер 
 
     if (!foundVideo) {
         const categorizedVideo = await checkCategory(video);
@@ -84,6 +85,7 @@ async function checkDuplicate(DBvideos, video) {
         return categorizedVideo;
     };
 
+    //он проверяет сам себя на размер , а не следущее видео 
     if (foundVideo.size_mb === video.sizeMB) {
         console.log(`⚠ Video is duplicate: ${foundVideo.name} (${foundVideo.size_mb} MB)`);
         await addLog({
