@@ -23,7 +23,7 @@ exports.importAll = async () => {
         };
 
     const DBnames = new Set(DBvideos.map(video => cleanName(video.name)));
-    const newVideos = await getNewVideos(DBnames, videoFiles);
+    const newVideos = await getNewVideos(DBnames, videoFiles); // TYT 
         if(newVideos.length === 0){
             console.log(`🚧 No videos for importing...`);
             return null;

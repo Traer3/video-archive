@@ -22,6 +22,7 @@ export default function SwipeArea() {
                     filtered: v.filtered
                 }));
                 const filtered = formatted.filter(vid => vid.filtered === false)
+                console.log("filtered: ",filtered)
                 setDbVideos(filtered);
 
                 console.log('DB videos loaded:', formatted.length);

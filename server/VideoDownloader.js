@@ -1,4 +1,3 @@
-
 const { YTGetLinks } = require("./services/linksGenerator/linksGeneratorService");
 const { getLinks, writeUpdate } = require("./services/linksService");
 const { checkHours } = require("./services/toolsService");
@@ -7,6 +6,7 @@ const { beginDownloadingVideos } = require("./services/videoDownloaderService");
 exports.VideoDownloader = async () => {
     try {
         const likedVideos = await getLinks(); 
+        
         if (!likedVideos || likedVideos.length === 0) {
             const links = await YTGetLinks();
             if(links && links.length > 0){
@@ -19,10 +19,11 @@ exports.VideoDownloader = async () => {
         const latestVideoTime = latestVideo.last_updated;
         const checkTime = checkHours(6, latestVideoTime)
 
-        if (checkTime) {
+        if (true) {
+            const currentTime = new Date();
             await writeUpdate({
                 id: latestVideo.id,
-                lastUpdated: now
+                lastUpdated: currentTime
             });
             const links = await YTGetLinks();
             await beginDownloadingVideos(links)

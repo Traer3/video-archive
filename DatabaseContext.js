@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 export const DatabaseContext = createContext();
 
-const BASE_IP = '192.168.0.8'
+const BASE_IP = '192.168.0.9'
 const BASE_PORT = '3001'
 
 export const DatabaseProvider = ({ children }) => {
@@ -13,6 +13,7 @@ export const DatabaseProvider = ({ children }) => {
         const initLoad = async () => {
             try{
                 const loadedData = await loadFromPhone();
+                console.log("loadedData: ",loadedData)
                 setServerData(loadedData)
             }catch(err){
                 console.error("Error loading data from phone: ",err);
