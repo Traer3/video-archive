@@ -1,1 +1,0 @@
-run node setup.js
