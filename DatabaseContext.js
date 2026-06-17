@@ -27,7 +27,7 @@ export const DatabaseProvider = ({ children }) => {
     const loadFromPhone = async () => {
         try {
             let jsonValue
-            jsonValue = await AsyncStorage.getItem('@serverData');
+            jsonValue = await AsyncStorage.getItem('@serverData'); // TYT
             return jsonValue != null ? JSON.parse(jsonValue) : { ip: BASE_IP, port: BASE_PORT }
         } catch (err) {
             console.error("Error while loading data");
