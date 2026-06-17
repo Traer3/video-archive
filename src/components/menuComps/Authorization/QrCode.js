@@ -20,7 +20,7 @@ const Scanner = ({ show, scanned, setScanned, }) => {
     };
 
     const hadleQrCodeScanned = ({ type, data }) => {
-        console.log("send ", data);
+        //console.log("get data from QR ", data);
         OpenQrCode(data)
 
         setAnswer(true)
@@ -28,7 +28,7 @@ const Scanner = ({ show, scanned, setScanned, }) => {
     };
 
     const userAnswer = () => {
-        console.log("userInput : ", userInput);
+        //console.log("userInput : ", userInput);
         const url = userInput.trim();
 
         if (!url.startsWith("http://localhost:8080/?")) {
@@ -82,7 +82,7 @@ export default function QrCode({ setScanned, scanned }) {
 
 
     const RequestPermission = () => {
-        console.log("Work")
+        //console.log("Work")
         setScanned(true);
         requestPermission()
     }
