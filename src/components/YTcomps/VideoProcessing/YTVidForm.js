@@ -5,7 +5,7 @@ import shareIcon from '../../../../assets/share.png'
 import * as Clipboard from 'expo-clipboard';
 import * as  Haptics from 'expo-haptics';
 
-export default function YTVidForm({thumbnail, name, date , duration,isItUnique,url}) {
+export default function YTVidForm({thumbnail, name, date , duration,isItUnique,url,id}) {
 
 
     const copyUrlToClipboard = async () => {
@@ -37,7 +37,7 @@ export default function YTVidForm({thumbnail, name, date , duration,isItUnique,u
             />
             <View style={{ marginLeft:3}}>
                     <Text style={{width:'220',}} numberOfLines={1} ellipsizeMode="tail">
-                        {name}
+                        {id} {name}
                     </Text>
                     <Text>{date}</Text>
                     <Text> {duration}</Text>
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
         flex:1,
         flexDirection:'row',
         backgroundColor:'rgb(73,106,154)',
-        height:'80',
+        height:80,
         borderWidth:2,
         marginTop:8,
         //marginRight:10,
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     imageStyle:{
         borderWidth:1,
         borderRadius:2,
-        height:'100%',
-        width:'30%'
+        height:76,
+        width:90
     }
 });

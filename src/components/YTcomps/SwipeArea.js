@@ -21,9 +21,9 @@ export default function SwipeArea() {
                     isitunique: v.isitunique,
                     filtered: v.filtered
                 }));
-                const filtered = formatted.filter(vid => vid.filtered === false)
-                console.log("filtered: ",filtered)
-                setDbVideos(filtered);
+                //const filtered = formatted.filter(vid => vid.filtered === false)
+                //console.log("filtered: ",filtered)
+                setDbVideos(formatted);
 
                 console.log('DB videos loaded:', formatted.length);
             } catch (err) {

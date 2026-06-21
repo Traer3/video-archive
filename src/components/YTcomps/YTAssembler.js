@@ -38,6 +38,10 @@ export default function YTAssembler ({dbVideos}) {
             const urlName = normolizeName(u.name);
 
             const dbVid = dbVideos.find(db => db.name === urlName);
+            if(!dbVid){
+                console.log('No video found in db: ',urlName)
+                console.log("Example from DB ", dbVideos[0]?.name)
+            }
             return{
                 id: dbVid ? dbVid.id : null,
                 name: u.name,
@@ -52,17 +56,21 @@ export default function YTAssembler ({dbVideos}) {
 
         }catch(err){
             console.log("Error merging videos : ", err)
-            setLoading(false);
+            
             setOffline(true);
+        }finally{
+            setLoading(false);
         }
     }
 
     const loadMore = async () => {
-        const INITIAL_BATHC_LIMIT = 50;
+        if(loading || !hasNext.current) return;
+        const INITIAL_BATHC_LIMIT = 10;
         const STANDARD_BATHC_LIMIT = 10;
 
         const nextPage = page.current + 1;
-        if(!hasNext.current) return;
+        //if(!hasNext.current) return;
+        setLoading(true);
 
         try{
             if(hasNext.current && nextPage <= 1){
@@ -85,11 +93,18 @@ export default function YTAssembler ({dbVideos}) {
             return null;
         }
         setVideos(prev => {
-            const existingIds = new Set(prev.map(p => p.id));
-            const unique = vids.filter(v => !existingIds.has(v.id));
-            const combined = [...prev, ...unique];
-            const sortedAll = combined.sort((a,b) => b.id - a.id)
-            return sortedAll;
+            const combined = [...prev, ...vids]
+            return combined.filter((video, index,self)=>
+                video !== null && self.findIndex(v => v.url === video.url) === index
+            )
+            /*
+            const existingIds = new Set(prev.map(p => p.url));
+            const unique = vids.filter(v => !existingIds.has(v.url));
+            //const combined = [...prev, ...unique];
+            //const sortedAll = combined.sort((a,b) => b.id - a.id)
+            //return sortedAll;
+            return [...prev, ...unique];
+            */
         });
     }
   
@@ -107,18 +122,21 @@ export default function YTAssembler ({dbVideos}) {
         />
     ),[deletionTrigger])
     
+    const videoWithNoDuration = videos.find(v => !v.duration);
+    //console.log(videos.map(video => video.id))
+
     return(
-        <View style={{flex:1}}>
-            {videos.find(v => !v.duration) && (
+        <View style={{height:'100%',width:"100%"}}>
+            {videoWithNoDuration && (
                 <DurationFetcher
-                    key={videos.find(v => !v.duration).id}
+                    key={videos.find(v => !v.duration).url}
                     url={videos.find(v => !v.duration).url}
                     onDurationReady={(dur)=>{
-                        const target = videos.find(v => !v.duration);
-                        saveVideoData(target.id, dur);
+                        //const target = videos.find(v => !v.duration);
+                        saveVideoData(videoWithNoDuration.id, dur);
                         setVideos(prev =>
                             prev.map(v=>
-                                v.id === target.id ? {...v, duration: dur} : v
+                                v.url === videoWithNoDuration.url ? {...v, duration: dur} : v
                             )
                         );
                     }}
@@ -128,18 +146,28 @@ export default function YTAssembler ({dbVideos}) {
                 <ServerLoading/>
             }
             <FlatList
-                style={{flex:1,}}
+                style={{flex:1}}
                 contentContainerStyle={{paddingBottom: 105}}
                 data={videos}
                 scrollEnabled={scrollAnimation}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 onEndReached={loadMore}
-                onEndReachedThreshold={0.5}
-                removeClippedSubviews={false}
+                onEndReachedThreshold={0.3}
+                removeClippedSubviews={true}
                 initialNumToRender={10}
-                windowSize={10}
-                ListFooterComponent={loading ? <Text style={{textAlign:'center',marginTop:"50%",fontWeight:'600',fontSize:20}}>loading...</Text> : null}
+                maxToRenderPerBatch={10}
+                windowSize={11}
+                getItemLayout={(data,index) => (
+                    {length: 88, offset: 88 * index, index}
+                )}
+                ListFooterComponent={
+                    loading ? (
+                    <View style={{height:60, justifyContent:'center',alignItems:'center'}}>
+                        <Text style={{textAlign:'center',fontWeight:'600',fontSize:20}}>loading...</Text>
+                    </View>
+                    ) : null
+                }
             />
             <VideoPlayer setSelectedVideo={setSelectedVideo} selectedVideo={selectedVideo}/>
         </View>
