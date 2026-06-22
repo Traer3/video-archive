@@ -6,37 +6,32 @@ import { useDatabase } from "../../../DatabaseContext";
 export default function SwipeArea() {
     const { SERVER_URL, loading } = useDatabase();
 
-    const [dbVideos, setDbVideos] = useState([]);
     const [showVideos, setShowVideos] = useState(false);
+    const [videoTable, setVideoTable] = useState(()=> new Map());
     useEffect(() => {
         const getDBData = async () => {
             try {
                 const res = await fetch(`${SERVER_URL}/api/server/YTVideos`);
                 const arr = await res.json();
-                const formatted = arr.data.map(v => ({
-                    id: v.id,
-                    name: v.name,
-                    duration: v.duration,
-                    category: v.category,
-                    isitunique: v.isitunique,
-                    filtered: v.filtered
-                }));
-                //const filtered = formatted.filter(vid => vid.filtered === false)
-                //console.log("filtered: ",filtered)
-                setDbVideos(formatted);
+                const localTable = new Map();
+                arr.data.forEach(video => {
+                    localTable.set(video.name, video)
+                })
+                
+                setVideoTable(localTable);
+                if(localTable.size > 0){
+                    setShowVideos(true)
+                }
 
-                console.log('DB videos loaded:', formatted.length);
+                console.log('DB videos loaded:', localTable.size);
             } catch (err) {
                 console.log("Error loading DB videos:", err);
                 return []
-            } finally {
-                setShowVideos(true)
             }
         };
         getDBData();
 
     }, [])
-
     return (
         <View style={{
             justifyContent: 'center',
@@ -44,7 +39,7 @@ export default function SwipeArea() {
         }} >
             {!loading &&
                 <View style={styles.conteiner}>
-                    {showVideos && <YTAssembler dbVideos={dbVideos} />}
+                    {showVideos && <YTAssembler videoTable={videoTable}/>}
                 </View>
             }
 

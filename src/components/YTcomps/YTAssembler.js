@@ -7,7 +7,7 @@ import ServerLoading from "../ServerLoading";
 import VideoPlayer from "./VideoPlayer";
 import { useDatabase } from "../../../DatabaseContext";
 
-export default function YTAssembler ({dbVideos}) {
+export default function YTAssembler ({videoTable}) {
     const {SERVER_URL} = useDatabase();
     const [videos, setVideos] = useState([]);
 
@@ -36,22 +36,25 @@ export default function YTAssembler ({dbVideos}) {
                 u.thumbnail = null
             }
             const urlName = normolizeName(u.name);
-
-            const dbVid = dbVideos.find(db => db.name === urlName);
-            if(!dbVid){
-                console.log('No video found in db: ',urlName)
-                console.log("Example from DB ", dbVideos[0]?.name)
-            }
+            const foundDBVideo = videoTable.get(urlName)
+            //if(foundDBVideo){console.log("foundDBVideo: ",foundDBVideo)}
+            //const test = videoTable.get('블루아카이브 애니메이션');
+            //console.log("test :" ,test)
             return{
-                id: dbVid ? dbVid.id : null,
+                id: foundDBVideo ? foundDBVideo.id : null,
                 name: u.name,
                 url: u.url,
                 thumbnail: u.thumbnail,
-                duration: dbVid ? dbVid.duration : null,
-                isitunique: dbVid ? dbVid.isitunique : false,
-            };
+                duration: foundDBVideo ? foundDBVideo.duration : null,
+                isitunique: foundDBVideo ? foundDBVideo.isitunique : false,
+            }
         });
         console.log('Loaded page ', pageNum, 'items:', newFormPage.length);
+        const idArr = []
+        for(const video of newFormPage){
+            idArr.push(video.id)
+        }
+        console.log("IdArray :" ,idArr)
         return newFormPage 
 
         }catch(err){
@@ -78,7 +81,7 @@ export default function YTAssembler ({dbVideos}) {
                 page.current = Math.floor(INITIAL_BATHC_LIMIT / 10);
                 updateVideo(newFormPage)
             }else{
-                console.log("SlowerPase")
+                //console.log("SlowerPase")
                 const newFormPage = await fetchAllVideos(nextPage,STANDARD_BATHC_LIMIT)
                 page.current = nextPage;
                 updateVideo(newFormPage)
@@ -124,7 +127,6 @@ export default function YTAssembler ({dbVideos}) {
     
     const videoWithNoDuration = videos.find(v => !v.duration);
     //console.log(videos.map(video => video.id))
-
     return(
         <View style={{height:'100%',width:"100%"}}>
             {videoWithNoDuration && (
