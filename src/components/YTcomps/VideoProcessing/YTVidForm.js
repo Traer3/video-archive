@@ -37,7 +37,7 @@ export default function YTVidForm({thumbnail, name, date , duration,isItUnique,u
             />
             <View style={{ marginLeft:3}}>
                     <Text style={{width:'220',}} numberOfLines={1} ellipsizeMode="tail">
-                        {id} {name}
+                        {name}
                     </Text>
                     <Text>{date}</Text>
                     <Text> {duration}</Text>
